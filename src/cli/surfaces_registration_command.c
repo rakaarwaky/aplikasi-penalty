@@ -76,14 +76,16 @@ void cli_surfaces_registration_execute(RegistrationAggregate *agg,
 
         if (len == 0) {
             if (state->participant_count >= MIN_PARTICIPANTS) break;
-            show_status(dp, "[!] Minimal 5 peserta untuk melanjutkan!",
+            show_status(dp, "[GAGAL] Minimal 5 peserta untuk melanjutkan!",
                         COLOR_ERROR, error_row, box_col, gw);
             dp->screen_refresh();
             continue;
         }
 
+        if (len == 1 && buffer[0] == 'q') break;
+
         if (sn != NULL && agent_sanitize_validate_string(sn, buffer, MAX_NAME_LENGTH) != SANITIZE_OK) {
-            show_status(dp, "[!] Input nama tidak valid!",
+            show_status(dp, "[GAGAL] Input nama tidak valid!",
                         COLOR_ERROR, error_row, box_col, gw);
             dp->screen_refresh();
             continue;
@@ -96,17 +98,17 @@ void cli_surfaces_registration_execute(RegistrationAggregate *agg,
         RegistrationError e = agent_registration_add(agg, state, &name);
         if (e == REG_OK) {
             registration_page_draw(dp, state);
-            snprintf(buf, sizeof buf, "[+] %s berhasil terdaftar!", name.value);
+            snprintf(buf, sizeof buf, "[OK] %s berhasil terdaftar!", name.value);
             show_status(dp, buf, COLOR_SUCCESS, error_row, box_col, gw);
             dp->screen_refresh();
         } else {
-            const char *emsg = "[!] Kesalahan pendaftaran!";
+            const char *emsg = "[GAGAL] Kesalahan pendaftaran!";
             switch (e) {
-                case REG_NAME_EMPTY:        emsg = "[!] Nama tidak boleh kosong!"; break;
-                case REG_NAME_TOO_LONG:     emsg = "[!] Nama maksimal 30 karakter!"; break;
-                case REG_NAME_INVALID_CHAR: emsg = "[!] Nama hanya boleh huruf dan spasi!"; break;
-                case REG_NAME_DUPLICATE:    emsg = "[!] Nama sudah terdaftar!"; break;
-                case REG_FULL:              emsg = "[!] Kuota peserta penuh!"; break;
+                case REG_NAME_EMPTY:        emsg = "[GAGAL] Nama tidak boleh kosong!"; break;
+                case REG_NAME_TOO_LONG:     emsg = "[GAGAL] Nama maksimal 30 karakter!"; break;
+                case REG_NAME_INVALID_CHAR: emsg = "[GAGAL] Nama hanya boleh huruf dan spasi!"; break;
+                case REG_NAME_DUPLICATE:    emsg = "[GAGAL] Nama sudah terdaftar!"; break;
+                case REG_FULL:              emsg = "[GAGAL] Kuota peserta penuh!"; break;
                 default: break;
             }
             show_status(dp, emsg, COLOR_ERROR, error_row, box_col, gw);
@@ -118,10 +120,10 @@ void cli_surfaces_registration_execute(RegistrationAggregate *agg,
     int final_count = state->participant_count;
     int final_error_row = registration_page_error_row();
 
-    snprintf(buf, sizeof buf, "[+] Total peserta: %d", final_count);
+    snprintf(buf, sizeof buf, "[OK] Total peserta: %d", final_count);
     show_status(dp, buf, COLOR_SUCCESS, final_error_row, box_col, gw);
 
-    dp->footer("[ENTER] Lanjut  \xe2\x94\x82  [q] Kembali");
+    dp->footer("[ENTER] Kembali ke menu");
     dp->screen_refresh();
     dp->readkey();
 }

@@ -23,8 +23,8 @@ void scoring_page_draw(DisplayPort *dp, ParticipantEntity *part,
     int cols = dp->get_cols();
 
     int gw = cols - 4;
-    if (gw > 64) gw = 64;
-    if (gw < 40) gw = 40;
+    if (gw > BOX_WIDTH_MAX) gw = BOX_WIDTH_MAX;
+    if (gw < BOX_WIDTH_MIN) gw = BOX_WIDTH_MIN;
     int box_col = (cols - gw) / 2;
     int box_row = 4;
 
@@ -82,6 +82,6 @@ void scoring_page_draw(DisplayPort *dp, ParticipantEntity *part,
         dp->draw_colored(box_row + BOX_HEIGHT - 2, box_col + 2, msg_color, 1, msg);
     }
 
-    dp->footer("[ENTER] Submit zona");
+    dp->footer("[ENTER] Submit zona  \xe2\x94\x82  [q] Batal");
     dp->screen_refresh();
 }

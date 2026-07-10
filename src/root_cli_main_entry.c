@@ -38,6 +38,7 @@ int main(void) {
     SearchAggregate       sr  = root_search_build();
     RecapAggregate        rc  = root_recap_build(rk.protocol);
     SanitizeAggregate     sn  = root_sanitize_build();
+    StorageAggregate      st  = root_storage_build();
 
     /* Hidupkan layar ncurses, rakit DisplayPort, lalu langsung ke menu utama. */
     tui_init();
@@ -45,7 +46,12 @@ int main(void) {
     /* Rakit DisplayPort — surfaces hanya pegang pointer ke ini. */
     DisplayPort dp = root_display_build();
 
-    cli_surfaces_menu_run(&reg, &sc, &rk, &sr, &rc, &state, &dp, &sn);
+    /* Muat data tersimpan bila ada (silent: kalau file belum ada, biarkan kosong). */
+    {
+        agent_storage_load(&st, STORAGE_DEFAULT_FILE, &state);
+    }
+
+    cli_surfaces_menu_run(&reg, &sc, &rk, &sr, &rc, &st, &state, &dp, &sn);
 
     /* D2: Ringkasan juara sebelum keluar — tampilkan di ncurses, tunggu Enter. */
     if (state.state == STATE_COMPLETED && state.participant_count > 0) {

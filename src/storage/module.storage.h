@@ -10,6 +10,9 @@
 #include "shared/taxonomy_storage_error.h"
 #include "shared/taxonomy_competition_state_vo.h"
 
+/* Nama file penyimpanan bawaan (lomba tersimpan di direktori kerja). */
+#define STORAGE_DEFAULT_FILE "data_lomba.bin"
+
 /* Fungsi baca/tulis file (diisi alamatnya saat rakit). */
 StorageProtocol storage_adapter_create(void);
 

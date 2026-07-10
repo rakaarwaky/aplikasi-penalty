@@ -11,6 +11,7 @@
 #include <ctype.h>
 
 #define BOX_HEIGHT 14
+#define BOX_ROW    4
 
 static ScoringError read_zone(DisplayPort *dp, int row, int col,
                               ZoneVO *out, char *raw_out, size_t raw_size) {
@@ -60,7 +61,12 @@ void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state
 
     if (state->state == STATE_INIT) {
         dp->cls();
-        dp->print_centered_colored(10, "[GAGAL] Daftar peserta dulu (Menu 1).", COLOR_ERROR, 1);
+        draw_double_line(dp, 0, 2, cols - 4);
+        dp->print_centered_colored(1, "  INPUT TENDANGAN  ", COLOR_TITLE, 1);
+        draw_double_line(dp, 2, 2, cols - 4);
+        dp->box(4, box_col, gw, 6);
+        dp->print_centered_colored(6, "[GAGAL] Daftar peserta dulu (Menu 1).", COLOR_ERROR, 1);
+        dp->footer("[ENTER] Kembali ke menu");
         dp->screen_refresh();
         dp->readkey();
         return;
@@ -68,8 +74,13 @@ void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state
 
     if (state->state == STATE_COMPLETED) {
         dp->cls();
-        dp->print_centered_colored(10, "[INFO] Semua peserta sudah selesai melakukan tendangan.",
+        draw_double_line(dp, 0, 2, cols - 4);
+        dp->print_centered_colored(1, "  INPUT TENDANGAN  ", COLOR_TITLE, 1);
+        draw_double_line(dp, 2, 2, cols - 4);
+        dp->box(4, box_col, gw, 6);
+        dp->print_centered_colored(6, "[INFO] Semua peserta sudah selesai melakukan tendangan.",
                                    COLOR_SUCCESS, 1);
+        dp->footer("[ENTER] Kembali ke menu");
         dp->screen_refresh();
         dp->readkey();
         return;
@@ -84,14 +95,15 @@ void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state
 
             ZoneVO z = { -1 };
             char raw[32] = "";
-            int input_row = 4 + 11;
-            int input_col = box_col + 2 + (int)strlen("Masukkan zona (0-5, contoh: 5): ");
+            int input_row = BOX_ROW + 11;
+            char label[64];
+            snprintf(label, sizeof label, "Masukkan zona (0-%d, contoh: 5): ", MAX_ZONE);
+            int input_col = box_col + 2 + (int)strlen(label);
             read_zone(dp, input_row, input_col, &z, raw, sizeof raw);
 
-            if (raw[0] == '\0' && part->kick_count.value == 0 && p == 0) {
-                if (!dp->confirm("Kembali ke menu? Progres yang belum tersimpan akan hilang."))
-                    continue;
-                cancelled = 1;
+            if (raw[0] == '\0') {
+                if (dp->confirm("Kembali ke menu? Progres yang belum tersimpan akan hilang."))
+                    cancelled = 1;
                 break;
             }
 
@@ -132,16 +144,19 @@ void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state
         if (cancelled) break;
 
         dp->cls();
+        draw_double_line(dp, 0, 2, cols - 4);
+        dp->print_centered_colored(1, "  INPUT TENDANGAN  ", COLOR_TITLE, 1);
         draw_double_line(dp, 2, 2, cols - 4);
-        dp->print_centered_colored(3, "[SELESAI]", COLOR_SUCCESS, 1);
-        draw_double_line(dp, 4, 2, cols - 4);
-        dp->box(6, box_col, gw, 6);
+        dp->box(4, box_col, gw, 6);
+        dp->separator(5, box_col, gw);
 
         snprintf(buf, sizeof buf, "Peserta: %s", part->name.value);
-        dp->draw_colored(8, box_col + 4, COLOR_GOLD, 1, buf);
+        dp->draw_colored(6, box_col + 4, COLOR_GOLD, 1, buf);
 
         snprintf(buf, sizeof buf, "Total Skor: %d poin", part->total_score.value);
-        dp->draw_colored(9, box_col + 4, COLOR_SUCCESS, 1, buf);
+        dp->draw_colored(7, box_col + 4, COLOR_SUCCESS, 1, buf);
+
+        dp->print_centered_colored(9, "[SELESAI]", COLOR_SUCCESS, 1);
 
         dp->footer("[ENTER] Lanjut");
         dp->screen_refresh();
@@ -149,10 +164,12 @@ void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state
     }
 
     dp->cls();
+    draw_double_line(dp, 0, 2, cols - 4);
+    dp->print_centered_colored(1, "  INPUT TENDANGAN  ", COLOR_TITLE, 1);
+    draw_double_line(dp, 2, 2, cols - 4);
     if (state->state == STATE_COMPLETED) {
-        draw_double_line(dp, 2, 2, cols - 4);
-        dp->print_centered_colored(3, "SEMUA TENDANGAN SELESAI!", COLOR_SUCCESS, 1);
-        draw_double_line(dp, 4, 2, cols - 4);
+        dp->box(4, box_col, gw, 6);
+        dp->print_centered_colored(6, "SEMUA TENDANGAN SELESAI!", COLOR_SUCCESS, 1);
     }
     dp->footer("[ENTER] Kembali ke menu");
     dp->screen_refresh();

@@ -22,8 +22,8 @@ void search_page_draw_input(DisplayPort *dp) {
 
     int cols = dp->get_cols();
     int gw = cols - 4;
-    if (gw > 64) gw = 64;
-    if (gw < 40) gw = 40;
+    if (gw > BOX_WIDTH_MAX) gw = BOX_WIDTH_MAX;
+    if (gw < BOX_WIDTH_MIN) gw = BOX_WIDTH_MIN;
     int box_col = (cols - gw) / 2;
     int box_row = 4;
 
@@ -38,6 +38,7 @@ void search_page_draw_input(DisplayPort *dp) {
     dp->draw_colored(box_row + 2, box_col + 2, COLOR_MENU, 0,
                      "Masukkan nama peserta yang dicari:");
     dp->draw_colored(box_row + 4, box_col + 2, COLOR_INFO, 0, "Nama: ");
+    dp->footer("[ENTER] Cari  \xe2\x94\x82  [q] Kembali");
     dp->screen_refresh();
 }
 
@@ -47,8 +48,8 @@ void search_page_draw_found(DisplayPort *dp, SearchResultVO *r) {
 
     int cols = dp->get_cols();
     int gw = cols - 4;
-    if (gw > 64) gw = 64;
-    if (gw < 40) gw = 40;
+    if (gw > BOX_WIDTH_MAX) gw = BOX_WIDTH_MAX;
+    if (gw < BOX_WIDTH_MIN) gw = BOX_WIDTH_MIN;
     int box_col = (cols - gw) / 2;
     int box_row = 4;
 
@@ -116,8 +117,8 @@ void search_page_draw_not_found(DisplayPort *dp, const char *query,
 
     int cols = dp->get_cols();
     int gw = cols - 4;
-    if (gw > 64) gw = 64;
-    if (gw < 40) gw = 40;
+    if (gw > BOX_WIDTH_MAX) gw = BOX_WIDTH_MAX;
+    if (gw < BOX_WIDTH_MIN) gw = BOX_WIDTH_MIN;
     int box_col = (cols - gw) / 2;
     int box_row = 4;
 

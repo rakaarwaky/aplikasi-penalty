@@ -27,7 +27,9 @@ void recap_page_draw(DisplayPort *dp, RankingEntryVO *ranking,
     int box_col = (cols - gw) / 2;
     int box_row = 4;
 
-    int box_height = state->participant_count + 8;
+    int box_height = state->participant_count + 10;
+    int max_h = dp->get_lines() - 6;
+    if (box_height > max_h) box_height = max_h;
 
     dp->print_centered_colored(0, "Menu Utama > Rekapitulasi Lengkap", COLOR_DIM, 0);
     draw_double_line(dp, 1, 2, cols - 4);
@@ -111,7 +113,7 @@ void recap_page_draw(DisplayPort *dp, RankingEntryVO *ranking,
         }
     }
 
-    dp->footer("[ENTER] Kembali");
+    dp->footer("[ENTER] Kembali ke menu");
     dp->screen_refresh();
     dp->readkey();
 }

@@ -15,6 +15,7 @@
 #include "ranking/module.ranking.h"
 #include "search/module.search.h"
 #include "recap/module.recap.h"
+#include "storage/module.storage.h"
 
 DisplayPort root_display_build(void);
 
@@ -22,9 +23,8 @@ DisplayPort root_display_build(void);
 int cli_surfaces_menu_run(RegistrationAggregate *reg,
                           ScoringAggregate *sc, RankingAggregate *rk,
                           SearchAggregate *sr, RecapAggregate *rc,
-                          CompetitionState *state,
-                          DisplayPort *dp,
-                          SanitizeAggregate *sn);
+                          StorageAggregate *st, CompetitionState *state,
+                          DisplayPort *dp, SanitizeAggregate *sn);
 
 void cli_surfaces_registration_execute(RegistrationAggregate *agg,
                                        CompetitionState *state, DisplayPort *dp,
@@ -38,6 +38,9 @@ void cli_surfaces_search_execute(SearchAggregate *agg,
                                  CompetitionState *state, DisplayPort *dp);
 void cli_surfaces_recap_execute(RecapAggregate *agg,
                                 CompetitionState *state, DisplayPort *dp);
+
+void cli_surfaces_storage_execute(StorageAggregate *agg,
+                                 CompetitionState *state, DisplayPort *dp);
 
 /* ── Dumb Surfaces (page) ── */
 void menu_page_draw(DisplayPort *dp, int selected, CompetitionStateKind state,
@@ -62,5 +65,8 @@ void search_page_draw_not_found(DisplayPort *dp, const char *query,
 void recap_page_draw(DisplayPort *dp, RankingEntryVO *ranking,
                      SearchResultVO *details, CompetitionState *state,
                      int total_score, int avg_score, int highest_score);
+
+void storage_page_draw(DisplayPort *dp, int selected, int file_exists,
+                       const char *msg, int msg_is_error);
 
 #endif /* MODULE_CLI_H */

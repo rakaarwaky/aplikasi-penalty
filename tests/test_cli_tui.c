@@ -12,6 +12,7 @@
 #include "sanitizer/module.sanitizer.h"
 #include "cli/module.cli.h"
 #include "tui/infrastructure_tui_adapter.h"   /* root_display_build */
+#include "storage/module.storage.h"
 
 /* API fake ncurses (tests/fake_ncurses.c) */
 extern void fake_tui_push_key(int k);
@@ -63,6 +64,7 @@ static void test_full_game_via_surfaces(void) {
     SearchAggregate sr = root_search_build();
     RecapAggregate rc = root_recap_build(root_ranking_build().protocol);
     SanitizeAggregate sn = root_sanitize_build();
+    StorageAggregate st = root_storage_build();
     DisplayPort dp = root_display_build();
 
     fake_tui_reset_input();
@@ -96,6 +98,7 @@ static void test_menu_dispatch_and_exit(void) {
     SearchAggregate sr = root_search_build();
     RecapAggregate rc = root_recap_build(root_ranking_build().protocol);
     SanitizeAggregate sn = root_sanitize_build();
+    StorageAggregate st = root_storage_build();
     DisplayPort dp = root_display_build();
 
     fake_tui_reset_input();
@@ -109,7 +112,7 @@ static void test_menu_dispatch_and_exit(void) {
     fake_tui_push_key(TUI_KEY_ENTER); /* footer */
     fake_tui_push_key('q');           /* keluar dari menu */
     fake_tui_push_str("y");           /* confirm keluar */
-    cli_surfaces_menu_run(&reg, &sc, &rk, &sr, &rc, &state, &dp, &sn);
+    cli_surfaces_menu_run(&reg, &sc, &rk, &sr, &rc, &st, &state, &dp, &sn);
     assert(state.participant_count == 5);
 
     /* Menu help screen ('h') lalu keluar. */
@@ -118,7 +121,7 @@ static void test_menu_dispatch_and_exit(void) {
     fake_tui_push_key(TUI_KEY_ENTER); /* kembali */
     fake_tui_push_key('0');           /* keluar */
     fake_tui_push_str("y");           /* confirm */
-    cli_surfaces_menu_run(&reg, &sc, &rk, &sr, &rc, &state, &dp, &sn);
+    cli_surfaces_menu_run(&reg, &sc, &rk, &sr, &rc, &st, &state, &dp, &sn);
 
     printf("  [PASS] test_menu_dispatch_and_exit\n");
 }

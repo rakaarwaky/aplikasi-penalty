@@ -7,7 +7,7 @@
 
 #include <stdio.h>
 
-#define MENU_ITEMS 6
+#define MENU_ITEMS 7
 #define MIN_LINES  18
 #define MIN_COLS   40
 
@@ -17,7 +17,8 @@ static const char *menu_labels[MENU_ITEMS] = {
     "Input Tendangan dan Skor",
     "Tampilkan Ranking",
     "Cari Peserta",
-    "Rekapitulasi Lengkap"
+    "Rekapitulasi Lengkap",
+    "Penyimpanan Data"
 };
 
 static void resolve_status(int item, CompetitionStateKind state,
@@ -38,6 +39,9 @@ static void resolve_status(int item, CompetitionStateKind state,
         case 3: case 5:
             if (state != STATE_COMPLETED) { *out_status = kunci; *out_color = COLOR_DIM; }
             else { *out_status = aktif; *out_color = COLOR_SUCCESS; }
+            break;
+        case 6:
+            *out_status = aktif; *out_color = COLOR_SUCCESS;
             break;
         case 4:
             if (state == STATE_INIT) { *out_status = kunci; *out_color = COLOR_DIM; }
@@ -70,10 +74,10 @@ static void draw_menu(DisplayPort *dp, int selected, CompetitionState *state) {
 
     int cols = dp->get_cols();
 
-    /* Box: adaptive width, max 60, min 40 */
+    /* Box: adaptive width */
     int gw = cols - 4;
-    if (gw > 60) gw = 60;
-    if (gw < 40) gw = 40;
+    if (gw > BOX_WIDTH_MAX) gw = BOX_WIDTH_MAX;
+    if (gw < BOX_WIDTH_MIN) gw = BOX_WIDTH_MIN;
 
     /* Center box horizontally */
     int box_col = (cols - gw) / 2;
@@ -86,7 +90,7 @@ static void draw_menu(DisplayPort *dp, int selected, CompetitionState *state) {
     dp->print_centered_colored(1, "  APLIKASI PERHITUNGAN PENALTI  ", COLOR_TITLE, 1);
     draw_double_line(dp, 2, hdr_col, hdr_w);
 
-    dp->box(box_row, box_col, gw, 14);
+    dp->box(box_row, box_col, gw, 15);
     dp->separator(box_row + 1, box_col, gw);
 
     int col1_x = box_col + 3;
@@ -98,7 +102,7 @@ static void draw_menu(DisplayPort *dp, int selected, CompetitionState *state) {
     dp->separator(box_row + 3, box_col, gw);
 
     int i;
-    for (i = 1; i <= 5; i++) {
+    for (i = 1; i <= 6; i++) {
         int row = box_row + 3 + i;
         int item_sel = (i == selected);
         int item_color = item_sel ? COLOR_HIGHLIGHT : COLOR_MENU;
@@ -120,20 +124,20 @@ static void draw_menu(DisplayPort *dp, int selected, CompetitionState *state) {
         dp->draw_colored(row, col2_x, status_color, 0, buf);
     }
 
-    dp->separator(box_row + 9, box_col, gw);
+    dp->separator(box_row + 10, box_col, gw);
 
     const char *state_text = "";
     int state_color = COLOR_DIM;
     resolve_state_text(state->state, &state_text, &state_color);
-    dp->draw_colored(box_row + 10, box_col + 2, state_color, 0, state_text);
+    dp->draw_colored(box_row + 11, box_col + 2, state_color, 0, state_text);
 
     snprintf(buf, sizeof buf, "Peserta: %d/7", state->participant_count);
-    dp->draw_colored(box_row + 10, box_col + 24, COLOR_MENU, 0, buf);
+    dp->draw_colored(box_row + 11, box_col + 24, COLOR_MENU, 0, buf);
 
     int exit_color = (0 == selected) ? COLOR_HIGHLIGHT : COLOR_ERROR;
-    dp->draw_colored(box_row + 10, box_col + gw - 18, exit_color, 1, "  [0] Keluar  ");
+    dp->draw_colored(box_row + 11, box_col + gw - 18, exit_color, 1, "  [0] Keluar  ");
 
-    dp->footer("[\xe2\x86\x91/\xe2\x86\x93] Navigasi  \xe2\x94\x82  [ENTER] Pilih  \xe2\x94\x82  [1-5] Shortcut  \xe2\x94\x82  [h] Bantuan");
+    dp->footer("[\xe2\x86\x91/\xe2\x86\x93] Navigasi  \xe2\x94\x82  [ENTER] Pilih  \xe2\x94\x82  [1-6] Shortcut  \xe2\x94\x82  [h] Bantuan");
     dp->screen_refresh();
 }
 
@@ -150,7 +154,12 @@ static void draw_help(DisplayPort *dp) {
     dp->print_centered_colored(1, "  PANDUAN PENGGUNAAN  ", COLOR_TITLE, 1);
     draw_double_line(dp, 2, 2, cols - 4);
 
-    dp->box(3, box_col, gw, 18);
+    int lines = dp->get_lines();
+    int box_height = 16;
+    int max_h = lines - 5;
+    if (box_height > max_h) box_height = max_h;
+
+    dp->box(3, box_col, gw, box_height);
     dp->separator(4, box_col, gw);
 
     dp->draw_colored(5, box_col + 2, COLOR_GOLD, 1, "ATURAN LOMBA:");
@@ -188,8 +197,18 @@ static void draw_help(DisplayPort *dp) {
 }
 
 static void show_locked_message(DisplayPort *dp, const char *msg) {
+    int cols = dp->get_cols();
+    int gw = cols - 4;
+    if (gw > 60) gw = 60;
+    if (gw < 40) gw = 40;
+    int box_col = (cols - gw) / 2;
+
     dp->cls();
-    dp->print_centered_colored(10, msg, COLOR_WARNING, 1);
+    draw_double_line(dp, 0, 2, cols - 4);
+    dp->print_centered_colored(1, "  MENU UTAMA  ", COLOR_TITLE, 1);
+    draw_double_line(dp, 2, 2, cols - 4);
+    dp->box(4, box_col, gw, 6);
+    dp->print_centered_colored(6, msg, COLOR_WARNING, 1);
     dp->footer("[ENTER] Kembali ke menu");
     dp->screen_refresh();
     dp->readkey();
@@ -198,8 +217,8 @@ static void show_locked_message(DisplayPort *dp, const char *msg) {
 static void dispatch_feature(int selected, RegistrationAggregate *reg,
                              ScoringAggregate *sc, RankingAggregate *rk,
                              SearchAggregate *sr, RecapAggregate *rc,
-                             CompetitionState *state, DisplayPort *dp,
-                             SanitizeAggregate *sn) {
+                             StorageAggregate *st, CompetitionState *state,
+                             DisplayPort *dp, SanitizeAggregate *sn) {
     if (selected == 1) {
         if (state->state == STATE_INIT || state->state == STATE_REGISTERED)
             cli_surfaces_registration_execute(reg, state, dp, sn);
@@ -227,15 +246,16 @@ static void dispatch_feature(int selected, RegistrationAggregate *reg,
             cli_surfaces_recap_execute(rc, state, dp);
         else
             show_locked_message(dp, "[INFO] Rekap terkunci. Selesaikan tendangan semua peserta dulu.");
+    } else if (selected == 6) {
+        cli_surfaces_storage_execute(st, state, dp);
     }
 }
 
 int cli_surfaces_menu_run(RegistrationAggregate *reg,
                           ScoringAggregate *sc, RankingAggregate *rk,
                           SearchAggregate *sr, RecapAggregate *rc,
-                          CompetitionState *state,
-                          DisplayPort *dp,
-                          SanitizeAggregate *sn) {
+                          StorageAggregate *st, CompetitionState *state,
+                          DisplayPort *dp, SanitizeAggregate *sn) {
     int selected = 1;
     int running = 1;
 
@@ -276,13 +296,14 @@ int cli_surfaces_menu_run(RegistrationAggregate *reg,
             case '3': selected = 3; goto do_enter;
             case '4': selected = 4; goto do_enter;
             case '5': selected = 5; goto do_enter;
+            case '6': selected = 6; goto do_enter;
             case TUI_KEY_ENTER:
             do_enter:
                 if (selected == 0) {
                     if (dp->confirm("Yakin ingin keluar?"))
                         running = 0;
                 } else {
-                    dispatch_feature(selected, reg, sc, rk, sr, rc, state, dp, sn);
+                    dispatch_feature(selected, reg, sc, rk, sr, rc, st, state, dp, sn);
                 }
                 break;
             case TUI_KEY_ESC:
