@@ -1,6 +1,6 @@
-/* AES_BYPASS: module declaration (barrel) — 1 header per feature folder.
-   Kontrak (protocol/aggregate) ada di shared/module.shared.h.
+/* Kontrak (protocol/aggregate) ada di shared/module.shared.h.
    File ini hanya deklarasi implementasi: capabilities, agent, root. */
+
 #ifndef MODULE_REGISTRATION_H
 #define MODULE_REGISTRATION_H
 
