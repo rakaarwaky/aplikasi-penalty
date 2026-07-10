@@ -125,20 +125,22 @@ graph TD
 
 ## 4. Struktur (struct)
 
-Seluruh data dibungkus dalam *Value Object* (VO) di `src/shared/` supaya tipe tidak tertukar saat kompilasi. Berikut struct yang ada di source:
+**Struct** (structure) adalah tipe data yang membungkus beberapa variabel menjadi satu kesatuan. Di program ini, seluruh data dibungkus dalam *Value Object* (VO) di `src/shared/` supaya tipe tidak tertukar saat kompilasi. Berikut struct yang ada di source:
 
-- **CompetitionState** — wadah status lomba utama; menampung array peserta, jumlah peserta, dan tahap lomba; di-pass via pointer dari `main()` (tanpa variabel global).
-- **CompetitionStateKind** — enum tahap lomba: `STATE_INIT` (belum ada peserta), `STATE_REGISTERED` (boleh tendang & cari), `STATE_COMPLETED` (boleh ranking & recap).
-- **ParticipantEntity** — satu peserta lengkap: id, nama, 7 hasil tendangan (`kicks`), total skor, frekuensi zona, dan jumlah tendangan dilakukan.
-- **ParticipantIdVO** — pembungkus nomor urut peserta (indeks dalam array data).
-- **ParticipantNameVO** — pembungkus nama peserta (`char[MAX_NAME_LENGTH+1]`) agar batas panjang terjaga.
-- **KickVO** — satu tendangan: `zone` (0–5) dan `points` (sama dengan zone).
-- **ZoneVO** — pembungkus nilai zona (0..5, 0 = miss) agar tidak tertukar dengan id/poin.
-- **TotalScoreVO** — pembungkus total skor peserta (0..35 = 7 × 5).
-- **ZoneFreqVO** — frekuensi tiap zona (0..5), dipakai pemecah seri peringkat.
-- **KickCountVO** — pembungkus jumlah tendangan yang sudah dilakukan (0..TOTAL_KICKS).
-- **RankingEntryVO** — satu baris hasil peringkat (ranking & recap): id, total skor, frekuensi zona, dan posisi rank.
-- **SearchResultVO** — balikan pencarian peserta: status ketemu, id, nama, skor, riwayat tendangan, dan frekuensi zona.
+| Struct | Keterangan |
+|---|---|
+| `CompetitionState` | Wadah status lomba utama; menampung array peserta, jumlah peserta, dan tahap lomba; di-pass via pointer dari `main()` (tanpa variabel global). |
+| `CompetitionStateKind` | Enum tahap lomba: `STATE_INIT` (belum ada peserta), `STATE_REGISTERED` (boleh tendang & cari), `STATE_COMPLETED` (boleh ranking & recap). |
+| `ParticipantEntity` | Satu peserta lengkap: id, nama, 7 hasil tendangan (`kicks`), total skor, frekuensi zona, dan jumlah tendangan dilakukan. |
+| `ParticipantIdVO` | Pembungkus nomor urut peserta (indeks dalam array data). |
+| `ParticipantNameVO` | Pembungkus nama peserta (`char[MAX_NAME_LENGTH+1]`) agar batas panjang terjaga. |
+| `KickVO` | Satu tendangan: `zone` (0–5) dan `points` (sama dengan zone). |
+| `ZoneVO` | Pembungkus nilai zona (0..5, 0 = miss) agar tidak tertukar dengan id/poin. |
+| `TotalScoreVO` | Pembungkus total skor peserta (0..35 = 7 × 5). |
+| `ZoneFreqVO` | Frekuensi tiap zona (0..5), dipakai pemecah seri peringkat. |
+| `KickCountVO` | Pembungkus jumlah tendangan yang sudah dilakukan (0..TOTAL_KICKS). |
+| `RankingEntryVO` | Satu baris hasil peringkat (ranking & recap): id, total skor, frekuensi zona, dan posisi rank. |
+| `SearchResultVO` | Balikan pencarian peserta: status ketemu, id, nama, skor, riwayat tendangan, dan frekuensi zona. |
 
 ---
 
@@ -146,55 +148,68 @@ Seluruh data dibungkus dalam *Value Object* (VO) di `src/shared/` supaya tipe ti
 
 Konstanta terpusat di `taxonomy_game_constant.h`:
 
-- **MIN_PARTICIPANTS = 5** — jumlah peserta minimal yang harus didaftarkan.
-- **MAX_PARTICIPANTS = 7** — batas maksimal peserta (ukuran array data lomba).
-- **TOTAL_KICKS = 7** — jumlah tendangan per peserta.
-- **MIN_ZONE = 0** — zona terendah (tendangan meleset / miss).
-- **MAX_ZONE = 5** — zona tertinggi (poin maksimal per tendangan).
-- **MAX_NAME_LENGTH = 30** — panjang maksimal nama peserta (karakter, tanpa null-terminator).
-- **DEFAULT_STORAGE_FILENAME = "data_lomba.bin"** — nama file penyimpanan lomba default.
-- **MENU_EXIT = 0** — kode pilihan menu: keluar dari program.
-- **MENU_REGISTRATION = 1** — kode pilihan menu: layar pendaftaran peserta.
-- **MENU_SCORING = 2** — kode pilihan menu: layar input tendangan & skor.
-- **MENU_RANKING = 3** — kode pilihan menu: layar tampilkan peringkat.
-- **MENU_SEARCH = 4** — kode pilihan menu: layar cari peserta.
-- **MENU_RECAP = 5** — kode pilihan menu: layar rekapitulasi lengkap.
+| Konstanta | Nilai | Keterangan |
+|---|---|---|
+| `MIN_PARTICIPANTS` | 5 | Jumlah peserta minimal yang harus didaftarkan. |
+| `MAX_PARTICIPANTS` | 7 | Batas maksimal peserta (ukuran array data lomba). |
+| `TOTAL_KICKS` | 7 | Jumlah tendangan per peserta. |
+| `MIN_ZONE` | 0 | Zona terendah (tendangan meleset / miss). |
+| `MAX_ZONE` | 5 | Zona tertinggi (poin maksimal per tendangan). |
+| `MAX_NAME_LENGTH` | 30 | Panjang maksimal nama peserta (karakter, tanpa null-terminator). |
+| `DEFAULT_STORAGE_FILENAME` | `"data_lomba.bin"` | Nama file penyimpanan lomba default. |
+| `MENU_EXIT` | 0 | Kode pilihan menu: keluar dari program. |
+| `MENU_REGISTRATION` | 1 | Kode pilihan menu: layar pendaftaran peserta. |
+| `MENU_SCORING` | 2 | Kode pilihan menu: layar input tendangan & skor. |
+| `MENU_RANKING` | 3 | Kode pilihan menu: layar tampilkan peringkat. |
+| `MENU_SEARCH` | 4 | Kode pilihan menu: layar cari peserta. |
+| `MENU_RECAP` | 5 | Kode pilihan menu: layar rekapitulasi lengkap. |
 
 ---
 
 ## 6. Variabel
 
-Aplikasi sengaja TIDAK menggunakan variabel global untuk data lomba. Seluruh state lomba disimpan di `main()` lalu di-pass via pointer ke tiap fitur. Variabel yang ada di `root_cli_main_entry.c`:
+**Variabel** adalah wadah nyata di memori yang menyimpan nilai; bisa bertipe dasar (mis. `int`) maupun bertipe **struct**. Aplikasi sengaja TIDAK menggunakan variabel global untuk data lomba — struct `CompetitionState` di Section 4 adalah cetakannya, sedangkan variabel `CompetitionState state` di bawah ini adalah *instance* nyatanya yang dibuat di `main()`. Seluruh state lomba disimpan di `main()` lalu di-pass via pointer ke tiap fitur. Variabel yang ada di `root_cli_main_entry.c`:
 
-- **`CompetitionState state`** — satu-satunya wadah data lomba; diinisialisasi `participant_count = 0` dan `state = STATE_INIT`, lalu di-pass ke seluruh fitur via pointer.
-- **`RegistrationAggregate reg`** — aggregate pendaftaran, hasil `root_registration_build()`.
-- **`ScoringAggregate sc`** — aggregate scoring, hasil `root_scoring_build()`.
-- **`RankingAggregate rk`** — aggregate ranking, hasil `root_ranking_build()`.
-- **`SearchAggregate sr`** — aggregate pencarian, hasil `root_search_build()`.
-- **`RecapAggregate rc`** — aggregate rekap, hasil `root_recap_build(rk.protocol)`.
-- **`SanitizeAggregate sn`** — aggregate validasi input, hasil `root_sanitize_build()`.
-- **`StorageAggregate st`** — aggregate penyimpanan, hasil `root_storage_build()`.
-- **`ExportAggregate ex`** — aggregate ekspor, hasil `root_export_build()`.
-- **`DisplayPort dp`** — antarmuka render (struct function-pointer), dirakit oleh `root_display_build()`; surfaces hanya pegang pointer ke ini.
-- **`RankingEntryVO entries[MAX_PARTICIPANTS]`** — array hasil peringkat sementara, diisi `agent_ranking_compute()` sebelum menampilkan juara.
-- **Variabel lokal layar penutup** — `char line[64]` (buffer baris) dan `const char *winner`, `*second`, `*third` (pointer nama juara 1–3).
+| Variabel | Keterangan |
+|---|---|
+| `CompetitionState state` | Satu-satunya wadah data lomba; diinisialisasi `participant_count = 0` dan `state = STATE_INIT`, lalu di-pass ke seluruh fitur via pointer. |
+| `RegistrationAggregate reg` | Aggregate pendaftaran, hasil `root_registration_build()`. |
+| `ScoringAggregate sc` | Aggregate scoring, hasil `root_scoring_build()`. |
+| `RankingAggregate rk` | Aggregate ranking, hasil `root_ranking_build()`. |
+| `SearchAggregate sr` | Aggregate pencarian, hasil `root_search_build()`. |
+| `RecapAggregate rc` | Aggregate rekap, hasil `root_recap_build(rk.protocol)`. |
+| `SanitizeAggregate sn` | Aggregate validasi input, hasil `root_sanitize_build()`. |
+| `StorageAggregate st` | Aggregate penyimpanan, hasil `root_storage_build()`. |
+| `ExportAggregate ex` | Aggregate ekspor, hasil `root_export_build()`. |
+| `DisplayPort dp` | Antarmuka render (struct function-pointer), dirakit oleh `root_display_build()`; surfaces hanya pegang pointer ke ini. |
+| `RankingEntryVO entries[MAX_PARTICIPANTS]` | Array hasil peringkat sementara, diisi `agent_ranking_compute()` sebelum menampilkan juara. |
+| Variabel lokal layar penutup | `char line[64]` (buffer baris) dan `const char *winner`, `*second`, `*third` (pointer nama juara 1–3). |
 
 ---
 
 ## 7. Fungsi
 
-Fungsi domain & infrastruktur utama:
+Fungsi domain & infrastruktur utama (semua ada di `src/`):
 
-- `root_registration_build` / `agent_registration_append` (pendaftaran peserta)
-- `capabilities_scoring_validate_zone` / `capabilities_scoring_record_kick` (input tendangan & skor)
-- `capabilities_ranking_compute` (urutkan + aturan seri zona 5→4→3→2→1)
-- `capabilities_search_resolver` (cari peserta)
-- `agent_recap_orchestrator` / `capabilities_recap_formatter` (rekapitulasi)
-- `agent_storage_save` / `agent_storage_load` / `agent_storage_delete` (simpan/muat/hapus file)
-- `sanitizer_validate_int` / `sanitizer_validate_string` (validasi input)
-- `cli_surfaces_menu_run` + `cli_surfaces_*_execute` (navigasi & layar tiap fitur)
-- `root_display_build` (rakit DisplayPort / antarmuka ncurses)
-- `cli_surfaces_storage_execute` (fitur Simpan/Muat/Reset)
+| Fungsi | Keterangan |
+|---|---|
+| `root_registration_build` | Merakit aggregate pendaftaran (di `main()`). |
+| `agent_registration_append` | Menambah peserta ke `CompetitionState` saat pendaftaran. |
+| `capabilities_scoring_validate_zone` | Memvalidasi zona (0–5) sebelum dicatat. |
+| `capabilities_scoring_record_kick` | Mencatat satu tendangan & mengakumulasi skor ke peserta. |
+| `capabilities_ranking_compute` | Mengurutkan peserta + menerapkan aturan seri zona 5→4→3→2→1. |
+| `capabilities_search_resolver` | Mencari peserta berdasarkan nama (cocok persis). |
+| `agent_recap_orchestrator` | Mengoordinasikan penyusunan rekapitulasi lengkap. |
+| `capabilities_recap_formatter` | Memformat data rekap menjadi tampilan. |
+| `agent_storage_save` | Menyimpan seluruh lomba ke file `data_lomba.bin`. |
+| `agent_storage_load` | Memuat lomba dari file saat startup. |
+| `agent_storage_delete` | Menghapus file penyimpanan lomba. |
+| `sanitizer_validate_int` | Memvalidasi input bilangan bulat (termasuk rentang). |
+| `sanitizer_validate_string` | Memvalidasi input teks (nama peserta). |
+| `cli_surfaces_menu_run` | Menjalankan menu utama & merutekan pilihan ke layar fitur. |
+| `cli_surfaces_*_execute` | Fungsi layar tiap fitur (pendaftaran, scoring, ranking, cari, recap, storage). |
+| `root_display_build` | Merakit `DisplayPort` (antarmuka render ncurses). |
+| `cli_surfaces_storage_execute` | Layar fitur Simpan / Muat / Reset data. |
 
 ---
 
