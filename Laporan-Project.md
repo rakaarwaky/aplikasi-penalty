@@ -104,16 +104,23 @@ graph TD
 ### 3.2 Alur Data Utama
 
 ```mermaid
-graph LR
-A[Menu Utama] --> B[Pendaftaran 5-7 Peserta]
-B --> C[Input Tendangan: 7 zona 0-5]
-C --> D[Konversi Zona ke Skor]
-D --> E{Total Skor Sama?}
-E -->|Ya| F[Pemecah Seri 5-4-3-2-1]
-E -->|Tidak| G[Ranking Final]
-F --> G
-G --> H[Rekap dan Cari Peserta]
-H --> I[Simpan / Muat File]
+graph TD
+    subgraph R1
+        direction LR
+        A[Menu Utama] --> B[Pendaftaran 5-7 Peserta] --> C[Input Tendangan: 7 zona 0-5]
+    end
+    subgraph R2
+        direction RL
+        D[Konversi Zona ke Skor] --> E{Total Skor Sama?}
+        E -->|Ya| F[Pemecah Seri 5-4-3-2-1]
+    end
+    subgraph R3
+        direction LR
+        G[Ranking Final] --> H[Rekap dan Cari Peserta] --> I[Simpan / Muat File]
+    end
+    C --> D
+    E -->|Tidak| G
+    F --> G
 ```
 
 ---

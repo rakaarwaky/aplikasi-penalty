@@ -13,18 +13,19 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)  # project root (scripts/ is one level down)
 os.chdir(ROOT)
 
+THEME_JSON = os.path.join(ROOT, 'build_assets', 'mermaid_theme.json')
+
 def render_mermaid(src: str, out_png: str):
-    # Hitam-putih (bukan ungu): base theme, semua node garis & teks hitam di atas putih.
-    init = ('%%{init: {"theme":"base", "themeVariables": '
-            '{"primaryColor":"#ffffff","primaryTextColor":"#000000",'
-            '"primaryBorderColor":"#000000","lineColor":"#000000",'
-            '"textColor":"#000000","fontSize":"16px"}}%%')
-    full = init + '\n' + src
-    enc = base64.urlsafe_b64encode(full.encode()).decode()
-    svg = os.path.join(tempfile.gettempdir(), 'mm.svg')
-    subprocess.run(['curl', '-s', '-H', 'Accept: image/svg+xml',
-                    '-o', svg, f'https://mermaid.ink/svg/{enc}'], check=True, timeout=40)
-    subprocess.run(['magick', '-density', '300', svg, out_png], check=True, timeout=40)
+    # Render lokal pakai mermaid-cli (mmdc) via npx — text PASTI ada (bukan mermaid.ink
+    # yang drop text node). Theme hitam-putih di build_assets/mermaid_theme.json.
+    # scale 3 -> resolusi tajam, font 24px -> text jelas di PDF.
+    mmd = os.path.join(tempfile.gettempdir(), 'mmd_in.mmd')
+    with open(mmd, 'w', encoding='utf-8') as f:
+        f.write(src)
+    subprocess.run(['npx', '--yes', '@mermaid-js/mermaid-cli',
+                    '-i', mmd, '-o', out_png,
+                    '-t', 'neutral', '-C', THEME_JSON, '-s', '3'],
+                   check=True, timeout=120)
 
 def md_to_html(md: str, imgdir: str) -> str:
     # Extract mermaid blocks, replace with <img> referencing rendered PNG.
@@ -174,8 +175,8 @@ def build():
   code {{ font-family:Consolas,monospace; font-size:9pt; }}
   table {{ border-collapse:collapse; width:60%; margin:10px 0; }}
   th,td {{ border:1px solid #999; padding:5px 8px; text-align:left; }}
-  .fig {{ text-align:center; margin:14px 0; }}
-  .fig img {{ max-width:100%; }}
+  .fig {{ text-align:center; margin:14px 0; page-break-inside: avoid; }}
+  .fig img {{ width:100%; height:auto; }}
   hr {{ margin:18px 0; }}
 </style></head><body>{body}</body></html>"""
 
