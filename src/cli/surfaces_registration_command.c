@@ -45,13 +45,13 @@ void cli_surfaces_registration_execute(RegistrationAggregate *agg,
     int box_col = get_box_col(dp);
     int count = state->participant_count;
     int row = registration_page_input_row(count);
-    int error_row = registration_page_error_row(count);
+    int error_row = registration_page_error_row();
     char buffer[64];
 
     while (state->participant_count < MAX_PARTICIPANTS) {
         count = state->participant_count;
         row = registration_page_input_row(count);
-        error_row = registration_page_error_row(count);
+        error_row = registration_page_error_row();
 
         snprintf(buf, sizeof buf, "Nama peserta #%d (contoh: \"Budi Santoso\"): ", count + 1);
         dp->draw_colored(row, box_col + 2, COLOR_INFO, 1, buf);
@@ -109,7 +109,7 @@ void cli_surfaces_registration_execute(RegistrationAggregate *agg,
 
     registration_page_draw(dp, state);
     int final_count = state->participant_count;
-    int final_error_row = registration_page_error_row(final_count);
+    int final_error_row = registration_page_error_row();
 
     snprintf(buf, sizeof buf, "Total peserta: %d", final_count);
     dp->draw_colored(final_error_row, box_col + 2, COLOR_SUCCESS, 1, buf);

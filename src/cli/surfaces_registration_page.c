@@ -65,6 +65,6 @@ int registration_page_input_row(int participant_count) {
     return 4 + 10 + participant_count;
 }
 
-int registration_page_error_row(int participant_count) {
-    return 4 + participant_count + BOX_HEIGHT_MIN - 2;
+int registration_page_error_row(void) {
+    return 4 + 4;
 }

@@ -46,7 +46,7 @@ void menu_page_draw_help(DisplayPort *dp);
 
 void registration_page_draw(DisplayPort *dp, CompetitionState *state);
 int  registration_page_input_row(int participant_count);
-int  registration_page_error_row(int participant_count);
+int  registration_page_error_row(void);
 
 void scoring_page_draw(DisplayPort *dp, ParticipantEntity *part,
                        const char *msg, int msg_is_error);
