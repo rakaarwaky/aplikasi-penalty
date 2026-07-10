@@ -13,7 +13,7 @@ extern void run_logger_tests(void);
 
 int main(void) {
     printf("========================================\n");
-    printf("  UNIT TESTS — C-AES Penalty Shootout\n");
+    printf("  UNIT TESTS — Aplikasi Perhitungan Penalty\n");
     printf("========================================\n\n");
 
     run_registration_tests();

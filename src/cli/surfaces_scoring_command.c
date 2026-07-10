@@ -15,12 +15,12 @@
 #define BOX_ROW 3
 #define BOX_COL 2
 
-static ScoringError read_zone(ZoneVO *out, char *raw_out, size_t raw_size) {
+static ScoringError read_zone(int row, int col, ZoneVO *out, char *raw_out, size_t raw_size) {
     char buf[32];
     echo();
     curs_set(1);
     memset(buf, 0, sizeof buf);
-    getnstr(buf, 10);
+    mvgetnstr(row, col, buf, 10);
     curs_set(0);
     noecho();
 
@@ -143,7 +143,7 @@ void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state
 
             ZoneVO z;
             char raw[32] = "";
-            if (read_zone(&z, raw, sizeof raw) != SC_OK || z.value < MIN_ZONE || z.value > MAX_ZONE) {
+            if (read_zone(BOX_ROW + 11, BOX_COL + 30, &z, raw, sizeof raw) != SC_OK || z.value < MIN_ZONE || z.value > MAX_ZONE) {
                 /* Tampilkan error di baris feedback saja, tanpa clear layar. */
                 char err_msg[96];
                 snprintf(err_msg, sizeof err_msg,

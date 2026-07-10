@@ -1,4 +1,4 @@
-# Makefile untuk C-AES Penalty Shootout (C99, AES v3.0)
+# Makefile untuk Aplikasi Perhitungan Penalty (C99, AES v3.0)
 CC      ?= gcc
 CFLAGS  ?= -std=c99 -Wall -Wextra -Wpedantic -O2 -g
 TARGET  := aplikasi_perhitungan_penalty

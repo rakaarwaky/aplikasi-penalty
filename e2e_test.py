@@ -24,9 +24,10 @@ def main():
         if not cond: fails.append(msg)
 
     def menu():
-        c.expect("LOMBA TENDANGAN PENALTI", timeout=12)
+        c.expect("STATUS", timeout=12)   # marker unik layar menu
 
-    # Splash auto-advances -> menu
+    # Splash auto-advances; pastikan layar menu muncul
+    c.sendline("")      # Enter cadangan bila splash masih menunggu
     menu()
     check(True, "menu muncul setelah splash otomatis")
 
@@ -45,8 +46,10 @@ def main():
     # ---- 2) Scoring ----
     c.sendline("2")
     c.expect("INPUT TENDANGAN DAN SKOR", timeout=10)
+    import time as _t
     for n in ORDER:
         for z in ZONES[n]:
+            _t.sleep(0.15)
             c.sendline(str(z))
             c.expect("Zona %d -> %d poin" % (z, z), timeout=10)
         c.expect("SELESAI", timeout=10)

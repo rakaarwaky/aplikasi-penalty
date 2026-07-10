@@ -1,4 +1,4 @@
-# C-AES Penalty Shootout
+# Aplikasi Perhitungan Penalty
 
 Aplikasi **console berbasis TUI** (Terminal User Interface) bahasa **C (C99)** untuk
 mengelola lomba tendangan penalti. Dibangun dengan arsitektur **AES v3.0** (Agentic

@@ -3,7 +3,7 @@
  * @brief Pembungkus ncurses untuk menggambar layar & membaca tombol.
  */
 
-#include "infrastructure_tui_adapter.h"
+#include "tui/infrastructure_tui_adapter.h"
 
 #ifdef _WIN32
 #include <curses.h>   /* PDCurses di Windows */
@@ -307,3 +307,72 @@ void tui_splash(int delay_ms) {
     /* Splash otomatis lanjut ke menu (tanpa menunggu Enter). */
 }
 
+/* ── Primitif Draw (implementasi untuk DisplayPort) ── */
+
+/* Tulis teks polos di posisi tertentu. */
+static void tui_draw_at(int row, int col, const char *text) {
+    if (text == NULL) return;
+    mvprintw(row, col, "%s", text);
+}
+
+/* Tulis teks berwarna di posisi tertentu. */
+static void tui_draw_colored(int row, int col, int color, int bold,
+                             const char *text) {
+    if (text == NULL) return;
+    int attrs = COLOR_PAIR(color);
+    if (bold) attrs |= A_BOLD;
+    attron(attrs);
+    mvprintw(row, col, "%s", text);
+    attroff(attrs);
+}
+
+/* Lanjutkan tulis teks dari posisi kursor saat ini. */
+static void tui_draw_append(const char *text) {
+    if (text == NULL) return;
+    addstr(text);
+}
+
+/* Lanjutkan tulis teks berwarna dari posisi kursor saat ini. */
+static void tui_draw_append_colored(int color, int bold, const char *text) {
+    if (text == NULL) return;
+    int attrs = COLOR_PAIR(color);
+    if (bold) attrs |= A_BOLD;
+    attron(attrs);
+    addstr(text);
+    attroff(attrs);
+}
+
+/* Kirim buffer ke terminal. */
+static void tui_screen_refresh(void) {
+    refresh();
+}
+
+/**
+ * Buat DisplayPort yang sudah terisi semua function pointer.
+ * Dipanggil oleh root_display_container untuk wiring.
+ */
+DisplayPort tui_display_port_create(void) {
+    DisplayPort dp;
+
+    dp.clear                = tui_clear;
+    dp.screen_refresh       = tui_screen_refresh;
+    dp.draw_at              = tui_draw_at;
+    dp.draw_colored         = tui_draw_colored;
+    dp.draw_append          = tui_draw_append;
+    dp.draw_append_colored  = tui_draw_append_colored;
+    dp.print_centered_colored = tui_print_centered_colored;
+    dp.print_colored        = tui_print_colored;
+    dp.box                  = tui_box;
+    dp.box_double           = tui_box_double;
+    dp.separator            = tui_separator;
+    dp.separator_thick      = tui_separator_thick;
+    dp.highlight_row        = tui_highlight_row;
+    dp.normal_row           = tui_normal_row;
+    dp.footer               = tui_footer;
+    dp.progress_bar         = tui_progress_bar;
+    dp.medal                = tui_medal;
+    dp.getch                = tui_getch;
+    dp.confirm              = tui_confirm;
+
+    return dp;
+}
