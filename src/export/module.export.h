@@ -15,6 +15,7 @@ typedef struct {
 
 ExportError agent_export_ranking(const ExportAggregate *agg,
                                  const char *filename,
+                                 const CompetitionState *state,
                                  const RankingEntryVO *entries,
                                  int count);
 

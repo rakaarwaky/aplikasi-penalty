@@ -4,9 +4,10 @@
 #include <string.h>
 
 static ExportError export_ranking_txt(const char *filename,
+                                      const CompetitionState *state,
                                       const RankingEntryVO *entries,
                                       int count) {
-    if (filename == NULL || entries == NULL) {
+    if (filename == NULL || state == NULL || entries == NULL) {
         return EXP_ERROR_FILE_NOT_FOUND;
     }
     if (count <= 0) {
@@ -27,9 +28,14 @@ static ExportError export_ranking_txt(const char *filename,
     fprintf(file, "------ -------------------- -----\n");
 
     for (int i = 0; i < count; i++) {
+        int pid = entries[i].participant_id;
+        const char *name = "Unknown";
+        if (pid >= 0 && pid < state->participant_count) {
+            name = state->participants[pid].name.value;
+        }
         fprintf(file, "%-6d %-20s %d\n",
                 entries[i].rank,
-                entries[i].name.value,
+                name,
                 entries[i].total_score);
     }
 

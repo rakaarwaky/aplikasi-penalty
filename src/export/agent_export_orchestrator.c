@@ -3,6 +3,7 @@
 
 ExportError agent_export_ranking(const ExportAggregate *agg,
                                  const char *filename,
+                                 const CompetitionState *state,
                                  const RankingEntryVO *entries,
                                  int count) {
     if (agg == NULL || agg->protocol == NULL) {
@@ -11,5 +12,5 @@ ExportError agent_export_ranking(const ExportAggregate *agg,
     if (agg->protocol->export_ranking == NULL) {
         return EXP_ERROR_FILE_NOT_FOUND;
     }
-    return agg->protocol->export_ranking(filename, entries, count);
+    return agg->protocol->export_ranking(filename, state, entries, count);
 }
