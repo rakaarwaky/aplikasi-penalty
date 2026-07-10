@@ -20,10 +20,8 @@ static StorageError storage_save_impl(const char *filename, const CompetitionSta
     }
 
     size_t written = fwrite(state, sizeof(CompetitionState), 1, file);
-    fclose(file);
-
-    if (written != 1) {
-        return ST_ERROR_CORRUPT; /* penulisan tidak penuh */
+    if (written != 1 || fclose(file) != 0) {
+        return ST_ERROR_CORRUPT; /* penulisan gagal/tidak penuh */
     }
 
     return ST_OK;

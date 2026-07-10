@@ -9,111 +9,92 @@
 #include <string.h>
 
 #define MENU_ITEMS 6
-#define BOX_WIDTH  52
+#define BOX_WIDTH  60
 #define BOX_START_ROW 3
 #define BOX_START_COL 2
 
+/* Label menu (indeks 0 = keluar, 1-5 = fitur). */
 static const char *menu_labels[MENU_ITEMS] = {
-    "  Keluar",
-    "  Pendaftaran Peserta",
-    "  Input Tendangan dan Skor",
-    "  Tampilkan Ranking",
-    "  Cari Peserta",
-    "  Rekapitulasi Lengkap"
+    "Keluar",
+    "Pendaftaran Peserta",
+    "Input Tendangan dan Skor",
+    "Tampilkan Ranking",
+    "Cari Peserta",
+    "Rekapitulasi Lengkap"
 };
 
-/* Gambar ulang layar menu; tambahkan label status sesuai kondisi lomba. */
+/* Gambar ulang layar menu; 2 kolom: MENU (kiri) + STATUS (kanan). */
 static void draw_menu(DisplayPort *dp, int selected, CompetitionStateKind state) {
     char buf[128];
     dp->cls();
 
-    /* Dekorasi header */
+    /* Header dekorasi */
     dp->print_centered_colored(0, "+----------------------------------------------------------+", COLOR_BORDER, 0);
     dp->print_centered_colored(1, "|", COLOR_BORDER, 0);
     dp->print_centered_colored(1, "  LOMBA TENDANGAN PENALTI  ", COLOR_TITLE, 1);
-
-    /* Tutup garis header */
     int title_len = 32;
-    int pad = (80 - title_len) / 2; /* fallback width; COLS tidak tersedia di sini */
+    int pad = (80 - title_len) / 2;
     dp->print_colored(1, pad + title_len, "|", COLOR_BORDER);
-
     dp->print_centered_colored(2, "+----------------------------------------------------------+", COLOR_BORDER, 0);
 
-    /* Bingkai kotak - grid 2 kolom */
-    int grid_width = 56;
-    int grid_height = 10;
+    /* Bingkai utama */
+    int grid_width = BOX_WIDTH;
+    int grid_height = 12;
     dp->box(BOX_START_ROW, BOX_START_COL, grid_width, grid_height);
-
-    /* Garis pemisah setelah judul box */
     dp->separator(BOX_START_ROW + 1, BOX_START_COL, grid_width);
 
-    /* Grid 2 kolom: item 1-5 di grid */
-    int col_width = (grid_width - 4) / 2;
-    int col_left  = BOX_START_COL + 2;
-    int col_right = BOX_START_COL + col_width + 3;
+    /* ── Layout 2 kolom ── */
+    int col1_x = BOX_START_COL + 2;                          /* Kolom kiri: menu   */
+    int col2_x = BOX_START_COL + grid_width - 16;            /* Kolom kanan: status */
+    int col2_width = 14;
 
     /* Header kolom */
-    snprintf(buf, sizeof buf, "%-*s", col_width, "  MENU");
-    dp->draw_colored(BOX_START_ROW + 2, col_left,  COLOR_HEADER, 1, buf);
-    snprintf(buf, sizeof buf, "%-*s", col_width, "  STATUS");
-    dp->draw_colored(BOX_START_ROW + 2, col_right, COLOR_HEADER, 1, buf);
+    snprintf(buf, sizeof buf, "%-*s", col2_x - col1_x, "  MENU");
+    dp->draw_colored(BOX_START_ROW + 2, col1_x, COLOR_HEADER, 1, buf);
+    snprintf(buf, sizeof buf, "%-*s", col2_width, "STATUS");
+    dp->draw_colored(BOX_START_ROW + 2, col2_x, COLOR_HEADER, 1, buf);
     dp->separator(BOX_START_ROW + 3, BOX_START_COL, grid_width);
 
-    /* Grid: 2 item per baris, 3 baris untuk 5 menu items (1-5) */
-    int grid_items[3][2] = {
-        {1, 2},  /* Pendaftaran, Input Skor */
-        {3, 4},  /* Ranking, Cari */
-        {5, 0}   /* Rekap, (kosong) */
-    };
+    /* ── Baris menu 1-5 ── */
+    int i;
+    for (i = 1; i <= 5; i++) {
+        int row = BOX_START_ROW + 3 + i;
 
-    int row_idx;
-    for (row_idx = 0; row_idx < 3; row_idx++) {
-        int row = BOX_START_ROW + 4 + row_idx;
+        /* Kolom 1: nomor + nama menu */
+        int item_color = (i == selected) ? COLOR_HIGHLIGHT : COLOR_MENU;
+        snprintf(buf, sizeof buf, "[%d] %s", i, menu_labels[i]);
+        dp->draw_colored(row, col1_x, item_color, 1, buf);
 
-        int col_idx;
-        for (col_idx = 0; col_idx < 2; col_idx++) {
-            int item = grid_items[row_idx][col_idx];
-            if (item == 0) continue;
+        /* Kolom 2: status */
+        const char *status = "";
+        int status_color = COLOR_DIM;
 
-            int cx = (col_idx == 0) ? col_left : col_right;
-
-            /* Status tags */
-            const char *status = "";
-            int status_color = COLOR_DIM;
-
-            if (item == 1) {
-                if (state == STATE_INIT) { status = "[AKTIF]"; status_color = COLOR_SUCCESS; }
-                else { status = "[SUDAH]"; status_color = COLOR_WARNING; }
-            } else if (item == 2) {
-                if (state == STATE_INIT) { status = "[KUNCI]"; status_color = COLOR_ERROR; }
-                else if (state == STATE_COMPLETED) { status = "[SELESAI]"; status_color = COLOR_WARNING; }
-                else { status = "[AKTIF]"; status_color = COLOR_SUCCESS; }
-            } else if (item == 3) {
-                if (state != STATE_COMPLETED) { status = "[KUNCI]"; status_color = COLOR_ERROR; }
-                else { status = "[AKTIF]"; status_color = COLOR_SUCCESS; }
-            } else if (item == 4) {
-                if (state == STATE_INIT) { status = "[KUNCI]"; status_color = COLOR_ERROR; }
-                else { status = "[AKTIF]"; status_color = COLOR_SUCCESS; }
-            } else if (item == 5) {
-                if (state != STATE_COMPLETED) { status = "[KUNCI]"; status_color = COLOR_ERROR; }
-                else { status = "[AKTIF]"; status_color = COLOR_SUCCESS; }
-            }
-
-            /* Nomor + nama menu */
-            int item_color = (item == selected) ? COLOR_HIGHLIGHT : COLOR_MENU;
-            snprintf(buf, sizeof buf, "[%d] %s", item, menu_labels[item] + 2);
-            dp->draw_colored(row, cx, item_color, (item <= 3), buf);
-
-            /* Status */
-            snprintf(buf, sizeof buf, "%s", status);
-            dp->draw_colored(row, cx + col_width - 6, status_color, 0, buf);
+        if (i == 1) {
+            if (state == STATE_INIT)      { status = "[AKTIF]";  status_color = COLOR_SUCCESS; }
+            else                          { status = "[SUDAH]";  status_color = COLOR_WARNING; }
+        } else if (i == 2) {
+            if (state == STATE_INIT)      { status = "[KUNCI]";  status_color = COLOR_ERROR;   }
+            else if (state == STATE_COMPLETED) { status = "[SELESAI]"; status_color = COLOR_WARNING; }
+            else                          { status = "[AKTIF]";  status_color = COLOR_SUCCESS; }
+        } else if (i == 3) {
+            if (state != STATE_COMPLETED) { status = "[KUNCI]";  status_color = COLOR_ERROR;   }
+            else                          { status = "[AKTIF]";  status_color = COLOR_SUCCESS; }
+        } else if (i == 4) {
+            if (state == STATE_INIT)      { status = "[KUNCI]";  status_color = COLOR_ERROR;   }
+            else                          { status = "[AKTIF]";  status_color = COLOR_SUCCESS; }
+        } else if (i == 5) {
+            if (state != STATE_COMPLETED) { status = "[KUNCI]";  status_color = COLOR_ERROR;   }
+            else                          { status = "[AKTIF]";  status_color = COLOR_SUCCESS; }
         }
+
+        snprintf(buf, sizeof buf, "%-*s", col2_width, status);
+        dp->draw_colored(row, col2_x, status_color, 0, buf);
     }
 
-    /* Garis pemisah */
-    dp->separator(BOX_START_ROW + 7, BOX_START_COL, grid_width);
+    /* Separator sebelum footer */
+    dp->separator(BOX_START_ROW + 9, BOX_START_COL, grid_width);
 
-    /* Info status lomba */
+    /* Status fase lomba */
     const char *state_text = "";
     int state_color = COLOR_DIM;
     switch (state) {
@@ -121,14 +102,14 @@ static void draw_menu(DisplayPort *dp, int selected, CompetitionStateKind state)
         case STATE_REGISTERED: state_text = "Fase: Input Tendangan"; state_color = COLOR_WARNING; break;
         case STATE_COMPLETED:  state_text = "Fase: Selesai";         state_color = COLOR_SUCCESS; break;
     }
-    dp->print_colored(BOX_START_ROW + 8, BOX_START_COL + 2, state_text, state_color);
+    dp->draw_colored(BOX_START_ROW + 10, BOX_START_COL + 2, state_color, 0, state_text);
 
-    /* Keluar button */
-    int exit_color = (selected == 0) ? COLOR_HIGHLIGHT : COLOR_ERROR;
-    dp->draw_colored(BOX_START_ROW + 9, BOX_START_COL + 2, exit_color, 1, "[0] Keluar");
+    /* Tombol keluar */
+    int exit_color = (0 == selected) ? COLOR_HIGHLIGHT : COLOR_ERROR;
+    dp->draw_colored(BOX_START_ROW + 10, BOX_START_COL + grid_width - 12, exit_color, 1, "[0] Keluar");
 
     /* Petunjuk navigasi */
-    dp->footer("[↑/↓] Pilih  [ENTER] OK  [1-5] Shortcut  [h] Bantuan  [q] Keluar");
+    dp->footer("[\xe2\x86\x91/\xe2\x86\x93] Pilih  [ENTER] OK  [1-5] Shortcut  [h] Bantuan  [q] Keluar");
 
     dp->screen_refresh();
 }

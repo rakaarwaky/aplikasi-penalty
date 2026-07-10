@@ -63,10 +63,9 @@ test: $(TEST_BIN)
 # pindahkan semua artefak (.gcno/.gcda) ke folder coverage/ agar tidak
 # berserakan di root. jalankan gcov dari dalam coverage/ untuk ringkasan.
 COV_DIR := coverage
-coverage: CFLAGS += --coverage
-coverage: LDFLAGS += --coverage
-coverage: $(TEST_BIN)
+coverage:
 	@mkdir -p $(COV_DIR)
+	$(MAKE) $(TEST_BIN) CFLAGS="$(CFLAGS) --coverage" LDFLAGS="$(LDFLAGS) --coverage"
 	./$(TEST_BIN)
 	@mv -f run_tests-*.gcno run_tests-*.gcda $(COV_DIR)/ 2>/dev/null || true
 	@cd $(COV_DIR) && for f in run_tests-*.gcno; do gcov -n "$$f" >/dev/null 2>&1; done
