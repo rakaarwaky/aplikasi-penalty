@@ -8,11 +8,8 @@
 #include <stdio.h>
 
 #define MENU_ITEMS 6
-#define BOX_WIDTH  60
-#define BOX_START_ROW 3
-#define BOX_START_COL 2
 #define MIN_LINES  18
-#define MIN_COLS   64
+#define MIN_COLS   40
 
 static const char *menu_labels[MENU_ITEMS] = {
     "Keluar",
@@ -61,36 +58,59 @@ static void resolve_state_text(CompetitionStateKind state,
     }
 }
 
+static void draw_double_line(DisplayPort *dp, int row, int col, int width) {
+    char line[256];
+    int i, pos = 0;
+    for (i = 0; i < width && pos < 252; i++) {
+        line[pos++] = '\xe2';
+        line[pos++] = '\x95';
+        line[pos++] = '\x90';
+    }
+    line[pos] = '\0';
+    dp->draw_colored(row, col, COLOR_DIM, 0, line);
+}
+
 static void draw_menu(DisplayPort *dp, int selected, CompetitionState *state) {
     char buf[128];
     dp->cls();
 
-    dp->print_centered_colored(0, UTF_DOUBLE_H_40, COLOR_DIM, 0);
-    dp->print_centered_colored(1, "    APLIKASI PERHITUNGAN PENALTI    ", COLOR_TITLE, 1);
-    dp->print_centered_colored(2, UTF_DOUBLE_H_40, COLOR_DIM, 0);
+    int cols = dp->get_cols();
 
-    int gw = BOX_WIDTH;
-    dp->box(BOX_START_ROW, BOX_START_COL, gw, 14);
-    dp->separator(BOX_START_ROW + 1, BOX_START_COL, gw);
+    /* Box: adaptive width, max 60, min 40 */
+    int gw = cols - 4;
+    if (gw > 60) gw = 60;
+    if (gw < 40) gw = 40;
 
-    int col1_x = BOX_START_COL + 3;
-    int col2_x = BOX_START_COL + gw - 16;
+    /* Center box horizontally */
+    int box_col = (cols - gw) / 2;
+    int box_row = 3;
+
+    /* Header: ═══ selebar box, center */
+    draw_double_line(dp, 0, box_col, gw);
+    dp->print_centered_colored(1, "  APLIKASI PERHITUNGAN PENALTI  ", COLOR_TITLE, 1);
+    draw_double_line(dp, 2, box_col, gw);
+
+    dp->box(box_row, box_col, gw, 14);
+    dp->separator(box_row + 1, box_col, gw);
+
+    int col1_x = box_col + 3;
+    int col2_x = box_col + gw - 16;
     int col2_width = 14;
 
-    dp->draw_colored(BOX_START_ROW + 2, col1_x, COLOR_INFO, 1, "MENU");
-    dp->draw_colored(BOX_START_ROW + 2, col2_x, COLOR_INFO, 1, "STATUS");
-    dp->separator(BOX_START_ROW + 3, BOX_START_COL, gw);
+    dp->draw_colored(box_row + 2, col1_x, COLOR_INFO, 1, "MENU");
+    dp->draw_colored(box_row + 2, col2_x, COLOR_INFO, 1, "STATUS");
+    dp->separator(box_row + 3, box_col, gw);
 
     int i;
     for (i = 1; i <= 5; i++) {
-        int row = BOX_START_ROW + 3 + i;
+        int row = box_row + 3 + i;
         int item_sel = (i == selected);
         int item_color = item_sel ? COLOR_HIGHLIGHT : COLOR_MENU;
 
         if (item_sel) {
             int j;
             for (j = 1; j < gw - 1; j++)
-                dp->draw_at(row, BOX_START_COL + j, " ");
+                dp->draw_at(row, box_col + j, " ");
         }
 
         snprintf(buf, sizeof buf, "  [%d]  %s", i, menu_labels[i]);
@@ -104,18 +124,18 @@ static void draw_menu(DisplayPort *dp, int selected, CompetitionState *state) {
         dp->draw_colored(row, col2_x, status_color, 0, buf);
     }
 
-    dp->separator(BOX_START_ROW + 9, BOX_START_COL, gw);
+    dp->separator(box_row + 9, box_col, gw);
 
     const char *state_text = "";
     int state_color = COLOR_DIM;
     resolve_state_text(state->state, &state_text, &state_color);
-    dp->draw_colored(BOX_START_ROW + 10, BOX_START_COL + 2, state_color, 0, state_text);
+    dp->draw_colored(box_row + 10, box_col + 2, state_color, 0, state_text);
 
     snprintf(buf, sizeof buf, "Peserta: %d/7", state->participant_count);
-    dp->draw_colored(BOX_START_ROW + 10, BOX_START_COL + 24, COLOR_MENU, 0, buf);
+    dp->draw_colored(box_row + 10, box_col + 24, COLOR_MENU, 0, buf);
 
     int exit_color = (0 == selected) ? COLOR_HIGHLIGHT : COLOR_ERROR;
-    dp->draw_colored(BOX_START_ROW + 10, BOX_START_COL + gw - 18, exit_color, 1, "  [0] Keluar  ");
+    dp->draw_colored(box_row + 10, box_col + gw - 18, exit_color, 1, "  [0] Keluar  ");
 
     dp->footer("[\xe2\x86\x91/\xe2\x86\x93] Navigasi  \xe2\x94\x82  [ENTER] Pilih  \xe2\x94\x82  [1-5] Shortcut  \xe2\x94\x82  [h] Bantuan");
     dp->screen_refresh();
@@ -123,13 +143,19 @@ static void draw_menu(DisplayPort *dp, int selected, CompetitionState *state) {
 
 static void draw_help(DisplayPort *dp) {
     dp->cls();
-    dp->print_centered_colored(0, UTF_DOUBLE_H_40, COLOR_DIM, 0);
-    dp->print_centered_colored(1, "  PANDUAN PENGGUNAAN  ", COLOR_TITLE, 1);
-    dp->print_centered_colored(2, UTF_DOUBLE_H_40, COLOR_DIM, 0);
 
-    int box_col = 2;
-    dp->box(3, box_col, BOX_WIDTH, 18);
-    dp->separator(4, box_col, BOX_WIDTH);
+    int cols = dp->get_cols();
+    int gw = cols - 4;
+    if (gw > 60) gw = 60;
+    if (gw < 40) gw = 40;
+    int box_col = (cols - gw) / 2;
+
+    draw_double_line(dp, 0, box_col, gw);
+    dp->print_centered_colored(1, "  PANDUAN PENGGUNAAN  ", COLOR_TITLE, 1);
+    draw_double_line(dp, 2, box_col, gw);
+
+    dp->box(3, box_col, gw, 18);
+    dp->separator(4, box_col, gw);
 
     dp->draw_colored(5, box_col + 2, COLOR_GOLD, 1, "ATURAN LOMBA:");
     const char *rules[] = {
@@ -144,7 +170,7 @@ static void draw_help(DisplayPort *dp) {
     for (ri = 0; rules[ri] != NULL; ri++)
         dp->draw_colored(6 + ri, box_col + 4, COLOR_MENU, 0, rules[ri]);
 
-    dp->separator(11, box_col, BOX_WIDTH);
+    dp->separator(11, box_col, gw);
 
     dp->draw_colored(12, box_col + 2, COLOR_GOLD, 1, "NAVIGASI:");
     const char *navs[] = {
@@ -159,7 +185,7 @@ static void draw_help(DisplayPort *dp) {
     for (ni = 0; navs[ni] != NULL; ni++)
         dp->draw_colored(13 + ni, box_col + 4, COLOR_MENU, 0, navs[ni]);
 
-    dp->separator(18, box_col, BOX_WIDTH);
+    dp->separator(18, box_col, gw);
     dp->footer("Tekan sembarang tombol untuk kembali ke menu");
     dp->screen_refresh();
     dp->readkey();
