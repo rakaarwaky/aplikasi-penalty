@@ -7,6 +7,7 @@
 #define SHARED_CONTRACT_SANITIZE_AGGREGATE_H
 
 #include "shared/contract_sanitize_protocol.h"
+#include "shared/taxonomy_sanitize_error.h"
 
 /** Penghubung ke fungsi sanitasi (disimpan alamatnya saja). */
 typedef struct {

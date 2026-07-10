@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-mutation_test.py — Mutation testing gate untuk aplikasi-penalty.
+mutation_test.py — Mutation testing gate untuk aplikasi-penalti.
 
 Cara kerja:
   Untuk tiap mutan: backup file -> patch (1 token) -> rebuild test binary

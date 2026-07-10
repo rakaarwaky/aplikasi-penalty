@@ -4,6 +4,7 @@
  */
 
 #include "cli/module.cli.h"
+#include "sanitizer/module.sanitizer.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -70,7 +71,8 @@ static void draw_registration_screen(DisplayPort *dp, CompetitionState *state) {
 }
 
 void cli_surfaces_registration_execute(RegistrationAggregate *agg,
-                                       CompetitionState *state, DisplayPort *dp) {
+                                       CompetitionState *state, DisplayPort *dp,
+                                       SanitizeAggregate *sn) {
     if (agg == NULL || state == NULL) return;
     char buf[128];
 
@@ -105,6 +107,13 @@ void cli_surfaces_registration_execute(RegistrationAggregate *agg,
         if (len == 0) {
             if (state->participant_count >= MIN_PARTICIPANTS) break;
             show_error(dp, "Minimal 5 peserta untuk melanjutkan!", error_row);
+            dp->screen_refresh();
+            continue;
+        }
+
+        /* Validasi mentah via sanitizer agent sebelum domain agent */
+        if (sn != NULL && agent_sanitize_validate_string(sn, buffer, MAX_NAME_LENGTH) != SANITIZE_OK) {
+            show_error(dp, "Input nama tidak valid!", error_row);
             dp->screen_refresh();
             continue;
         }

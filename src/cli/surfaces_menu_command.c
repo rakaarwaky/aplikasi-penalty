@@ -34,7 +34,7 @@ static void draw_menu(DisplayPort *dp, int selected, CompetitionStateKind state,
 
     /* ── Header: double-line border ── */
     dp->print_centered_colored(0, "==========================================================", COLOR_GOLD, 1);
-    dp->print_centered_colored(1, "    APLIKASI PERHITUNGAN PENALTY    ", COLOR_TITLE, 1);
+    dp->print_centered_colored(1, "    APLIKASI PERHITUNGAN PENALTI    ", COLOR_TITLE, 1);
     dp->print_centered_colored(2, "==========================================================", COLOR_GOLD, 1);
 
     /* ── Bingkai utama (1 baris kosong dari header = Gestalt Proximity) ── */
@@ -249,10 +249,10 @@ int cli_surfaces_menu_run(RegistrationAggregate *reg,
                         running = 0;
                 } else if (selected == 1) {
                     if (state->state == STATE_INIT || state->state == STATE_REGISTERED)
-                        cli_surfaces_registration_execute(reg, state, dp);
+                        cli_surfaces_registration_execute(reg, state, dp, sn);
                 } else if (selected == 2) {
                     if (state->state == STATE_REGISTERED)
-                        cli_surfaces_scoring_execute(sc, state, dp);
+                        cli_surfaces_scoring_execute(sc, state, dp, sn);
                 } else if (selected == 3) {
                     if (state->state == STATE_COMPLETED)
                         cli_surfaces_ranking_execute(rk, state, dp);

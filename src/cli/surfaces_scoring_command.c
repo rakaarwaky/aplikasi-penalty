@@ -4,6 +4,7 @@
  */
 
 #include "cli/module.cli.h"
+#include "sanitizer/module.sanitizer.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -97,7 +98,7 @@ static void draw_scoring_screen(DisplayPort *dp, ParticipantEntity *part,
 }
 
 void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state,
-                                  DisplayPort *dp) {
+                                  DisplayPort *dp, SanitizeAggregate *sn) {
     char buf[128];
     if (agg == NULL || state == NULL) return;
 
@@ -126,8 +127,20 @@ void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state
 
             ZoneVO z;
             char raw[32] = "";
-            if (read_zone(&z, raw, sizeof raw) != SC_OK ||
-                z.value < MIN_ZONE || z.value > MAX_ZONE) {
+            read_zone(&z, raw, sizeof raw);
+
+            /* Validasi mentah via sanitizer agent sebelum domain agent */
+            if (sn != NULL && raw[0] != '\0' &&
+                agent_sanitize_validate_int(sn, raw, MIN_ZONE, MAX_ZONE) != SANITIZE_OK) {
+                snprintf(buf, sizeof buf,
+                         "[GAGAL] Input zona tidak valid: '%s'.", raw);
+                dp->draw_colored(BOX_ROW + BOX_HEIGHT - 2, BOX_COL + 2, COLOR_ERROR, 1, buf);
+                dp->screen_refresh();
+                dp->readkey();
+                continue;
+            }
+
+            if (z.value < MIN_ZONE || z.value > MAX_ZONE) {
                 snprintf(buf, sizeof buf,
                          "[GAGAL] Zona harus %d-%d. Input: '%s'.", MIN_ZONE, MAX_ZONE, raw);
                 dp->draw_colored(BOX_ROW + BOX_HEIGHT - 2, BOX_COL + 2, COLOR_ERROR, 1, buf);

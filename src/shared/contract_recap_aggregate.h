@@ -11,6 +11,7 @@
 #define SHARED_CONTRACT_RECAP_AGGREGATE_H
 
 #include "shared/contract_recap_protocol.h"
+#include "shared/taxonomy_rank_vo.h"
 #include "shared/contract_ranking_protocol.h"
 
 /** Penghubung recap: detail peserta + peringkat (dipinjam). */

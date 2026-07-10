@@ -18,6 +18,7 @@
 #endif
 
 #include "shared/contract_display_port.h"
+#include "shared/taxonomy_display_constant.h"
 
 /* Hidupkan & matikan moda ncurses. Dipanggil dari root entry. */
 void tui_init(void);

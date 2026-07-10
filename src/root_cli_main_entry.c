@@ -43,7 +43,7 @@ int main(void) {
 
     tui_splash(50);
     flushinp();  /* buang sisa Enter agar tidak bocor ke menu utama */
-    cli_surfaces_menu_run(&reg, &sc, &rk, &sr, &rc, &state, &dp);
+    cli_surfaces_menu_run(&reg, &sc, &rk, &sr, &rc, &state, &dp, &sn);
 
     /* D2: Ringkasan juara sebelum keluar — tampilkan di ncurses, tunggu Enter. */
     if (state.state == STATE_COMPLETED && state.participant_count > 0) {

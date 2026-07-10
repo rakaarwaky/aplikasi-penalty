@@ -7,6 +7,7 @@
 #define SHARED_CONTRACT_REGISTRATION_AGGREGATE_H
 
 #include "shared/contract_registration_protocol.h"
+#include "shared/taxonomy_participant_vo.h"
 
 /** Penghubung ke fungsi pendaftaran (disimpan alamatnya saja). */
 typedef struct {
