@@ -47,10 +47,6 @@ void cli_surfaces_storage_execute(StorageAggregate *agg,
                                   CompetitionState *state, DisplayPort *dp);
 
 /* ── Dumb Surfaces (page) ── */
-void menu_page_draw(DisplayPort *dp, int selected, CompetitionStateKind state,
-                    int participant_count);
-void menu_page_draw_help(DisplayPort *dp);
-
 void registration_page_draw(DisplayPort *dp, CompetitionState *state);
 int  registration_page_input_row(int participant_count);
 int  registration_page_error_row(void);
