@@ -1,7 +1,16 @@
 #include "registration/module.registration.h"
 
 #include <string.h>
-#include "shared/taxonomy_string_utility.h"
+#include <ctype.h>
+
+/* utility inline (milik capability ini): banding string case-insensitive. */
+static int ci_equal(const char *a, const char *b) {
+    while (*a && *b) {
+        if (tolower((unsigned char)*a) != tolower((unsigned char)*b)) return 0;
+        a++; b++;
+    }
+    return *a == *b;
+}
 
 RegistrationError capabilities_registration_validate_name(const CompetitionState *state,
                                                           const ParticipantNameVO *name) {
