@@ -66,5 +66,5 @@ int registration_page_input_row(int participant_count) {
 }
 
 int registration_page_error_row(void) {
-    return 4 + 4;
+    return 4 + 5;
 }

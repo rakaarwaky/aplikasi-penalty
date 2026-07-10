@@ -53,11 +53,11 @@ void cli_surfaces_registration_execute(RegistrationAggregate *agg,
         row = registration_page_input_row(count);
         error_row = registration_page_error_row();
 
-        snprintf(buf, sizeof buf, "Nama peserta #%d (contoh: \"Budi Santoso\"): ", count + 1);
+        snprintf(buf, sizeof buf, "Nama #%d: ", count + 1);
         dp->draw_colored(row, box_col + 2, COLOR_INFO, 1, buf);
         dp->screen_refresh();
 
-        dp->input_string(row, box_col + 21, buffer, 30);
+        dp->input_string(row, box_col + 12, buffer, 30);
 
         size_t len = strlen(buffer);
         while (len > 0 && (buffer[len - 1] == '\n' || buffer[len - 1] == '\r'))
