@@ -11,6 +11,15 @@
 #include "search/module.search.h"
 #include "recap/module.recap.h"
 
+/* Menu surfaces — header, display, dispatch */
+void cli_surfaces_menu_header(void);
+void cli_surfaces_menu_display(CompetitionStateKind state);
+void cli_surfaces_menu_dispatch(int choice, RegistrationAggregate *reg,
+                                ScoringAggregate *sc, RankingAggregate *rk,
+                                SearchAggregate *sr, RecapAggregate *rc,
+                                CompetitionState *state);
+
+/* Feature surfaces */
 void cli_surfaces_registration_execute(RegistrationAggregate *agg, CompetitionState *state);
 void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state);
 void cli_surfaces_ranking_execute(RankingAggregate *agg, CompetitionState *state);
