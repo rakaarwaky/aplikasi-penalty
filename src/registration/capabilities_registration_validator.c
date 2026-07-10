@@ -1,16 +1,7 @@
 #include "registration/module.registration.h"
 
 #include <string.h>
-#include <ctype.h>
-
-/* C99-aman: banding case-insensitive tanpa strcasecmp. */
-static int ci_equal(const char *a, const char *b) {
-    while (*a && *b) {
-        if (tolower((unsigned char)*a) != tolower((unsigned char)*b)) return 0;
-        a++; b++;
-    }
-    return *a == *b;
-}
+#include "shared/taxonomy_string_utility.h"
 
 RegistrationError capabilities_registration_validate_name(const CompetitionState *state,
                                                           const ParticipantNameVO *name) {

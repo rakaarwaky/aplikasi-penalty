@@ -13,7 +13,7 @@ The **Agentic Engineering System (AES)** adalah pola arsitektur berlapis ketat, 
 | --------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | **Workspace**         | Root direktori proyek yang berisi semua konfigurasi dan source.                                              |
 | **Feature directory** | Satu subdirektori di dalam`src/` yang mewakili satu fitur vertikal (mis. `registration/`, `scoring/`). |
-| **Member**            | Satu file C (`.c` + `.h` pair) yang mewakili satu unit layer dalam satu fitur.                           |
+| **Member**            | Satu file C  yang mewakili satu unit layer dalam satu fitur.                                               |
 
 ---
 
@@ -21,7 +21,7 @@ The **Agentic Engineering System (AES)** adalah pola arsitektur berlapis ketat, 
 
 ### 1. Strict Layered Boundary Enforcement
 
-Kode dibagi ke dalam batas horizontal dan vertikal yang jelas. Layer hanya boleh berkomunikasi secara **downward-only** (lapisan di atas mengimpor lapisan di bawah, tidak sebaliknya). Pelanggaran batas ini ditangkap oleh linter statik AES.
+Kode dibagi ke dalam batas horizontal dan vertikal yang jelas. Layer hanya boleh berkomunikasi secara **downward-only** (lapisan di atas mengimpor lapisan di bawah, tidak sebaliknya). 
 
 ### 2. Capabilities dan Infrastructure sebagai Peer Layer
 

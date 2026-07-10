@@ -1,6 +1,6 @@
 #include "registration/module.registration.h"
 
-#include <stdio.h>
+#include <string.h>
 
 RegistrationError capabilities_registration_append(CompetitionState *state,
                                                    const ParticipantNameVO *name) {
@@ -9,8 +9,9 @@ RegistrationError capabilities_registration_append(CompetitionState *state,
 
     int slot = state->participant_count;
     state->participants[slot].id = slot;
-    snprintf(state->participants[slot].name.value,
-             sizeof state->participants[slot].name.value, "%s", name->value);
+    memcpy(state->participants[slot].name.value,
+           name->value, MAX_NAME_LENGTH);
+    state->participants[slot].name.value[MAX_NAME_LENGTH] = '\0';
     state->participants[slot].total_score = 0;
     state->participants[slot].kick_count = 0;
     for (int z = 0; z <= MAX_ZONE; z++) state->participants[slot].zone_freq[z] = 0;

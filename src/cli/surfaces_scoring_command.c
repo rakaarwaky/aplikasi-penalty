@@ -35,7 +35,11 @@ void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state
             fflush(stdout);
 
             ZoneVO z;
-            if (read_zone(&z) != SC_OK) { printf("  [GAGAL] Zona harus %d-%d.\n", MIN_ZONE, MAX_ZONE); continue; }
+            if (read_zone(&z) != SC_OK) {
+                if (feof(stdin)) return;   /* input habis */
+                printf("  [GAGAL] Zona harus %d-%d.\n", MIN_ZONE, MAX_ZONE);
+                continue;
+            }
 
             ScoringError e = agent_scoring_record(agg, state, p, z);
             if (e == SC_OK) printf("  Zona %d -> %d poin\n", z.value, z.value);

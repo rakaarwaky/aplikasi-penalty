@@ -123,16 +123,3 @@ Sistem menerapkan state machine untuk mencegah akses fitur yang belum waktunya:
 5. User dapat memilih menu 4, mengetikkan nama peserta, dan sistem menampilkan detail 7 tendangan beserta total skornya.
 6. User memilih menu 5 untuk melihat tabel rekapitulasi berborder ASCII.
 7. User memilih menu 0 untuk keluar dari program.
-
-## 8. Pemetaan ke Template Laporan
-
-| No | Tahapan Laporan       | Sumber Pemetaan                                                                                 |
-| -- | --------------------- | ----------------------------------------------------------------------------------------------- |
-| 1  | Analisis Permasalahan | Bagian 1, 2, 4, dan 5 berisi deskripsi produk, aturan bisnis, state machine, dan error handling |
-| 2  | Skenario Program      | Bagian 7 berisi alur penggunaan fitur dan navigasi menu                                         |
-| 3  | Konstruksi Program    | Dependency graph antar fitur dan layer internal                                                 |
-| 4  | Struktur Data         | Data model per fitur seperti Participant, Kick, CompetitionState                                |
-| 5  | Konstanta             | Batasan angka: MAX_PARTICIPANTS, MIN_PARTICIPANTS, TOTAL_KICKS, MAX_ZONE, MAX_NAME_LENGTH       |
-| 6  | Variabel              | Variabel lokal per fungsi, state di-pass via pointer                                            |
-| 7  | Fungsi                | Daftar fungsi per fitur seperti calculate_score, evaluate_tie_breaker, clear_input_buffer       |
-| 8  | Kode Sumber           | Seluruh file implementasi per fitur                                                             |

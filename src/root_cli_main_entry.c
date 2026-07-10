@@ -41,8 +41,14 @@ int main(void) {
         print_header();
         print_menu(state.state);
         int choice;
-        if (scanf("%d", &choice) != 1) { getchar(); continue; }
-        getchar(); /* consume newline */
+        int r = scanf("%d", &choice);
+        if (r == EOF) break;               /* input habis: keluar */
+        if (r != 1) {                       /* bukan angka: buang baris */
+            int c;
+            while ((c = getchar()) != '\n' && c != EOF) { }
+            continue;
+        }
+        { int c; while ((c = getchar()) != '\n' && c != EOF) { } } /* buang newline */
 
         switch (choice) {
             case MENU_EXIT: running = 0; break;
