@@ -1,7 +1,34 @@
 #!/usr/bin/env python3
-"""Terminal ANSI → PNG via aha (ANSI→HTML) + Chromium (HTML→PNG)."""
+"""Terminal ANSI → PNG via aha (ANSI→HTML) + Chromium (HTML→PNG).
+Post-processes aha output to fix color mapping."""
 
-import sys, os, subprocess, tempfile
+import sys, os, subprocess, tempfile, re
+
+# ── Fix aha's color names to match actual ncurses terminal colors ──
+COLOR_FIX = {
+    # aha maps \033[37m to "gray" — we want the actual terminal white
+    'color:gray':         'color:#cccccc',
+    'color:teal':         'color:#00aaaa',
+    'color:green':        'color:#00aa00',
+    'color:red':          'color:#aa0000',
+    'color:blue':         'color:#0000aa',
+    'color:cyan':         'color:#00aaaa',
+    'color:yellow':       'color:#aa5500',
+    'color:magenta':      'color:#aa00aa',
+    'color:white':        'color:#ffffff',
+    'color:black':        'color:#000000',
+    'background-color:gray':   'background-color:#555555',
+    'background-color:teal':   'background-color:#00aaaa',
+    'background-color:green':  'background-color:#00aa00',
+    'background-color:red':    'background-color:#aa0000',
+    'background-color:blue':   'background-color:#0000aa',
+    'background-color:cyan':   'background-color:#00aaaa',
+    'background-color:yellow': 'background-color:#aa5500',
+    'background-color:magenta':'background-color:#aa00aa',
+    'background-color:white':  'background-color:#ffffff',
+    'background-color:black':  'background-color:#000000',
+    'background-color:navy':   'background-color:#0000aa',
+}
 
 HTML_TEMPLATE = """\
 <!DOCTYPE html>
@@ -14,23 +41,31 @@ body {{
   background: #1e1e1e;
   font-family: 'DejaVu Sans Mono', 'Liberation Mono', 'Courier New', monospace;
   font-size: {font_size}px;
-  line-height: 1.25;
-  padding: 12px 16px;
+  line-height: 1.3;
   color: #cccccc;
   white-space: pre;
+}}
+.wrap {{
   display: inline-block;
+  padding: 8px 12px;
 }}
 </style>
 </head>
 <body>
+<div class="wrap">
 {body}
+</div>
 </body>
 </html>
 """
 
+def fix_aha_colors(html):
+    """Replace aha's inaccurate color names with hex values."""
+    for old, new in COLOR_FIX.items():
+        html = html.replace(old, new)
+    return html
+
 def ansi_to_png(input_txt, output_png, font_size=16):
-    """Convert ANSI text file to PNG using aha + Chromium."""
-    # Step 1: ANSI → HTML via aha
     with open(input_txt, "r") as f:
         ansi_text = f.read()
 
@@ -41,36 +76,28 @@ def ansi_to_png(input_txt, output_png, font_size=16):
     if proc.returncode != 0:
         print(f"aha error: {proc.stderr}", file=sys.stderr)
         return False
-    body_html = proc.stdout
-
-    # Step 2: Wrap in full HTML
+    body_html = fix_aha_colors(proc.stdout)
     full_html = HTML_TEMPLATE.format(font_size=font_size, body=body_html)
 
-    # Step 3: Write temp HTML
     with tempfile.NamedTemporaryFile(suffix=".html", delete=False, mode="w") as f:
         f.write(full_html)
         tmp_html = f.name
 
-    # Step 4: HTML → PNG via html2image (Chromium)
     try:
         from html2image import Html2Image
         hti = Html2Image(
             browser_executable="/usr/bin/chromium-browser",
             output_path=os.path.dirname(os.path.abspath(output_png)),
             custom_flags=[
-                "--no-sandbox",
-                "--disable-gpu",
-                "--disable-software-rasterizer",
-                "--hide-scrollbars",
+                "--no-sandbox", "--disable-gpu",
+                "--disable-software-rasterizer", "--hide-scrollbars",
             ]
         )
         base = os.path.splitext(os.path.basename(output_png))[0]
-        hti.screenshot(html_file=tmp_html, save_as=f"{base}.png", size=(1200, 800))
-        # html2image saves to output_path, may add extra size param
+        hti.screenshot(html_file=tmp_html, save_as=f"{base}.png", size=(900, 600))
         result = os.path.join(os.path.dirname(os.path.abspath(output_png)), f"{base}.png")
         if not os.path.exists(result):
-            # Fallback: try with different name
-            hti.screenshot(html_str=full_html, save_as=f"{base}.png", size=(1200, 800))
+            hti.screenshot(html_str=full_html, save_as=f"{base}.png", size=(900, 600))
     finally:
         os.unlink(tmp_html)
 
@@ -78,9 +105,8 @@ def ansi_to_png(input_txt, output_png, font_size=16):
         sz = os.path.getsize(output_png)
         print(f"OK: {output_png} ({sz} bytes)")
         return True
-    else:
-        print(f"FAIL: {output_png} not created", file=sys.stderr)
-        return False
+    print(f"FAIL: {output_png}", file=sys.stderr)
+    return False
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:

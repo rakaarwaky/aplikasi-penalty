@@ -31,12 +31,30 @@ def code(t):
     r.font.size = Pt(9)
     return p
 
+import base64, subprocess, os, tempfile
+def add_mermaid(src, width_in=6.3):
+    """Render mermaid source to PNG via mermaid.ink and embed as picture."""
+    enc = base64.urlsafe_b64encode(src.encode('utf-8')).decode('ascii')
+    url = f'https://mermaid.ink/img/{enc}'
+    fd, png = tempfile.mkstemp(suffix='.png')
+    os.close(fd)
+    try:
+        subprocess.run(['curl', '-s', '-H', 'Accept: image/png', '-o', png, url],
+                       check=True, timeout=30)
+        if os.path.getsize(png) < 500:
+            raise RuntimeError('mermaid render too small')
+        from docx.shared import Inches
+        doc.add_picture(png, width=Inches(width_in))
+    finally:
+        try: os.remove(png)
+        except OSError: pass
+
 # ---- Title ----
 title = doc.add_heading('LAPORAN PROJECT', level=0)
 sub = doc.add_paragraph('Aplikasi Perhitungan Hasil Lomba Tendangan Penalti')
 sub.runs[0].bold = True
 sub.alignment = WD_ALIGN_PARAGRAPH.CENTER
-meta = doc.add_paragraph('Bahasa C — Arsitektur Hexagonal (Ports & Adapters)')
+meta = doc.add_paragraph('Bahasa C — Arsitektur AES (Agentic Engineering System)')
 meta.alignment = WD_ALIGN_PARAGRAPH.CENTER
 doc.add_paragraph()
 
@@ -99,23 +117,58 @@ para('Verifikasi alur penuh (daftar → tendang → ranking → cari → rekap) 
 
 # ---- 3. Konstruksi Program ----
 h1('3. Konstruksi Program')
-para('Arsitektur yang digunakan adalah Hexagonal (Ports & Adapters): aturan bisnis '
-     'berada di domain (registration, scoring, ranking, search, recap, storage, '
-     'sanitizer), antarmuka (CLI/TUI) hanya berkomunikasi lewat kontrak function '
-     'pointer (DisplayPort, StorageProtocol, dsb). Hal ini memungkinkan pengujian '
-     'tanpa terminal nyata (fake DisplayPort).')
-para('Alur data utama (tanpa diagram bitmap):')
-code('main()\n'
-     ' └─ CompetitionState state   (satu-satunya wadah data, di-pass via pointer)\n'
-     ' ├─ root_*_build()           (rakit tiap aggregate domain + DisplayPort)\n'
-     ' ├─ agent_storage_load()     (auto-muat data_lomba.bin bila ada)\n'
-     ' └─ cli_surfaces_menu_run()  (event loop menu)\n'
-     '       ├─ [1] Registration → agent_registration_orchestrator\n'
-     '       ├─ [2] Scoring       → agent_scoring_orchestrator\n'
-     '       ├─ [3] Ranking       → capabilities_ranking_calculator\n'
-     '       ├─ [4] Search        → capabilities_search_resolver\n'
-     '       ├─ [5] Recap         → agent_recap_orchestrator\n'
-     '       └─ [6] Storage       → agent_storage_save / load / delete')
+para('Arsitektur yang digunakan adalah AES (Agentic Engineering System) — pola '
+     'berlapis ketat (strict layered) dengan dependency inversion dilakukan lewat '
+     'struct of function pointers sebagai pengganti interface. Arah dependensi '
+     'downward-only: taxonomy -> contract -> capabilities/infrastructure -> agent '
+     '-> surfaces -> root (wiring only). Capabilities dan Infrastructure adalah '
+     'layer setara (peer) yang sama-sama bergantung ke bawah pada Contract, dan '
+     'tidak saling mengimpor.')
+
+para('Hierarki layer (arah panah = arah import yang diizinkan):')
+add_mermaid('''graph TD
+    subgraph ROOT["root_  ── Wiring Layer (wraps all layers)"]
+        direction TB
+
+        S["surface_<br/>(CLI, MCP Server, API)"]
+        A["agent_<br/>(Orchestrators)"]
+
+        subgraph PEER["Peer Layers (no direct sibling import)"]
+            direction LR
+            C["capabilities_<br/>(Checkers, Analyzers)"]
+            I["infrastructure_<br/>(Adapters, Scanners)"]
+        end
+
+        CT["contract_<br/>(Ports, Protocols, Aggregates)"]
+        T["taxonomy_<br/>(VOs, Entities, Errors, Events, Constants)"]
+
+        S -->|"imports"| CT
+        S -->|"imports"| T
+        A -->|"imports"| CT
+        A -->|"imports"| T
+        C -->|"imports"| CT
+        C -->|"imports"| T
+        I -->|"imports"| CT
+        I -->|"imports"| T
+        CT -->|"imports"| T
+    end
+
+    ROOT_CONT["root_container<br/>(DI Wiring — instantiates & injects all)"]
+    ROOT_ENTRY["root_entry<br/>(Binary Bootstrap)"]
+
+    ROOT_CONT -->|"wires"| ROOT
+    ROOT_ENTRY -->|"starts"| ROOT_CONT''')
+para('Alur data utama aplikasi:')
+add_mermaid('''graph LR
+A[Menu Utama] --> B[Pendaftaran 5-7 Peserta]
+B --> C[Input Tendangan: 7 zona 0-5]
+C --> D[Konversi Zona ke Skor]
+D --> E{Total Skor Sama?}
+E -->|Ya| F[Pemecah Seri 5-4-3-2-1]
+E -->|Tidak| G[Ranking Final]
+F --> G
+G --> H[Rekap dan Cari Peserta]
+H --> I[Simpan / Muat File]''')
 
 # ---- 4. Struktur (struct) ----
 h1('4. Struktur (struct)')
