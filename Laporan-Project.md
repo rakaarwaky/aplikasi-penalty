@@ -11,52 +11,35 @@
 
 ## 1. Analisis Permasalahan
 
-Berdasarkan kerangka epistemologis filsafat masalah, suatu kondisi hanya dapat disebut "masalah" apabila memenuhi tiga prasyarat sekaligus:
+Berdasarkan kerangka epistemologis filsafat masalah, suatu kondisi hanya dapat disebut "masalah" apabila memenuhi prasyarat berikut:
 
-(a) terdapat subjek yang memiliki tujuan;
+- terdapat subjek yang memiliki tujuan;
+- terdapat kesenjangan antara keadaan aktual dan keadaan yang dikehendaki;
+- terdapat hambatan yang tidak dapat diatasi secara langsung.
 
-(b) terdapat kesenjangan  antara keadaan aktual dan keadaan yang dikehendaki;
+### Tujuan
 
-(c) terdapat hambatan yang tidak dapat diatasi secara langsung.
+- Membangun program bahasa C untuk mengelola hasil lomba tendangan penalti.
+- Jumlah peserta 5-7 orang; setiap peserta 7 tendangan; zona bernilai 0 sampai 5.
+- Mengubah zona menjadi skor; total skor = jumlah seluruh skor tendangan.
+- Menentukan juara dari total skor tertinggi, dengan aturan seri 5 -> 4 -> 3 -> 2 -> 1.
+- Menyimpan data peserta, mencatat hasil tendangan, mencari peserta, menampilkan rekap, dan mengurutkan ranking.
 
-### 1.1 Tujuan
+### Keadaan Saat Ini dan Keadaan Diinginkan
 
-Membangun program bahasa C untuk mengelola hasil lomba tendangan penalti.
+Keadaan saat ini: belum tersedia program yang memenuhi seluruh ketentuan di atas. Keadaan diinginkan: program yang secara utuh memenuhi batas peserta (5-7), batas tendangan (7), rentang zona (0-5), aturan konversi dan akumulasi skor, aturan seri bertingkat, serta kelima kemampuan kelola data. Kesenjangan antara kedua keadaan inilah yang menjadikan tugas ini sebagai masalah.
 
-Jumlah peserta 5-7 orang; setiap peserta 7 tendangan; zona bernilai 0 sampai 5.
+### Hambatan
 
-Mengubah zona menjadi skor; total skor = jumlah seluruh skor tendangan.
-
-Menentukan juara dari total skor tertinggi, dengan aturan seri 5 -> 4 -> 3 -> 2 -> 1.
-
-Menyimpan data peserta, mencatat hasil tendangan, mencari peserta, menampilkan rekap, dan mengurutkan ranking.
-
-### 1.2 Keadaan Saat Ini dan Keadaan Diinginkan
-
-Keadaan saat ini: belum tersedia program yang memenuhi seluruh ketentuan di atas. Keadaan diinginkan  program yang secara utuh memenuhi batas peserta (5-7), batas tendangan (7), rentang zona (0-5), aturan konversi dan akumulasi skor, aturan seri bertingkat, serta kelima kemampuan kelola data. Kesenjangan antara kedua keadaan inilah yang menjadikan tugas ini sebagai masalah.
-
-### 1.3 Hambatan
-
-- **Masalah 1** - Pembatasan input zona 0-5 (Ketentuan 2 & 4). Tanpa pembatasan, pengguna dapat memasukkan nilai di luar rentang yang merusak perhitungan
-- **Masalah 2** - Batas jumlah peserta 5-7 (aturan lomba). Data peserta harus dialokasikan menampung maksimal 7 tanpa meluap, namun tetap menerima minimal 5.
-- **Masalah 3** - Konversi zona ke skor dan akumulasi (Ketentuan 3 & 4). Setiap zona harus dipetakan ke poin, lalu dijumlahkan menjadi total skor tiap peserta.
-- **Masalah 4** - Penentuan juara dan aturan seri bertingkat (Ketentuan 5 & 6). Pengurutan tidak cukup hanya by total skor; diperlukan pemecah seri 5 -> 4 -> 3 -> 2 -> 1, dan peringkat sama bila seluruh komponen identik.
-- **Masalah 5** - Kelola data antar-fitur (simpan, catat, cari, rekap, ranking). Seluruh fitur harus beroperasi pada satu kesatuan data peserta yang konsisten.
+- Pembatasan input zona 0-5. Tanpa pembatasan, pengguna dapat memasukkan nilai di luar rentang yang merusak perhitungan.
+- Batas jumlah peserta 5-7 (aturan lomba). Data peserta harus dialokasikan menampung maksimal 7 tanpa meluap, namun tetap menerima minimal 5.
+- Konversi zona ke skor dan akumulasi. Setiap zona harus dipetakan ke poin, lalu dijumlahkan menjadi total skor tiap peserta.
+- Penentuan juara dan aturan seri bertingkat. Pengurutan tidak cukup hanya by total skor; diperlukan pemecah seri 5 -> 4 -> 3 -> 2 -> 1, dan peringkat sama bila seluruh komponen identik.
+- Kelola data antar-fitur (simpan, catat, cari, rekap, ranking). Seluruh fitur harus beroperasi pada satu kesatuan data peserta yang konsisten.
 
 ---
 
 ## 2. Skenario Program
-
-Alur penggunaan aplikasi dalam satu sesi:
-
-- Menu utama menampilkan 6 fitur + 1 fitur simpan/muat, dengan status tiap fitur (Aktif / Terkunci / Selesai) sesuai tahap lomba.
-- Tahap 1 — Pendaftaran: pengguna memasukkan nama peserta (5–7). Tombol peserta ke-8 ditolak; nama kosong mengakhiri pendaftaran.
-- Tahap 2 — Input Tendangan & Skor: untuk tiap peserta, masukkan 7 zona (0–5). Zona divalidasi; total skor diakumulasi otomatis.
-- Tahap 3 — Ranking & Rekap: setelah semua peserta selesai, pengguna dapat melihat peringkat (dengan aturan seri) dan rekapitulasi lengkap.
-- Fitur Cari Peserta: mencari peserta berdasarkan nama (cocok persis).
-- Fitur Simpan / Muat Data: menyimpan seluruh lomba ke file `data_lomba.bin`, memuatnya kembali saat startup, menghapus file, atau me-reset lomba dari memori.
-
-Verifikasi alur penuh (daftar → tendang → ranking → cari → rekap) telah ditutupi oleh test otomatis `test_full_game_via_surfaces`.
 
 ```mermaid
 graph TD
@@ -78,13 +61,37 @@ graph TD
     F --> G
 ```
 
+![Menu utama: user memilih fitur; status tiap fitur ditampilkan (Aktif / Terkunci / Selesai) sesuai tahap lomba.](screenshots/01_menu_utama.png)
+
+![Tahap 1 — Pendaftaran (awal): user mulai memasukkan nama peserta.](screenshots/02_pendaftaran_awal.png)
+
+![Tahap 1 — Pendaftaran: 5 peserta terdaftar (Budi, Sari, Tono, Wati, Joko); kuota 5/7 terisi.](screenshots/03_pendaftaran_5peserta.png)
+
+![Menu setelah pendaftaran (STATUS: Registered): fitur Input Tendangan aktif, fitur lain terkunci.](screenshots/04_menu_registered.png)
+
+![Tahap 2 — Input Tendangan & Skor: user memasukkan 7 zona (0–5); skor diakumulasi otomatis per peserta.](screenshots/05_scoring_awal.png)
+
+![Tahap 2 — Tendangan peserta Budi selesai (7/7); tiap zona divalidasi dan dijumlahkan.](screenshots/06_scoring_selesai_budi.png)
+
+![Menu setelah semua peserta selesai (STATUS: Selesai): fitur Ranking, Cari, Rekap, Simpan aktif.](screenshots/07_menu_completed.png)
+
+![Tahap 3 — Ranking: user melihat peringkat peserta dengan aturan seri zona 5→4→3→2→1.](screenshots/08_ranking.png)
+
+![Fitur Cari Peserta (input): user mengetik nama yang ingin dicari.](screenshots/09_search_input.png)
+
+![Fitur Cari Peserta (hasil): data peserta yang cocok ditampilkan.](screenshots/10_search_found.png)
+
+![Tahap 3 — Rekapitulasi Lengkap: ringkasan semua peserta + juara; tombol [E] export ke file.](screenshots/11_recap.png)
+
+![Fitur Simpan / Muat Data: simpan ke data_lomba.bin, muat, hapus file, atau reset lomba.](screenshots/12_storage.png)
+
+![Layar Bantuan: keterangan navigasi tombol ([↑/↓], [ENTER], [1-6], [h]).](screenshots/13_help.png)
+
 ---
 
 ## 3. Konstruksi Program
 
 Arsitektur yang digunakan adalah **AES (Agentic Engineering System)** — pola berlapis ketat (strict layered) dengan dependency inversion dilakukan lewat struct of function pointers sebagai pengganti interface. Arah dependensi downward-only: `taxonomy -> contract -> capabilities/infrastructure -> agent -> surfaces -> root (wiring only)`. Capabilities dan Infrastructure adalah layer setara (peer) yang sama-sama bergantung ke bawah pada Contract, dan tidak saling mengimpor.
-
-### 3.1 Hierarki Layer
 
 ```mermaid
 graph TD
@@ -212,27 +219,61 @@ graph TD
 
 ---
 
-## 7. Fungsi
+## 7. Fungsi (capabilities, infrastructure, agent)
+
+### 7.1 Capabilities
 
 | Fungsi | Keterangan |
 |---|---|
-| `root_registration_build` | Merakit aggregate pendaftaran (di `main()`). |
-| `agent_registration_append` | Menambah peserta ke `CompetitionState` saat pendaftaran. |
-| `capabilities_scoring_validate_zone` | Memvalidasi zona (0–5) sebelum dicatat. |
-| `capabilities_scoring_record_kick` | Mencatat satu tendangan & mengakumulasi skor ke peserta. |
-| `capabilities_ranking_compute` | Mengurutkan peserta + menerapkan aturan seri zona 5→4→3→2→1. |
+| `capabilities_registration_validate_name` | Validasi nama peserta (kosong / panjang / karakter / duplikat). |
+| `capabilities_registration_append` | Menambah peserta ke `CompetitionState`. |
+| `capabilities_scoring_validate_zone` | Validasi zona (0–5) sebelum dicatat. |
+| `capabilities_scoring_record_kick` | Mencatat satu tendangan & akumulasi skor ke peserta. |
+| `capabilities_ranking_compute` | Mengurutkan peserta + aturan seri zona 5→4→3→2→1. |
 | `capabilities_search_resolver` | Mencari peserta berdasarkan nama (cocok persis). |
-| `agent_recap_orchestrator` | Mengoordinasikan penyusunan rekapitulasi lengkap. |
+| `capabilities_recap_prepare_details` | Menyiapkan detail rekapitulasi dari `CompetitionState`. |
 | `capabilities_recap_formatter` | Memformat data rekap menjadi tampilan. |
-| `agent_storage_save` | Menyimpan seluruh lomba ke file `data_lomba.bin`. |
-| `agent_storage_load` | Memuat lomba dari file saat startup. |
-| `agent_storage_delete` | Menghapus file penyimpanan lomba. |
-| `sanitizer_validate_int` | Memvalidasi input bilangan bulat (termasuk rentang). |
-| `sanitizer_validate_string` | Memvalidasi input teks (nama peserta). |
-| `cli_surfaces_menu_run` | Menjalankan menu utama & merutekan pilihan ke layar fitur. |
-| `cli_surfaces_*_execute` | Fungsi layar tiap fitur (pendaftaran, scoring, ranking, cari, recap, storage). |
-| `root_display_build` | Merakit `DisplayPort` (antarmuka render ncurses). |
-| `cli_surfaces_storage_execute` | Layar fitur Simpan / Muat / Reset data. |
+
+### 7.2 Infrastructure
+
+| Fungsi | Keterangan |
+|---|---|
+| `storage_adapter_create` | Membuat `StorageProtocol` (adapter simpan/muat/hapus file). |
+| `storage_save_impl` | Implementasi simpan lomba ke file. |
+| `storage_load_impl` | Implementasi muat lomba dari file. |
+| `storage_delete_impl` | Implementasi hapus file penyimpanan. |
+| `export_adapter_create` | Membuat `ExportProtocol` (adapter ekspor). |
+| `tui_init` | Inisialisasi antarmuka ncurses. |
+| `tui_end` | Menutup antarmuka ncurses. |
+| `tui_clear` | Membersihkan layar. |
+| `tui_print` | Cetak teks di posisi (row, col). |
+| `tui_print_centered` | Cetak teks terpusat di satu baris. |
+| `tui_box` | Gambar kotak sederhana. |
+| `tui_box_double` | Gambar kotak garis ganda. |
+| `tui_highlight_row` | Tampilkan baris ter-highlight. |
+| `tui_normal_row` | Tampilkan baris biasa. |
+| `tui_separator` | Gambar pemisah horizontal. |
+| `tui_separator_thick` | Gambar pemisah horizontal tebal. |
+| `tui_progress_bar` | Gambar bilah progres. |
+| `tui_getch` | Baca input keyboard. |
+
+### 7.3 Agent
+
+| Fungsi | Keterangan |
+|---|---|
+| `agent_registration_add` | Orkestrasi tambah peserta lewat `RegistrationAggregate`. |
+| `agent_scoring_record` | Orkestrasi catat tendangan lewat `ScoringAggregate`. |
+| `agent_ranking_compute` | Orkestrasi peringkat lewat `RankingAggregate`. |
+| `agent_search_find` | Orkestrasi cari peserta lewat `SearchAggregate`. |
+| `agent_recap_prepare` | Orkestrasi siapkan rekap lewat `RecapAggregate`. |
+| `agent_sanitize_validate_string` | Orkestrasi validasi teks lewat `SanitizeAggregate`. |
+| `agent_sanitize_validate_int` | Orkestrasi validasi bilangan lewat `SanitizeAggregate`. |
+| `agent_storage_save` | Orkestrasi simpan lomba lewat `StorageAggregate`. |
+| `agent_storage_load` | Orkestrasi muat lomba lewat `StorageAggregate`. |
+| `agent_storage_delete` | Orkestrasi hapus file lewat `StorageAggregate`. |
+| `agent_export_ranking` | Orkestrasi ekspor peringkat lewat `ExportAggregate`. |
+| `agent_export_recap` | Orkestrasi ekspor rekap lewat `ExportAggregate`. |
+| `agent_export_participant` | Orkestrasi ekspor peserta lewat `ExportAggregate`. |
 
 ---
 

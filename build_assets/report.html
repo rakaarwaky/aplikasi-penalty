@@ -11,6 +11,7 @@
   th,td { border:1px solid #999; padding:5px 8px; text-align:left; }
   .fig { text-align:center; margin:14px 0; page-break-inside: avoid; }
   .fig img { width:100%; height:auto; }
+  .cap { font-size:9.5pt; color:#333; margin-top:4px; font-style:italic; }
   hr { margin:18px 0; }
 </style></head><body><h1>LAPORAN PROJECT</h1>
 
@@ -22,53 +23,59 @@
 
 <h2>1. Analisis Permasalahan</h2>
 
-<p>Berdasarkan kerangka epistemologis filsafat masalah, suatu kondisi hanya dapat disebut &quot;masalah&quot; apabila memenuhi tiga prasyarat sekaligus:</p>
+<p>Berdasarkan kerangka epistemologis filsafat masalah, suatu kondisi hanya dapat disebut &quot;masalah&quot; apabila memenuhi prasyarat berikut:</p>
 
-<p>(a) terdapat subjek yang memiliki tujuan;</p>
+<ul><li>terdapat subjek yang memiliki tujuan;</li><li>terdapat kesenjangan antara keadaan aktual dan keadaan yang dikehendaki;</li><li>terdapat hambatan yang tidak dapat diatasi secara langsung.</li></ul>
 
-<p>(b) terdapat kesenjangan  antara keadaan aktual dan keadaan yang dikehendaki;</p>
+<h3>Tujuan</h3>
 
-<p>(c) terdapat hambatan yang tidak dapat diatasi secara langsung.</p>
+<ul><li>Membangun program bahasa C untuk mengelola hasil lomba tendangan penalti.</li><li>Jumlah peserta 5-7 orang; setiap peserta 7 tendangan; zona bernilai 0 sampai 5.</li><li>Mengubah zona menjadi skor; total skor = jumlah seluruh skor tendangan.</li><li>Menentukan juara dari total skor tertinggi, dengan aturan seri 5 -&gt; 4 -&gt; 3 -&gt; 2 -&gt; 1.</li><li>Menyimpan data peserta, mencatat hasil tendangan, mencari peserta, menampilkan rekap, dan mengurutkan ranking.</li></ul>
 
-<h3>1.1 Tujuan</h3>
+<h3>Keadaan Saat Ini dan Keadaan Diinginkan</h3>
 
-<p>Membangun program bahasa C untuk mengelola hasil lomba tendangan penalti.</p>
+<p>Keadaan saat ini: belum tersedia program yang memenuhi seluruh ketentuan di atas. Keadaan diinginkan: program yang secara utuh memenuhi batas peserta (5-7), batas tendangan (7), rentang zona (0-5), aturan konversi dan akumulasi skor, aturan seri bertingkat, serta kelima kemampuan kelola data. Kesenjangan antara kedua keadaan inilah yang menjadikan tugas ini sebagai masalah.</p>
 
-<p>Jumlah peserta 5-7 orang; setiap peserta 7 tendangan; zona bernilai 0 sampai 5.</p>
+<h3>Hambatan</h3>
 
-<p>Mengubah zona menjadi skor; total skor = jumlah seluruh skor tendangan.</p>
-
-<p>Menentukan juara dari total skor tertinggi, dengan aturan seri 5 -&gt; 4 -&gt; 3 -&gt; 2 -&gt; 1.</p>
-
-<p>Menyimpan data peserta, mencatat hasil tendangan, mencari peserta, menampilkan rekap, dan mengurutkan ranking.</p>
-
-<h3>1.2 Keadaan Saat Ini dan Keadaan Diinginkan</h3>
-
-<p>Keadaan saat ini: belum tersedia program yang memenuhi seluruh ketentuan di atas. Keadaan diinginkan  program yang secara utuh memenuhi batas peserta (5-7), batas tendangan (7), rentang zona (0-5), aturan konversi dan akumulasi skor, aturan seri bertingkat, serta kelima kemampuan kelola data. Kesenjangan antara kedua keadaan inilah yang menjadikan tugas ini sebagai masalah.</p>
-
-<h3>1.3 Hambatan</h3>
-
-<ul><li><strong>Masalah 1</strong> - Pembatasan input zona 0-5 (Ketentuan 2 &amp; 4). Tanpa pembatasan, pengguna dapat memasukkan nilai di luar rentang yang merusak perhitungan</li><li><strong>Masalah 2</strong> - Batas jumlah peserta 5-7 (aturan lomba). Data peserta harus dialokasikan menampung maksimal 7 tanpa meluap, namun tetap menerima minimal 5.</li><li><strong>Masalah 3</strong> - Konversi zona ke skor dan akumulasi (Ketentuan 3 &amp; 4). Setiap zona harus dipetakan ke poin, lalu dijumlahkan menjadi total skor tiap peserta.</li><li><strong>Masalah 4</strong> - Penentuan juara dan aturan seri bertingkat (Ketentuan 5 &amp; 6). Pengurutan tidak cukup hanya by total skor; diperlukan pemecah seri 5 -&gt; 4 -&gt; 3 -&gt; 2 -&gt; 1, dan peringkat sama bila seluruh komponen identik.</li><li><strong>Masalah 5</strong> - Kelola data antar-fitur (simpan, catat, cari, rekap, ranking). Seluruh fitur harus beroperasi pada satu kesatuan data peserta yang konsisten.</li></ul>
+<ul><li>Pembatasan input zona 0-5. Tanpa pembatasan, pengguna dapat memasukkan nilai di luar rentang yang merusak perhitungan.</li><li>Batas jumlah peserta 5-7 (aturan lomba). Data peserta harus dialokasikan menampung maksimal 7 tanpa meluap, namun tetap menerima minimal 5.</li><li>Konversi zona ke skor dan akumulasi. Setiap zona harus dipetakan ke poin, lalu dijumlahkan menjadi total skor tiap peserta.</li><li>Penentuan juara dan aturan seri bertingkat. Pengurutan tidak cukup hanya by total skor; diperlukan pemecah seri 5 -&gt; 4 -&gt; 3 -&gt; 2 -&gt; 1, dan peringkat sama bila seluruh komponen identik.</li><li>Kelola data antar-fitur (simpan, catat, cari, rekap, ranking). Seluruh fitur harus beroperasi pada satu kesatuan data peserta yang konsisten.</li></ul>
 
 <hr/>
 
 <h2>2. Skenario Program</h2>
 
-<p>Alur penggunaan aplikasi dalam satu sesi:</p>
-
-<ul><li>Menu utama menampilkan 6 fitur + 1 fitur simpan/muat, dengan status tiap fitur (Aktif / Terkunci / Selesai) sesuai tahap lomba.</li><li>Tahap 1 — Pendaftaran: pengguna memasukkan nama peserta (5–7). Tombol peserta ke-8 ditolak; nama kosong mengakhiri pendaftaran.</li><li>Tahap 2 — Input Tendangan &amp; Skor: untuk tiap peserta, masukkan 7 zona (0–5). Zona divalidasi; total skor diakumulasi otomatis.</li><li>Tahap 3 — Ranking &amp; Rekap: setelah semua peserta selesai, pengguna dapat melihat peringkat (dengan aturan seri) dan rekapitulasi lengkap.</li><li>Fitur Cari Peserta: mencari peserta berdasarkan nama (cocok persis).</li><li>Fitur Simpan / Muat Data: menyimpan seluruh lomba ke file <code>data_lomba.bin</code>, memuatnya kembali saat startup, menghapus file, atau me-reset lomba dari memori.</li></ul>
-
-<p>Verifikasi alur penuh (daftar → tendang → ranking → cari → rekap) telah ditutupi oleh test otomatis <code>test_full_game_via_surfaces</code>.</p>
-
 <p><div class="fig"><img src="file:///home/raka/Study/PengantarCoding/aplikasi-penalty/build_assets/mermaid_0.png"/></div></p>
+
+<div class="fig"><img src="file:///home/raka/Study/PengantarCoding/aplikasi-penalty/screenshots/01_menu_utama.png"/><div class="cap">Menu utama: user memilih fitur; status tiap fitur ditampilkan (Aktif / Terkunci / Selesai) sesuai tahap lomba.</div></div>
+
+<div class="fig"><img src="file:///home/raka/Study/PengantarCoding/aplikasi-penalty/screenshots/02_pendaftaran_awal.png"/><div class="cap">Tahap 1 — Pendaftaran (awal): user mulai memasukkan nama peserta.</div></div>
+
+<div class="fig"><img src="file:///home/raka/Study/PengantarCoding/aplikasi-penalty/screenshots/03_pendaftaran_5peserta.png"/><div class="cap">Tahap 1 — Pendaftaran: 5 peserta terdaftar (Budi, Sari, Tono, Wati, Joko); kuota 5/7 terisi.</div></div>
+
+<div class="fig"><img src="file:///home/raka/Study/PengantarCoding/aplikasi-penalty/screenshots/04_menu_registered.png"/><div class="cap">Menu setelah pendaftaran (STATUS: Registered): fitur Input Tendangan aktif, fitur lain terkunci.</div></div>
+
+<div class="fig"><img src="file:///home/raka/Study/PengantarCoding/aplikasi-penalty/screenshots/05_scoring_awal.png"/><div class="cap">Tahap 2 — Input Tendangan &amp; Skor: user memasukkan 7 zona (0–5); skor diakumulasi otomatis per peserta.</div></div>
+
+<div class="fig"><img src="file:///home/raka/Study/PengantarCoding/aplikasi-penalty/screenshots/06_scoring_selesai_budi.png"/><div class="cap">Tahap 2 — Tendangan peserta Budi selesai (7/7); tiap zona divalidasi dan dijumlahkan.</div></div>
+
+<div class="fig"><img src="file:///home/raka/Study/PengantarCoding/aplikasi-penalty/screenshots/07_menu_completed.png"/><div class="cap">Menu setelah semua peserta selesai (STATUS: Selesai): fitur Ranking, Cari, Rekap, Simpan aktif.</div></div>
+
+<div class="fig"><img src="file:///home/raka/Study/PengantarCoding/aplikasi-penalty/screenshots/08_ranking.png"/><div class="cap">Tahap 3 — Ranking: user melihat peringkat peserta dengan aturan seri zona 5→4→3→2→1.</div></div>
+
+<div class="fig"><img src="file:///home/raka/Study/PengantarCoding/aplikasi-penalty/screenshots/09_search_input.png"/><div class="cap">Fitur Cari Peserta (input): user mengetik nama yang ingin dicari.</div></div>
+
+<div class="fig"><img src="file:///home/raka/Study/PengantarCoding/aplikasi-penalty/screenshots/10_search_found.png"/><div class="cap">Fitur Cari Peserta (hasil): data peserta yang cocok ditampilkan.</div></div>
+
+<div class="fig"><img src="file:///home/raka/Study/PengantarCoding/aplikasi-penalty/screenshots/11_recap.png"/><div class="cap">Tahap 3 — Rekapitulasi Lengkap: ringkasan semua peserta + juara; tombol [E] export ke file.</div></div>
+
+<div class="fig"><img src="file:///home/raka/Study/PengantarCoding/aplikasi-penalty/screenshots/12_storage.png"/><div class="cap">Fitur Simpan / Muat Data: simpan ke data_lomba.bin, muat, hapus file, atau reset lomba.</div></div>
+
+<div class="fig"><img src="file:///home/raka/Study/PengantarCoding/aplikasi-penalty/screenshots/13_help.png"/><div class="cap">Layar Bantuan: keterangan navigasi tombol ([↑/↓], [ENTER], [1-6], [h]).</div></div>
 
 <hr/>
 
 <h2>3. Konstruksi Program</h2>
 
 <p>Arsitektur yang digunakan adalah <strong>AES (Agentic Engineering System)</strong> — pola berlapis ketat (strict layered) dengan dependency inversion dilakukan lewat struct of function pointers sebagai pengganti interface. Arah dependensi downward-only: <code>taxonomy -&gt; contract -&gt; capabilities/infrastructure -&gt; agent -&gt; surfaces -&gt; root (wiring only)</code>. Capabilities dan Infrastructure adalah layer setara (peer) yang sama-sama bergantung ke bawah pada Contract, dan tidak saling mengimpor.</p>
-
-<h3>3.1 Hierarki Layer</h3>
 
 <p><div class="fig"><img src="file:///home/raka/Study/PengantarCoding/aplikasi-penalty/build_assets/mermaid_1.png"/></div></p>
 
@@ -94,9 +101,19 @@
 
 <hr/>
 
-<h2>7. Fungsi</h2>
+<h2>7. Fungsi (capabilities, infrastructure, agent)</h2>
 
-<table><thead><tr><th>Fungsi</th><th>Keterangan</th></tr></thead><tbody><tr><td><code>root_registration_build</code></td><td>Merakit aggregate pendaftaran (di <code>main()</code>).</td></tr><tr><td><code>agent_registration_append</code></td><td>Menambah peserta ke <code>CompetitionState</code> saat pendaftaran.</td></tr><tr><td><code>capabilities_scoring_validate_zone</code></td><td>Memvalidasi zona (0–5) sebelum dicatat.</td></tr><tr><td><code>capabilities_scoring_record_kick</code></td><td>Mencatat satu tendangan &amp; mengakumulasi skor ke peserta.</td></tr><tr><td><code>capabilities_ranking_compute</code></td><td>Mengurutkan peserta + menerapkan aturan seri zona 5→4→3→2→1.</td></tr><tr><td><code>capabilities_search_resolver</code></td><td>Mencari peserta berdasarkan nama (cocok persis).</td></tr><tr><td><code>agent_recap_orchestrator</code></td><td>Mengoordinasikan penyusunan rekapitulasi lengkap.</td></tr><tr><td><code>capabilities_recap_formatter</code></td><td>Memformat data rekap menjadi tampilan.</td></tr><tr><td><code>agent_storage_save</code></td><td>Menyimpan seluruh lomba ke file <code>data_lomba.bin</code>.</td></tr><tr><td><code>agent_storage_load</code></td><td>Memuat lomba dari file saat startup.</td></tr><tr><td><code>agent_storage_delete</code></td><td>Menghapus file penyimpanan lomba.</td></tr><tr><td><code>sanitizer_validate_int</code></td><td>Memvalidasi input bilangan bulat (termasuk rentang).</td></tr><tr><td><code>sanitizer_validate_string</code></td><td>Memvalidasi input teks (nama peserta).</td></tr><tr><td><code>cli_surfaces_menu_run</code></td><td>Menjalankan menu utama &amp; merutekan pilihan ke layar fitur.</td></tr><tr><td><code>cli_surfaces_*_execute</code></td><td>Fungsi layar tiap fitur (pendaftaran, scoring, ranking, cari, recap, storage).</td></tr><tr><td><code>root_display_build</code></td><td>Merakit <code>DisplayPort</code> (antarmuka render ncurses).</td></tr><tr><td><code>cli_surfaces_storage_execute</code></td><td>Layar fitur Simpan / Muat / Reset data.</td></tr></tbody></table>
+<h3>7.1 Capabilities</h3>
+
+<table><thead><tr><th>Fungsi</th><th>Keterangan</th></tr></thead><tbody><tr><td><code>capabilities_registration_validate_name</code></td><td>Validasi nama peserta (kosong / panjang / karakter / duplikat).</td></tr><tr><td><code>capabilities_registration_append</code></td><td>Menambah peserta ke <code>CompetitionState</code>.</td></tr><tr><td><code>capabilities_scoring_validate_zone</code></td><td>Validasi zona (0–5) sebelum dicatat.</td></tr><tr><td><code>capabilities_scoring_record_kick</code></td><td>Mencatat satu tendangan &amp; akumulasi skor ke peserta.</td></tr><tr><td><code>capabilities_ranking_compute</code></td><td>Mengurutkan peserta + aturan seri zona 5→4→3→2→1.</td></tr><tr><td><code>capabilities_search_resolver</code></td><td>Mencari peserta berdasarkan nama (cocok persis).</td></tr><tr><td><code>capabilities_recap_prepare_details</code></td><td>Menyiapkan detail rekapitulasi dari <code>CompetitionState</code>.</td></tr><tr><td><code>capabilities_recap_formatter</code></td><td>Memformat data rekap menjadi tampilan.</td></tr></tbody></table>
+
+<h3>7.2 Infrastructure</h3>
+
+<table><thead><tr><th>Fungsi</th><th>Keterangan</th></tr></thead><tbody><tr><td><code>storage_adapter_create</code></td><td>Membuat <code>StorageProtocol</code> (adapter simpan/muat/hapus file).</td></tr><tr><td><code>storage_save_impl</code></td><td>Implementasi simpan lomba ke file.</td></tr><tr><td><code>storage_load_impl</code></td><td>Implementasi muat lomba dari file.</td></tr><tr><td><code>storage_delete_impl</code></td><td>Implementasi hapus file penyimpanan.</td></tr><tr><td><code>export_adapter_create</code></td><td>Membuat <code>ExportProtocol</code> (adapter ekspor).</td></tr><tr><td><code>tui_init</code></td><td>Inisialisasi antarmuka ncurses.</td></tr><tr><td><code>tui_end</code></td><td>Menutup antarmuka ncurses.</td></tr><tr><td><code>tui_clear</code></td><td>Membersihkan layar.</td></tr><tr><td><code>tui_print</code></td><td>Cetak teks di posisi (row, col).</td></tr><tr><td><code>tui_print_centered</code></td><td>Cetak teks terpusat di satu baris.</td></tr><tr><td><code>tui_box</code></td><td>Gambar kotak sederhana.</td></tr><tr><td><code>tui_box_double</code></td><td>Gambar kotak garis ganda.</td></tr><tr><td><code>tui_highlight_row</code></td><td>Tampilkan baris ter-highlight.</td></tr><tr><td><code>tui_normal_row</code></td><td>Tampilkan baris biasa.</td></tr><tr><td><code>tui_separator</code></td><td>Gambar pemisah horizontal.</td></tr><tr><td><code>tui_separator_thick</code></td><td>Gambar pemisah horizontal tebal.</td></tr><tr><td><code>tui_progress_bar</code></td><td>Gambar bilah progres.</td></tr><tr><td><code>tui_getch</code></td><td>Baca input keyboard.</td></tr></tbody></table>
+
+<h3>7.3 Agent</h3>
+
+<table><thead><tr><th>Fungsi</th><th>Keterangan</th></tr></thead><tbody><tr><td><code>agent_registration_add</code></td><td>Orkestrasi tambah peserta lewat <code>RegistrationAggregate</code>.</td></tr><tr><td><code>agent_scoring_record</code></td><td>Orkestrasi catat tendangan lewat <code>ScoringAggregate</code>.</td></tr><tr><td><code>agent_ranking_compute</code></td><td>Orkestrasi peringkat lewat <code>RankingAggregate</code>.</td></tr><tr><td><code>agent_search_find</code></td><td>Orkestrasi cari peserta lewat <code>SearchAggregate</code>.</td></tr><tr><td><code>agent_recap_prepare</code></td><td>Orkestrasi siapkan rekap lewat <code>RecapAggregate</code>.</td></tr><tr><td><code>agent_sanitize_validate_string</code></td><td>Orkestrasi validasi teks lewat <code>SanitizeAggregate</code>.</td></tr><tr><td><code>agent_sanitize_validate_int</code></td><td>Orkestrasi validasi bilangan lewat <code>SanitizeAggregate</code>.</td></tr><tr><td><code>agent_storage_save</code></td><td>Orkestrasi simpan lomba lewat <code>StorageAggregate</code>.</td></tr><tr><td><code>agent_storage_load</code></td><td>Orkestrasi muat lomba lewat <code>StorageAggregate</code>.</td></tr><tr><td><code>agent_storage_delete</code></td><td>Orkestrasi hapus file lewat <code>StorageAggregate</code>.</td></tr><tr><td><code>agent_export_ranking</code></td><td>Orkestrasi ekspor peringkat lewat <code>ExportAggregate</code>.</td></tr><tr><td><code>agent_export_recap</code></td><td>Orkestrasi ekspor rekap lewat <code>ExportAggregate</code>.</td></tr><tr><td><code>agent_export_participant</code></td><td>Orkestrasi ekspor peserta lewat <code>ExportAggregate</code>.</td></tr></tbody></table>
 
 <hr/>
 

@@ -79,6 +79,15 @@ def simple_markdown(md: str) -> str:
                 i += 1; continue
         if in_code:
             code_buf.append(line); i += 1; continue
+        # Image: ![caption](path.png) -> figure with caption
+        m_img = re.match(r'^\s*!\[(.+?)\]\((.+?)\)\s*$', line)
+        if m_img:
+            cap = m_img.group(1)
+            path = m_img.group(2)
+            absp = path if os.path.isabs(path) else os.path.join(ROOT, path)
+            html_lines.append(
+                f'<div class="fig"><img src="file://{absp}"/><div class="cap">{_inline(_esc(cap))}</div></div>')
+            i += 1; continue
         # Table handling: collect a | row; optionally a |---| separator
         s = line.rstrip()
         if s.strip().startswith('|') and '|' in s[1:]:
@@ -188,6 +197,7 @@ def build():
   th,td {{ border:1px solid #999; padding:5px 8px; text-align:left; }}
   .fig {{ text-align:center; margin:14px 0; page-break-inside: avoid; }}
   .fig img {{ width:100%; height:auto; }}
+  .cap {{ font-size:9.5pt; color:#333; margin-top:4px; font-style:italic; }}
   hr {{ margin:18px 0; }}
 </style></head><body>{body}</body></html>"""
 
