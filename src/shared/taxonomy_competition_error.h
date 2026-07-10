@@ -24,9 +24,4 @@ typedef enum {
     RC_OK = 0, RC_NOT_READY
 } RecapError;
 
-typedef enum {
-    ST_OK = 0, ST_ERROR_FILE_NOT_FOUND, ST_ERROR_PERMISSION,
-    ST_ERROR_CORRUPT, ST_ERROR_FULL
-} StorageError;
-
 #endif /* SHARED_TAXONOMY_COMPETITION_ERROR_H */
