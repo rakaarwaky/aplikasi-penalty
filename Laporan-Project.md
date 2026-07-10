@@ -125,7 +125,7 @@ graph TD
 
 ## 4. Struktur (struct)
 
-**Struct** (structure) adalah tipe data yang membungkus beberapa variabel menjadi satu kesatuan. Di program ini, seluruh data dibungkus dalam *Value Object* (VO) di `src/shared/` supaya tipe tidak tertukar saat kompilasi. Berikut struct yang ada di source:
+**Struct** (structure) adalah tipe data yang membungkus beberapa variabel menjadi satu kesatuan. Di program ini, seluruh data dibungkus dalam *Value Object* (VO) di `src/shared/` supaya tipe tidak tertukar saat kompilasi. Daftar di bawah adalah **TIPE (cetakan)**, bukan variabel — variabel yang dibuat dari tipe-tipe ini dicantumkan di Section 6. Tipe aggregate (`RegistrationAggregate`, `ScoringAggregate`, dll.) didefinisikan di `contract_*_aggregate.h` / `module.*.h` dan menjadi tipe bagi variabel aggregate di Section 6. Berikut struct yang ada di source:
 
 | Struct | Keterangan |
 |---|---|
@@ -168,26 +168,26 @@ Konstanta terpusat di `taxonomy_game_constant.h`:
 
 ## 6. Variabel
 
-**Variabel** adalah wadah nyata di memori yang menyimpan nilai; bisa bertipe dasar (mis. `int`) maupun bertipe **struct**. Aplikasi sengaja TIDAK menggunakan variabel global untuk data lomba — struct `CompetitionState` di Section 4 adalah cetakannya, sedangkan variabel `CompetitionState state` di bawah ini adalah *instance* nyatanya yang dibuat di `main()`. Seluruh state lomba disimpan di `main()` lalu di-pass via pointer ke tiap fitur. Variabel yang ada di `root_cli_main_entry.c`:
+**Variabel** adalah wadah nyata di memori yang menyimpan nilai. Ia bisa bertipe dasar (mis. `int`) maupun bertipe **struct** — artinya sebuah variabel yang tipenya adalah struct akan membungkus variabel-variabel lain di dalamnya. Aplikasi sengaja TIDAK menggunakan variabel global untuk data lomba. Di bawah ini, setiap baris adalah **VARIABEL (instance)** yang dibuat di `main()`; kolom *Jenis* menunjukkan apakah variabel itu bertipe dasar atau bertipe struct. Seluruh state lomba disimpan di `main()` lalu di-pass via pointer ke tiap fitur. Variabel yang ada di `root_cli_main_entry.c`:
 
-| Variabel | Keterangan |
-|---|---|
-| `CompetitionState state` | Satu-satunya wadah data lomba; diinisialisasi `participant_count = 0` dan `state = STATE_INIT`, lalu di-pass ke seluruh fitur via pointer. |
-| `RegistrationAggregate reg` | Aggregate pendaftaran, hasil `root_registration_build()`. |
-| `ScoringAggregate sc` | Aggregate scoring, hasil `root_scoring_build()`. |
-| `RankingAggregate rk` | Aggregate ranking, hasil `root_ranking_build()`. |
-| `SearchAggregate sr` | Aggregate pencarian, hasil `root_search_build()`. |
-| `RecapAggregate rc` | Aggregate rekap, hasil `root_recap_build(rk.protocol)`. |
-| `SanitizeAggregate sn` | Aggregate validasi input, hasil `root_sanitize_build()`. |
-| `StorageAggregate st` | Aggregate penyimpanan, hasil `root_storage_build()`. |
-| `ExportAggregate ex` | Aggregate ekspor, hasil `root_export_build()`. |
-| `DisplayPort dp` | Antarmuka render (struct function-pointer), dirakit oleh `root_display_build()`; surfaces hanya pegang pointer ke ini. |
-| `RankingEntryVO entries[MAX_PARTICIPANTS]` | Array hasil peringkat sementara, diisi `agent_ranking_compute()` sebelum menampilkan juara. |
-| Variabel lokal layar penutup | `char line[64]` (buffer baris) dan `const char *winner`, `*second`, `*third` (pointer nama juara 1–3). |
+| Variabel | Jenis | Keterangan |
+|---|---|---|
+| `CompetitionState state` | Struct (`CompetitionState`, Sect. 4) | Satu-satunya wadah data lomba; diinisialisasi `participant_count = 0` dan `state = STATE_INIT`, lalu di-pass ke seluruh fitur via pointer. |
+| `RegistrationAggregate reg` | Struct (`RegistrationAggregate`, contract) | Instance aggregate pendaftaran — facade pintu masuk surfaces ke fitur pendaftaran; dirakit `root_registration_build()`. |
+| `ScoringAggregate sc` | Struct (`ScoringAggregate`, contract) | Instance aggregate scoring; surfaces pakai ini untuk input tendangan & skor. |
+| `RankingAggregate rk` | Struct (`RankingAggregate`, contract) | Instance aggregate ranking; surfaces pakai ini untuk peringkat & seri. |
+| `SearchAggregate sr` | Struct (`SearchAggregate`, contract) | Instance aggregate pencarian; surfaces pakai ini untuk cari peserta. |
+| `RecapAggregate rc` | Struct (`RecapAggregate`, contract) | Instance aggregate rekap; dirakit `root_recap_build(rk.protocol)`. |
+| `SanitizeAggregate sn` | Struct (`SanitizeAggregate`, contract) | Instance aggregate validasi input; surfaces pakai ini sebelum menerima input. |
+| `StorageAggregate st` | Struct (`StorageAggregate`, contract) | Instance aggregate penyimpanan; surfaces pakai ini untuk simpan/muat/hapus. |
+| `ExportAggregate ex` | Struct (`ExportAggregate`, contract) | Instance aggregate ekspor; surfaces pakai ini untuk ekspor lomba. |
+| `DisplayPort dp` | Struct (`DisplayPort`, contract) | Antarmuka render (struct function-pointer); surfaces pegang pointer ke ini untuk menampilkan hasil. |
+| `RankingEntryVO entries[MAX_PARTICIPANTS]` | Array of struct (`RankingEntryVO`, Sect. 4) | Array hasil peringkat sementara, diisi `agent_ranking_compute()` sebelum menampilkan juara. |
+| `char line[64]` | Dasar (`char`) | Buffer baris untuk menampilkan juara di layar penutup. |
+| `const char *winner`, `*second`, `*third` | Dasar (pointer `char`) | Pointer nama juara 1–3 di layar penutup. |
 
----
+Catatan aggregate: dalam AES (`ARCHITECTURE.md`), `XxxAggregate` adalah **contract** — struct berisi function-pointer yang bertindak sebagai *facade* mengomposisi port/protocol, dan menjadi **satu-satunya pintu masuk surfaces ke domain**. Surfaces memanggil domain **lewat aggregate**, bukan langsung ke agent; agent mengimplementasikan orkestrasinya di balik contract tersebut. Variabel `reg, sc, rk, …` di atas adalah **instance** dari struct aggregate itu (dibuat oleh `_container`, dirakit di `main()`) — jadi merekalah yang menyimpan (sebagai variabel) contract yang menghubungkan surfaces ke agent, bukan sebaliknya.
 
-## 7. Fungsi
 
 Fungsi domain & infrastruktur utama (semua ada di `src/`):
 

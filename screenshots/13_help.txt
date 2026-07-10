@@ -1,22 +1,22 @@
 [37m[40m  ════════════════════════════════════════════════════════════════════════════
-                             [1m[36m  PANDUAN PENGGUNAAN  [0m[37m[40m
+                             [1m  PANDUAN PENGGUNAAN  [0m[37m[40m
   ════════════════════════════════════════════════════════════════════════════
-          [36m╔══════════════════════════════════════════════════════════╗[37m
-          [36m├──────────────────────────────────────────────────────────┤[37m
-          [36m║[37m [1m[33mATURAN LOMBA:[0m[37m[40m                                            [36m║[37m
-          [36m║[37m   - Jumlah peserta : 5 sampai 7 orang                    [36m║[37m
-          [36m║[37m   - Setiap peserta : 7 tendangan penalti                 [36m║[37m
-          [36m║[37m   - Nilai zona     : 0=Miss  1=Mudah  2=Sedang           [36m║[37m
-          [36m║[37m                      3=Sulit 4=Sangat Sulit  5=Top!      [36m║[37m
-          [36m║[37m   - Pemenang       : peserta dengan total skor tertinggi [36m║[37m
-          [36m├──────────────────────────────────────────────────────────┤[37m
-          [36m║[37m [1m[33mNAVIGASI:[0m[37m[40m                                                [36m║[37m
-          [36m║[37m   [Panah ↑/↓]  : Pindah pilihan menu                     [36m║[37m
-          [36m║[37m   [1-6]        : Langsung pilih menu 1-6                 [36m║[37m
-          [36m║[37m   [ENTER]	   : Konfirmasi pilihan                      [36m║[37m
-          [36m║[37m   [q / 0]	   : Keluar dari aplikasi                    [36m║[37m
-          [36m║[37m   [h]          : Tampilkan layar bantuan ini             [36m║[37m
-          [36m├──────────────────────────────────────────────────────────┤[37m
+          ╔══════════════════════════════════════════════════════════╗
+          ├──────────────────────────────────────────────────────────┤
+          ║ [1mATURAN LOMBA:[0m[37m[40m                                            ║
+          ║   - Jumlah peserta : 5 sampai 7 orang                    ║
+          ║   - Setiap peserta : 7 tendangan penalti                 ║
+          ║   - Nilai zona     : 0=Miss  1=Mudah  2=Sedang           ║
+          ║                      3=Sulit 4=Sangat Sulit  5=Top!      ║
+          ║   - Pemenang       : peserta dengan total skor tertinggi ║
+          ├──────────────────────────────────────────────────────────┤
+          ║ [1mNAVIGASI:[0m[37m[40m                                                ║
+          ║   [Panah ↑/↓]  : Pindah pilihan menu                     ║
+          ║   [1-6]        : Langsung pilih menu 1-6                 ║
+          ║   [ENTER]	   : Konfirmasi pilihan                      ║
+          ║   [q / 0]	   : Keluar dari aplikasi                    ║
+          ║   [h]          : Tampilkan layar bantuan ini             ║
+          ├──────────────────────────────────────────────────────────┤
 
 
   ├──────────────────────────────────────────────────────────────────────────┤
