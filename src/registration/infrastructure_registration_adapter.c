@@ -51,12 +51,12 @@ static void infra_clear_buffer(void) {
 
 RegistrationPort *create_registration_port(void) {
     static RegistrationPort port;
-    port.display_header  = infra_display_header;
-    port.display_prompt  = infra_display_prompt;
-    port.read_name       = infra_read_name;
+    port.display_header = infra_display_header;
+    port.display_prompt = infra_display_prompt;
+    port.read_name = infra_read_name;
     port.display_success = infra_display_success;
-    port.display_error   = infra_display_error;
-    port.display_wait    = infra_display_wait;
-    port.clear_buffer    = infra_clear_buffer;
+    port.display_error = infra_display_error;
+    port.display_wait = infra_display_wait;
+    port.clear_buffer = infra_clear_buffer;
     return &port;
 }

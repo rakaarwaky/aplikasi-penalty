@@ -27,7 +27,7 @@ RegistrationError agent_registration_run(RegistrationAggregate *agg, Competition
             printf("  Belum mencapai minimal %d peserta. Lanjutkan.\n", MIN_PARTICIPANTS);
             continue;
         }
-        if (ci_equal(buffer, "selesai") || ci_equal(buffer, "SELESAI")) {
+        if (ci_equal(buffer, "selesai")) {
             if (state->participant_count >= MIN_PARTICIPANTS) break;
             agg->port->display_error(REG_TOO_FEW);
             continue;

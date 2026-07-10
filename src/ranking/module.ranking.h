@@ -1,61 +1,57 @@
 /* AES_BYPASS: module declaration (barrel) — 1 header per feature folder.
-   Menyatukan deklarasi publik scoring: contract, capabilities, infrastructure,
+   Menyatukan deklarasi publik ranking: contract, capabilities, infrastructure,
    agent, root. */
-#ifndef MODULE_SCORING_H
-#define MODULE_SCORING_H
+#ifndef MODULE_RANKING_H
+#define MODULE_RANKING_H
 
 #include "shared/module.shared.h"
 
 /* ============================================================
-   CONTRACT — PROTOCOL (AES402: pakai ZoneVO, bukan int mentah)
+   CONTRACT — PROTOCOL
    ============================================================ */
-typedef ScoringError (*validate_zone_fn)(ZoneVO zone);
-typedef ScoringError (*record_kick_fn)(CompetitionState *state, int id, ZoneVO zone);
+typedef RankingError (*compute_ranking_fn)(const CompetitionState *state,
+                                           RankingEntryVO *out, int capacity);
 typedef struct {
-    validate_zone_fn validate_zone;
-    record_kick_fn record_kick;
-} ScoringProtocol;
+    compute_ranking_fn compute_ranking;
+} RankingProtocol;
 
 /* ============================================================
    CONTRACT — PORT
    ============================================================ */
 typedef struct {
     void (*display_header)(void);
-    void (*display_prompt)(const ParticipantEntity *p, int kick_no);
-    ScoringError (*read_zone)(ZoneVO *out);
-    void (*display_result)(int zone, int points);
-    void (*display_error)(ScoringError e);
+    void (*display_entry)(const CompetitionState *state, const RankingEntryVO *e);
+    void (*display_not_ready)(void);
     void (*display_wait)(void);
-    void (*clear_buffer)(void);
-} ScoringPort;
+} RankingPort;
 
 /* ============================================================
    CONTRACT — AGGREGATE
    ============================================================ */
 typedef struct {
-    ScoringProtocol *protocol;
-    ScoringPort *port;
-} ScoringAggregate;
+    RankingProtocol *protocol;
+    RankingPort *port;
+} RankingAggregate;
 
 /* ============================================================
    CAPABILITIES
    ============================================================ */
-ScoringError capabilities_scoring_validate_zone(ZoneVO zone);
-ScoringError capabilities_scoring_record_kick(CompetitionState *state, int id, ZoneVO zone);
+RankingError capabilities_ranking_compute(const CompetitionState *state,
+                                          RankingEntryVO *out, int capacity);
 
 /* ============================================================
    INFRASTRUCTURE — port factory
    ============================================================ */
-ScoringPort *create_scoring_port(void);
+RankingPort *create_ranking_port(void);
 
 /* ============================================================
    AGENT — orchestrator
    ============================================================ */
-ScoringError agent_scoring_run(ScoringAggregate *agg, CompetitionState *state);
+RankingError agent_ranking_run(RankingAggregate *agg, CompetitionState *state);
 
 /* ============================================================
    ROOT — container builder (wiring only)
    ============================================================ */
-ScoringAggregate root_scoring_build(void);
+RankingAggregate root_ranking_build(void);
 
-#endif /* MODULE_SCORING_H */
+#endif /* MODULE_RANKING_H */

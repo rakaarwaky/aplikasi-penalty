@@ -1,61 +1,61 @@
 /* AES_BYPASS: module declaration (barrel) — 1 header per feature folder.
-   Menyatukan deklarasi publik scoring: contract, capabilities, infrastructure,
+   Menyatukan deklarasi publik search: contract, capabilities, infrastructure,
    agent, root. */
-#ifndef MODULE_SCORING_H
-#define MODULE_SCORING_H
+#ifndef MODULE_SEARCH_H
+#define MODULE_SEARCH_H
 
 #include "shared/module.shared.h"
 
 /* ============================================================
-   CONTRACT — PROTOCOL (AES402: pakai ZoneVO, bukan int mentah)
+   CONTRACT — PROTOCOL
    ============================================================ */
-typedef ScoringError (*validate_zone_fn)(ZoneVO zone);
-typedef ScoringError (*record_kick_fn)(CompetitionState *state, int id, ZoneVO zone);
+typedef SearchError (*find_participant_fn)(const CompetitionState *state,
+                                           const ParticipantNameVO *name,
+                                           SearchResultVO *out);
 typedef struct {
-    validate_zone_fn validate_zone;
-    record_kick_fn record_kick;
-} ScoringProtocol;
+    find_participant_fn find_participant;
+} SearchProtocol;
 
 /* ============================================================
    CONTRACT — PORT
    ============================================================ */
 typedef struct {
     void (*display_header)(void);
-    void (*display_prompt)(const ParticipantEntity *p, int kick_no);
-    ScoringError (*read_zone)(ZoneVO *out);
-    void (*display_result)(int zone, int points);
-    void (*display_error)(ScoringError e);
+    void (*display_prompt)(void);
+    SearchError (*read_name)(char *buffer, int size);
+    void (*display_result)(const SearchResultVO *r);
+    void (*display_not_found)(const char *name);
     void (*display_wait)(void);
-    void (*clear_buffer)(void);
-} ScoringPort;
+} SearchPort;
 
 /* ============================================================
    CONTRACT — AGGREGATE
    ============================================================ */
 typedef struct {
-    ScoringProtocol *protocol;
-    ScoringPort *port;
-} ScoringAggregate;
+    SearchProtocol *protocol;
+    SearchPort *port;
+} SearchAggregate;
 
 /* ============================================================
    CAPABILITIES
    ============================================================ */
-ScoringError capabilities_scoring_validate_zone(ZoneVO zone);
-ScoringError capabilities_scoring_record_kick(CompetitionState *state, int id, ZoneVO zone);
+SearchError capabilities_search_find(const CompetitionState *state,
+                                     const ParticipantNameVO *name,
+                                     SearchResultVO *out);
 
 /* ============================================================
    INFRASTRUCTURE — port factory
    ============================================================ */
-ScoringPort *create_scoring_port(void);
+SearchPort *create_search_port(void);
 
 /* ============================================================
    AGENT — orchestrator
    ============================================================ */
-ScoringError agent_scoring_run(ScoringAggregate *agg, CompetitionState *state);
+SearchError agent_search_run(SearchAggregate *agg, CompetitionState *state);
 
 /* ============================================================
    ROOT — container builder (wiring only)
    ============================================================ */
-ScoringAggregate root_scoring_build(void);
+SearchAggregate root_search_build(void);
 
-#endif /* MODULE_SCORING_H */
+#endif /* MODULE_SEARCH_H */

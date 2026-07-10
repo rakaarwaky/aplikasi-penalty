@@ -1,12 +1,10 @@
-/* AES_BYPASS: module declaration file — 1 header per feature folder.
-   Berisi semua deklarasi publik untuk fitur registration:
-   contract (protocol, port, aggregate), capabilities, infrastructure, agent, root. */
+/* AES_BYPASS: module declaration (barrel) — 1 header per feature folder.
+   Menyatukan deklarasi publik registration: contract (protocol, port, aggregate),
+   capabilities, infrastructure, agent, root. */
 #ifndef MODULE_REGISTRATION_H
 #define MODULE_REGISTRATION_H
 
-#include "shared/taxonomy_competition_state_vo.h"
-#include "shared/taxonomy_participant_vo.h"
-#include "shared/taxonomy_errors.h"
+#include "shared/module.shared.h"
 
 /* ============================================================
    CONTRACT — PROTOCOL (inbound, business operations)

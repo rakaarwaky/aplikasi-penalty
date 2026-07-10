@@ -1,61 +1,63 @@
 /* AES_BYPASS: module declaration (barrel) — 1 header per feature folder.
-   Menyatukan deklarasi publik scoring: contract, capabilities, infrastructure,
+   Menyatukan deklarasi publik recap: contract, capabilities, infrastructure,
    agent, root. */
-#ifndef MODULE_SCORING_H
-#define MODULE_SCORING_H
+#ifndef MODULE_RECAP_H
+#define MODULE_RECAP_H
 
 #include "shared/module.shared.h"
 
 /* ============================================================
-   CONTRACT — PROTOCOL (AES402: pakai ZoneVO, bukan int mentah)
+   CONTRACT — PROTOCOL (recap menyusun ranking + detail tendangan)
    ============================================================ */
-typedef ScoringError (*validate_zone_fn)(ZoneVO zone);
-typedef ScoringError (*record_kick_fn)(CompetitionState *state, int id, ZoneVO zone);
+typedef RecapError (*prepare_recap_fn)(const CompetitionState *state,
+                                       RankingEntryVO *ranking,
+                                       SearchResultVO *details,
+                                       int capacity);
 typedef struct {
-    validate_zone_fn validate_zone;
-    record_kick_fn record_kick;
-} ScoringProtocol;
+    prepare_recap_fn prepare_recap;
+} RecapProtocol;
 
 /* ============================================================
    CONTRACT — PORT
    ============================================================ */
 typedef struct {
     void (*display_header)(void);
-    void (*display_prompt)(const ParticipantEntity *p, int kick_no);
-    ScoringError (*read_zone)(ZoneVO *out);
-    void (*display_result)(int zone, int points);
-    void (*display_error)(ScoringError e);
+    void (*display_row)(const CompetitionState *state,
+                        const RankingEntryVO *e,
+                        const SearchResultVO *d);
+    void (*display_not_ready)(void);
     void (*display_wait)(void);
-    void (*clear_buffer)(void);
-} ScoringPort;
+} RecapPort;
 
 /* ============================================================
    CONTRACT — AGGREGATE
    ============================================================ */
 typedef struct {
-    ScoringProtocol *protocol;
-    ScoringPort *port;
-} ScoringAggregate;
+    RecapProtocol *protocol;
+    RecapPort *port;
+} RecapAggregate;
 
 /* ============================================================
    CAPABILITIES
    ============================================================ */
-ScoringError capabilities_scoring_validate_zone(ZoneVO zone);
-ScoringError capabilities_scoring_record_kick(CompetitionState *state, int id, ZoneVO zone);
+RecapError capabilities_recap_prepare(const CompetitionState *state,
+                                      RankingEntryVO *ranking,
+                                      SearchResultVO *details,
+                                      int capacity);
 
 /* ============================================================
    INFRASTRUCTURE — port factory
    ============================================================ */
-ScoringPort *create_scoring_port(void);
+RecapPort *create_recap_port(void);
 
 /* ============================================================
    AGENT — orchestrator
    ============================================================ */
-ScoringError agent_scoring_run(ScoringAggregate *agg, CompetitionState *state);
+RecapError agent_recap_run(RecapAggregate *agg, CompetitionState *state);
 
 /* ============================================================
    ROOT — container builder (wiring only)
    ============================================================ */
-ScoringAggregate root_scoring_build(void);
+RecapAggregate root_recap_build(void);
 
-#endif /* MODULE_SCORING_H */
+#endif /* MODULE_RECAP_H */
