@@ -40,46 +40,38 @@ meta = doc.add_paragraph('Bahasa C — Arsitektur Hexagonal (Ports & Adapters)')
 meta.alignment = WD_ALIGN_PARAGRAPH.CENTER
 doc.add_paragraph()
 
-# ---- 1. Analisis Permasalahan (kerangka filsafat masalah, gaya akademis) ----
+# ---- 1. Analisis Permasalahan ----
 h1('1. Analisis Permasalahan')
+
 para('Berdasarkan kerangka epistemologis filsafat masalah, suatu kondisi hanya dapat '
-     'disebut "masalah" apabila memenuhi tiga prasyarat sekaligus: (a) terdapat subjek '
-     'yang memiliki tujuan; (b) terdapat kesenjangan (gap) antara keadaan aktual dan '
-     'keadaan yang dikehendaki; serta (c) terdapat hambatan yang tidak dapat diatasi '
-     'secara langsung. Dalam laporan ini, tujuan dan norma tidak dibentuk sendiri, '
-     'melainkan ditetapkan secara eksplisit oleh dokumen tugas (Project_Task.pdf) — '
-     'sehingga masalah diturunkan langsung dari requirement tersebut, bukan dari asumsi.')
+     'disebut "masalah" apabila memenuhi tiga prasyarat sekaligus: ')
+para('(a) terdapat subjek yang memiliki tujuan; ')
+para('(b) terdapat kesenjangan  antara keadaan aktual dan keadaan yang dikehendaki;  ')
+para('(c) terdapat hambatan yang tidak dapat diatasi secara langsung. ')
 
-h2('1.1 Tujuan (ditetapkan Project_Task.pdf)')
-para('Subjek dalam konteks ini adalah penyusun program yang diwajibkan memenuhi '
-     'spesifikasi dokumen tugas. Tujuan diambil verbatim dari dokumen tugas, bukan '
-     'dirumuskan sendiri:')
-bullet('Membangun program bahasa C untuk mengelola hasil lomba tendangan penalti.')
-bullet('Jumlah peserta 5-7 orang; setiap peserta 7 tendangan; zona bernilai 0 sampai 5.')
-bullet('Mengubah zona menjadi skor; total skor = jumlah seluruh skor tendangan.')
-bullet('Menentukan juara dari total skor tertinggi, dengan aturan seri 5 -> 4 -> 3 -> 2 -> 1.')
-bullet('Menyimpan data peserta, mencatat hasil tendangan, mencari peserta, menampilkan '
-       'rekap, dan mengurutkan ranking.')
+h2('1.1 Tujuan')
 
-h2('1.2 Keadaan Saat Ini dan Keadaan Diinginkan (Norma)')
+para('Membangun program bahasa C untuk mengelola hasil lomba tendangan penalti.')
+para('Jumlah peserta 5-7 orang; setiap peserta 7 tendangan; zona bernilai 0 sampai 5.')
+para('Mengubah zona menjadi skor; total skor = jumlah seluruh skor tendangan.')
+para('Menentukan juara dari total skor tertinggi, dengan aturan seri 5 -> 4 -> 3 -> 2 -> 1.')
+para('Menyimpan data peserta, mencatat hasil tendangan, mencari peserta, menampilkan '
+     'rekap, dan mengurutkan ranking.')
+
+h2('1.2 Keadaan Saat Ini dan Keadaan Diinginkan')
+
 para('Keadaan saat ini: belum tersedia program yang memenuhi seluruh ketentuan di atas. '
-     'Keadaan diinginkan (norma dari PDF): program yang secara utuh memenuhi batas '
-     'peserta (5-7), batas tendangan (7), rentang zona (0-5), aturan konversi dan '
-     'akumulasi skor, aturan seri bertingkat, serta kelima kemampuan kelola data. '
-     'Kesenjangan (gap) antara kedua keadaan inilah yang menjadikan tugas ini sebagai masalah.')
+     'Keadaan diinginkan  program yang secara utuh memenuhi batas peserta (5-7), batas '
+     'tendangan (7), rentang zona (0-5), aturan konversi dan akumulasi skor, aturan seri '
+     'bertingkat, serta kelima kemampuan kelola data. Kesenjangan antara kedua keadaan '
+     'inilah yang menjadikan tugas ini sebagai masalah.')
 
-h2('1.3 Hambatan (Diturunkan dari Requirement PDF)')
-para('Berikut hambatan yang diturunkan dari requirement Project_Task.pdf, terbagi menjadi '
-     'batasan (constraint) dan kebutuhan fungsional yang wajib diimplementasi:')
+h2('1.3 Hambatan')
 
-para('Batasan (constraint) — pembatas yang melahirkan obstacle bila dilanggar:')
 bullet('Masalah 1 - Pembatasan input zona 0-5 (Ketentuan 2 & 4). Tanpa pembatasan, '
-       'pengguna dapat memasukkan nilai di luar rentang yang merusak perhitungan, '
-       'sehingga melanggar spesifikasi zona.')
+       'pengguna dapat memasukkan nilai di luar rentang yang merusak perhitungan')
 bullet('Masalah 2 - Batas jumlah peserta 5-7 (aturan lomba). Data peserta harus '
        'dialokasikan menampung maksimal 7 tanpa meluap, namun tetap menerima minimal 5.')
-
-para('Kebutuhan fungsional — kewajiban spesifikasi yang harus dipenuhi agar tujuan tercapai:')
 bullet('Masalah 3 - Konversi zona ke skor dan akumulasi (Ketentuan 3 & 4). Setiap zona '
        'harus dipetakan ke poin, lalu dijumlahkan menjadi total skor tiap peserta.')
 bullet('Masalah 4 - Penentuan juara dan aturan seri bertingkat (Ketentuan 5 & 6). '
@@ -87,14 +79,6 @@ bullet('Masalah 4 - Penentuan juara dan aturan seri bertingkat (Ketentuan 5 & 6)
        '-> 2 -> 1, dan peringkat sama bila seluruh komponen identik.')
 bullet('Masalah 5 - Kelola data antar-fitur (simpan, catat, cari, rekap, ranking). '
        'Seluruh fitur harus beroperasi pada satu kesatuan data peserta yang konsisten.')
-
-h2('1.4 Pembedaan Problem yang Dipresentasikan dan Problem Sesungguhnya')
-para('Problem yang dipresentasikan (presented problem): kesulitan nyata yang tampak saat '
-     'menyusun program — membatasi input, mengurutkan peringkat, menjaga batas data. '
-     'Problem sesungguhnya (real problem / akar masalah): ketiadaan lapisan validasi '
-     'input, ketiadaan logika pemecah seri bertingkat, dan ketiadaan struktur data '
-     'tunggal yang diakses semua fitur. Analisis ini menempatkan gejala di permukaan dan '
-     'akar masalah di dasar, sehingga penyelesaian menyasar penyebab, bukan sekadar simptom.')
 
 # ---- 2. Skenario Program ----
 h1('2. Skenario Program')
@@ -242,15 +226,29 @@ first_hdr.is_linked_to_previous = False
 for p in list(first_hdr.paragraphs):
     p._p.getparent().remove(p._p)
 
-identity = [
-    'Nama        : Raka Arwaky',
-    'Nim         : 22342030',
-    'Mata Kuliah : Pengantar Coding',
-    'Sesi        : 863',
-]
-for line in identity:
-    hp = first_hdr.add_paragraph()
-    hp.add_run(line)
+# Header 2 kolom: kiri (Nama, Nim), kanan (Mata Kuliah/Kelas, Sesi)
+from docx.oxml.ns import qn
+from docx.enum.table import WD_TABLE_ALIGNMENT
+
+from docx.shared import Inches
+tbl = first_hdr.add_table(rows=2, cols=2, width=Inches(6.5))
+tbl.alignment = WD_TABLE_ALIGNMENT.LEFT
+tbl.autofit = True
+cells = tbl.rows[0].cells + tbl.rows[1].cells
+left = [('Nama', 'Raka Arwaky'), ('Nim', '22342030')]
+right = [('Mata Kuliah', 'Pengantar Coding'), ('Sesi', '863')]
+for i in range(2):
+    lc = cells[i]; rc = cells[i + 2]
+    lc.text = ''; rc.text = ''
+    lc.paragraphs[0].add_run(f'{left[i][0]} : {left[i][1]}')
+    rc.paragraphs[0].add_run(f'{right[i][0]} : {right[i][1]}')
+# Hapus border tabel biar tampak seperti teks biasa
+tblPr = tbl._tbl.tblPr
+borders = tblPr.makeelement(qn('w:tblBorders'), {})
+for edge in ('top', 'left', 'bottom', 'right', 'insideH', 'insideV'):
+    e = borders.makeelement(qn('w:' + edge), {qn('w:val'): 'none', qn('w:sz'): '0'})
+    borders.append(e)
+tblPr.append(borders)
 
 # Pastikan tidak ada default header (biar halaman 2+ kosong)
 sec.header.is_linked_to_previous = True

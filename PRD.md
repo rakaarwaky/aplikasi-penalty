@@ -1,8 +1,8 @@
-# PRD: Aplikasi Pengelola Lomba Tendangan Penalti
+# PRD: Aplikasi Perhitungan Lomba Tendangan Penalti
 
 ## 1. Deskripsi Produk
 
-Aplikasi console berbasis bahasa C untuk mengelola pelaksanaan lomba tendangan penalti secara terstruktur. Aplikasi ini menangani pendaftaran peserta, pencatatan hasil tendangan, perhitungan skor otomatis, penentuan peringkat juara dengan aturan tie-breaker, pencarian data peserta, serta pencetakan rekapitulasi hasil lomba.
+Aplikasi console berbasis bahasa C untuk mengelola perhitungan lomba tendangan penalti secara terstruktur. Aplikasi ini menangani pendaftaran peserta, pencatatan hasil tendangan, perhitungan skor otomatis, penentuan peringkat juara dengan aturan tie-breaker, pencarian data peserta, serta pencetakan rekapitulasi hasil lomba.
 
 ## 2. Feature Breakdown
 
