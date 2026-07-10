@@ -120,4 +120,5 @@ void ranking_page_draw(DisplayPort *dp, RankingEntryVO *entries,
 
     dp->footer("[ENTER] Kembali ke menu");
     dp->screen_refresh();
+    dp->readkey();
 }

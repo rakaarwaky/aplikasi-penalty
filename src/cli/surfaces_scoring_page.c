@@ -82,5 +82,6 @@ void scoring_page_draw(DisplayPort *dp, ParticipantEntity *part,
         dp->draw_colored(box_row + BOX_HEIGHT - 2, box_col + 2, msg_color, 1, msg);
     }
 
+    dp->footer("[ENTER] Submit zona");
     dp->screen_refresh();
 }

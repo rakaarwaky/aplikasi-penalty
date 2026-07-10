@@ -84,7 +84,9 @@ void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state
 
             ZoneVO z = { -1 };
             char raw[32] = "";
-            read_zone(dp, &z, raw, sizeof raw);
+            int input_row = 4 + 11;
+            int input_col = box_col + 2 + (int)strlen("Masukkan zona (0-5, contoh: 5): ");
+            read_zone(dp, input_row, input_col, &z, raw, sizeof raw);
 
             if (raw[0] == '\0' && part->kick_count.value == 0 && p == 0) {
                 if (!dp->confirm("Kembali ke menu? Progres yang belum tersimpan akan hilang."))
