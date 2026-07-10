@@ -190,25 +190,25 @@ graph TD
 
 ## 6. Variabel (field di dalam struct)
 
-| Variabel | Tipe |
+| Variabel | Keterangan |
 |---|---|
-| `participants` | `ParticipantEntity[MAX_PARTICIPANTS]` |
-| `participant_count` | `int` |
-| `state` | `CompetitionStateKind` |
-| `id` | `ParticipantIdVO` |
-| `name` | `ParticipantNameVO` |
-| `kicks` | `KickVO[TOTAL_KICKS]` |
-| `total_score` | `TotalScoreVO` |
-| `zone_freq` | `ZoneFreqVO` |
-| `kick_count` | `KickCountVO` |
-| `value` | `int` |
-| `value` | `char[MAX_NAME_LENGTH + 1]` |
-| `zone` | `int` |
-| `points` | `int` |
-| `freq` | `int[MAX_ZONE + 1]` |
-| `participant_id` | `int` |
-| `rank` | `int` |
-| `found` | `int` |
+| `participants` | Array semua peserta (tipe `ParticipantEntity[MAX_PARTICIPANTS]`). |
+| `participant_count` | Jumlah peserta yang benar-benar terdaftar. |
+| `state` | Tahap lomba: `STATE_INIT`, `STATE_REGISTERED`, `STATE_COMPLETED`. |
+| `id` | Nomor urut peserta (`ParticipantIdVO`). |
+| `name` | Nama peserta (`ParticipantNameVO`). |
+| `kicks` | Hasil 7 tendangan peserta (`KickVO[TOTAL_KICKS]`). |
+| `total_score` | Akumulasi poin seluruh tendangan (`TotalScoreVO`). |
+| `zone_freq` | Frekuensi tiap zona, dipakai pemecah seri (`ZoneFreqVO`). |
+| `kick_count` | Jumlah tendangan yang sudah dilakukan (`KickCountVO`). |
+| `value` | Isi id peserta / zona / skor / count, tipe `int`. |
+| `value` | Isi nama peserta, tipe `char[MAX_NAME_LENGTH + 1]`. |
+| `zone` | Zona tendangan (0–5) dalam satu `KickVO`. |
+| `points` | Poin tendangan (sama dengan zona) dalam satu `KickVO`. |
+| `freq` | Hitungan tendangan per zona (indeks 0..5) dalam `ZoneFreqVO`. |
+| `participant_id` | Nomor peserta pada `RankingEntryVO` / `SearchResultVO`. |
+| `rank` | Posisi peringkat peserta (`RankingEntryVO`). |
+| `found` | Status ketemu (1/0) pada `SearchResultVO`. |
 
 ---
 
