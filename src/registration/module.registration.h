@@ -1,18 +1,16 @@
-/* Kontrak (protocol/aggregate) ada di shared/module.shared.h.
-   File ini hanya deklarasi implementasi: capabilities, agent, root. */
-
+/* Deklarasi modul pendaftaran — capabilities, agent, root. */
 #ifndef MODULE_REGISTRATION_H
 #define MODULE_REGISTRATION_H
 
 #include "shared/contract_registration_aggregate.h"
 
-/* CAPABILITIES — implementasi RegistrationProtocol (pure, tanpa I/O) */
+/* CAPABILITIES — implementasi RegistrationProtocol (murni, tanpa I/O) */
 RegistrationError capabilities_registration_validate_name(const CompetitionState *state,
                                                           const ParticipantNameVO *name);
 RegistrationError capabilities_registration_append(CompetitionState *state,
                                                    const ParticipantNameVO *name);
 
-/* AGENT — koordinasi (validate lalu append); tanpa I/O */
+/* AGENT — koordinasi (validasi lalu tambah); tanpa I/O */
 RegistrationError agent_registration_add(RegistrationAggregate *agg,
                                          CompetitionState *state,
                                          const ParticipantNameVO *name);

@@ -71,7 +71,7 @@ static void draw_menu(int selected, CompetitionStateKind state) {
     /* Petunjuk navigasi. */
     attron(COLOR_PAIR(COLOR_MENU));
     mvprintw(BOX_START_ROW + MENU_ITEMS + 3, BOX_START_COL + 2,
-             "Navigate: v/^  Select: Enter  Quit: 0");
+             "Navigasi: v/^  Pilih: Enter  Keluar: 0");
     attroff(COLOR_PAIR(COLOR_MENU));
 
     refresh();

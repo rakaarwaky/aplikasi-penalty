@@ -7,21 +7,21 @@
 #include <ncurses.h>  /* ncurses di Linux */
 #endif
 
-/* ncurses initialization and teardown */
+/* Inisialisasi dan akhir ncurses */
 void tui_init(void);
 void tui_end(void);
 
-/* Screen clearing */
+/* Pengosongan layar */
 void tui_clear(void);
 
-/* Output functions */
+/* Fungsi output */
 void tui_print(int row, int col, const char *text);
 void tui_print_centered(int row, const char *text);
 void tui_box(int row, int col, int width, int height);
 void tui_highlight_row(int row, int col, int width, const char *text);
 void tui_normal_row(int row, int col, int width, const char *text);
 
-/* Color definitions */
+/* Definisi warna */
 #define COLOR_DEFAULT  0
 #define COLOR_TITLE    1
 #define COLOR_MENU     2
@@ -33,7 +33,7 @@ void tui_normal_row(int row, int col, int width, const char *text);
 /* Input */
 int tui_getch(void);
 
-/* Key constants – gunakan definisi asli curses agar portabel */
+/* Konstanta tombol — gunakan definisi asli curses agar portabel */
 #define TUI_KEY_UP     KEY_UP
 #define TUI_KEY_DOWN   KEY_DOWN
 #define TUI_KEY_ENTER  10

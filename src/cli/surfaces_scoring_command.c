@@ -1,6 +1,6 @@
 /**
  * @file surfaces_scoring_command.c
- * @brief Surface: layar input tendangan & skor (I/O ncurses + delegasi ke agent).
+ * @brief Layar input tendangan: baca zona tiap peserta & catat skornya.
  */
 
 #include "cli/module.cli.h"
@@ -10,12 +10,7 @@
 #include <string.h>
 #include <ctype.h>
 
-/* ──────────────────────────────────────────────
- * Baca satu zona dari pengguna (string -> int).
- * Validasi karakter digit/- di sini (pramasuk),
- * lalu kembalikan via out. SC_INVALID_ZONE bila
- * input bukan angka sah.
- * ────────────────────────────────────────────── */
+/* Baca satu angka zona dari pengguna; tolak bila bukan angka sah. */
 static ScoringError read_zone(ZoneVO *out) {
     char buf[32];
     echo();
@@ -25,7 +20,7 @@ static ScoringError read_zone(ZoneVO *out) {
     curs_set(0);
     noecho();
 
-    /* Hanya digit atau '-' yang diizinkan sebagai awal angka. */
+    /* Hanya digit atau tanda minus yang diizinkan. */
     int i = 0;
     while (buf[i] != '\0' && buf[i] != '\n') {
         if (!isdigit((unsigned char)buf[i]) && buf[i] != '-') return SC_INVALID_ZONE;
@@ -38,15 +33,13 @@ static ScoringError read_zone(ZoneVO *out) {
 }
 
 /**
- * Layar scoring: untuk tiap peserta, loop TOTAL_KICKS tendangan.
- * Setiap tendangan dibaca (read_zone), divalidasi rentang, lalu
- * didelegasikan ke agent_scoring_record(). Guard state: blokir bila
- * STATE_INIT (belum daftar) atau STATE_COMPLETED (sudah selesai).
+ * Layar scoring: untuk tiap peserta, ulang minta zona sebanyak 7 kali,
+ * catat ke data, tampilkan hasil. Tolak bila belum daftar/sudah selesai.
  */
 void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state) {
     if (agg == NULL || state == NULL) return;
 
-    /* Blokir bila peserta belum daftar. */
+    /* Belum ada peserta terdaftar. */
     if (state->state == STATE_INIT) {
         tui_clear();
         attron(COLOR_PAIR(COLOR_ERROR));
@@ -57,7 +50,7 @@ void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state
         return;
     }
 
-    /* Blokir bila kompetisi sudah selesai. */
+    /* Sudah semua selesai. */
     if (state->state == STATE_COMPLETED) {
         tui_clear();
         attron(COLOR_PAIR(COLOR_MENU));
@@ -68,14 +61,14 @@ void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state
         return;
     }
 
-    /* Iterasi tiap peserta. */
+    /* Untuk tiap peserta. */
     int p;
     for (p = 0; p < state->participant_count; p++) {
         ParticipantEntity *part = &state->participants[p];
         while (part->kick_count < TOTAL_KICKS) {
             tui_clear();
 
-            /* Judul + bingkai + info peserta & riwayat tendangan. */
+            /* Judul, bingkai, info peserta & riwayat. */
             attron(COLOR_PAIR(COLOR_TITLE) | A_BOLD);
             tui_print_centered(1, "INPUT TENDANGAN DAN SKOR");
             attroff(COLOR_PAIR(COLOR_TITLE) | A_BOLD);
@@ -103,7 +96,7 @@ void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state
             attroff(COLOR_PAIR(COLOR_MENU));
             refresh();
 
-            /* Baca & validasi rentang zona. */
+            /* Baca & pastikan zona dalam rentang. */
             ZoneVO z;
             if (read_zone(&z) != SC_OK || z.value < MIN_ZONE || z.value > MAX_ZONE) {
                 tui_clear();
@@ -119,7 +112,7 @@ void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state
                 continue;
             }
 
-            /* Delegasikan pencatatan ke agent. */
+            /* Catat tendangan. */
             ScoringError e = agent_scoring_record(agg, state, p, z);
             tui_clear();
             attron(COLOR_PAIR(COLOR_TITLE) | A_BOLD);
@@ -153,7 +146,7 @@ void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state
         tui_getch();
     }
 
-    /* Penutup: bila semua selesai, state sudah COMPLETED. */
+    /* Penutup. */
     tui_clear();
     if (state->state == STATE_COMPLETED) {
         attron(COLOR_PAIR(COLOR_SUCCESS) | A_BOLD);

@@ -1,4 +1,4 @@
-/* STORAGE — Module Declaration */
+/* Deklarasi modul penyimpanan — save/load state kompetisi. */
 #ifndef MODULE_STORAGE_H
 #define MODULE_STORAGE_H
 
@@ -6,10 +6,10 @@
 #include "shared/taxonomy_storage_error.h"
 #include "shared/taxonomy_competition_state_vo.h"
 
-/* INFRASTRUCTURE — file I/O implementation (implements StorageProtocol) */
+/* INFRASTRUCTURE — implementasi file I/O (mengimplementasikan StorageProtocol) */
 StorageProtocol storage_adapter_create(void);
 
-/* AGENT — orchestration through protocol */
+/* AGENT — orkestrasi melalui protocol */
 typedef struct {
     const StorageProtocol *protocol;
 } StorageAggregate;

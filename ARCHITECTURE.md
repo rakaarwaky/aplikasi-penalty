@@ -1,6 +1,6 @@
 # AES Architecture: Agentic Engineering System — C99 Adaptation
 
-The **Agentic Engineering System (AES)** adalah pola arsitektur berlapis ketat, sangat terdekopling, dan dirancang untuk kejelasan navigasi AI agent. Dokumen ini adalah **adaptasi C99** dari AES v3.0 — semua konsep ditulis dalam terminologi bahasa C.
+The **Agentic Engineering System (AES)** adalah pola arsitektur berlapis ketat, sangat terdekopling, dan dirancang untuk kejelasan navigasi Developer. Dokumen ini adalah **adaptasi C99** dari AES v3.0 — semua konsep ditulis dalam terminologi bahasa C.
 
 > **Bahasa Target:** C (C99). Tidak ada Rust, Python, atau TypeScript di proyek ini.
 > Semua contoh menggunakan ekstensi `.c` dan `.h`.
@@ -21,7 +21,7 @@ The **Agentic Engineering System (AES)** adalah pola arsitektur berlapis ketat, 
 
 ### 1. Strict Layered Boundary Enforcement
 
-Kode dibagi ke dalam batas horizontal dan vertikal yang jelas. Layer hanya boleh berkomunikasi secara **downward-only** (lapisan di atas mengimpor lapisan di bawah, tidak sebaliknya). 
+Kode dibagi ke dalam batas horizontal dan vertikal yang jelas. Layer hanya boleh berkomunikasi secara **downward-only** (lapisan di atas mengimpor lapisan di bawah, tidak sebaliknya).
 
 ### 2. Capabilities dan Infrastructure sebagai Peer Layer
 
