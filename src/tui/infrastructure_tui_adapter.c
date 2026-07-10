@@ -34,10 +34,12 @@ void tui_clear(void) {
 }
 
 void tui_print(int row, int col, const char *text) {
+    if (text == NULL) return;
     mvprintw(row, col, "%s", text);
 }
 
 void tui_print_centered(int row, const char *text) {
+    if (text == NULL) return;
     int len = (int)strlen(text);
     int col = (COLS - len) / 2;
     if (col < 0) col = 0;
@@ -45,6 +47,7 @@ void tui_print_centered(int row, const char *text) {
 }
 
 void tui_box(int row, int col, int width, int height) {
+    if (width < 2 || height < 2) return;
     int i;
     attron(COLOR_PAIR(COLOR_BORDER));
 
@@ -69,6 +72,7 @@ void tui_box(int row, int col, int width, int height) {
 }
 
 void tui_highlight_row(int row, int col, int width, const char *text) {
+    if (text == NULL || width < 2) return;
     int i;
     attron(COLOR_PAIR(COLOR_HIGHLIGHT));
     for (i = 0; i < width - 2; i++) mvaddch(row, col + 1 + i, ' ');
@@ -77,6 +81,7 @@ void tui_highlight_row(int row, int col, int width, const char *text) {
 }
 
 void tui_normal_row(int row, int col, int width, const char *text) {
+    if (text == NULL || width < 2) return;
     int i;
     attron(COLOR_PAIR(COLOR_MENU));
     for (i = 0; i < width - 2; i++) mvaddch(row, col + 1 + i, ' ');

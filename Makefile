@@ -23,7 +23,7 @@ TEST_SRCS  := $(wildcard $(TEST_DIR)/*.c)
 TEST_INC   := -I$(SRC_DIR) -I$(SRC_DIR)/shared \
               -I$(SRC_DIR)/registration -I$(SRC_DIR)/scoring \
               -I$(SRC_DIR)/ranking -I$(SRC_DIR)/search \
-              -I$(SRC_DIR)/recap
+              -I$(SRC_DIR)/recap -I$(SRC_DIR)/cli -I$(SRC_DIR)/tui
 TEST_LIB_SRC := $(filter-out $(SRC_DIR)/root_cli_main_entry.c \
                   $(SRC_DIR)/cli/surfaces_menu_command.c \
                   $(SRC_DIR)/cli/surfaces_registration_command.c \
@@ -52,7 +52,7 @@ test: $(TEST_BIN)
 	./$(TEST_BIN)
 
 $(TEST_BIN): $(TEST_LIB_SRC) $(TEST_SRCS)
-	$(CC) $(CFLAGS) $(TEST_INC) -o $@ $^
+	$(CC) $(CFLAGS) $(TEST_INC) -o $@ $^ $(LDFLAGS)
 
 clean:
 	rm -rf $(BUILD_DIR) $(TARGET) $(TEST_BIN)
