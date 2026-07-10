@@ -9,6 +9,7 @@ extern void run_infrastructure_tests(void);
 extern void run_sanitizer_tests(void);
 extern void run_integration_tests(void);
 extern void run_export_tests(void);
+extern void run_logger_tests(void);
 
 int main(void) {
     printf("========================================\n");
@@ -24,6 +25,7 @@ int main(void) {
     run_sanitizer_tests();
     run_integration_tests();
     run_export_tests();
+    run_logger_tests();
 
     printf("========================================\n");
     printf("  ALL TESTS PASSED!\n");

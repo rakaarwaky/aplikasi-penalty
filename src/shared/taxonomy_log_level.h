@@ -1,4 +1,4 @@
-/* LOG — Taxonomy: Log Levels */
+/* Level log untuk seluruh modul aplikasi. */
 #ifndef SHARED_TAXONOMY_LOG_LEVEL_H
 #define SHARED_TAXONOMY_LOG_LEVEL_H
 

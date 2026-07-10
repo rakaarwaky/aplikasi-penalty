@@ -2,8 +2,8 @@
  * @file capabilities_sanitizer_validator.c
  * @brief Sanitizer: validasi input string & integer (murni, tanpa I/O terminal).
  *
- * Catatan: file ini berada di folder sanitizer/ dengan awalan
- * capabilities_ (bukan infrastructure_) — ia berisi logika validasi
+ * File ini berada di folder sanitizer/ dengan awalan
+ * capabilities_  — ia berisi logika validasi
  * murni; pemanggilan langsung (sanitizer_validate_*) juga disediakan
  * sebagai convenience wrapper di bawah.
  */
