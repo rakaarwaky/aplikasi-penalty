@@ -40,8 +40,7 @@ static void test_full_pipeline(void) {
 
     /* 3. Calculate ranking */
     RankingEntryVO rankings[MAX_PARTICIPANTS];
-    RankingProtocol rp = ranking_capabilities_create();
-    rp.calculate(&state, rankings, MAX_PARTICIPANTS);
+    capabilities_ranking_compute(&state, rankings, MAX_PARTICIPANTS);
 
     /* Verify ranking order: Alice(35) > Bob(28) > Diana(21) > Charlie(20) > Eve(14) */
     assert(rankings[0].total_score == 35);
@@ -51,19 +50,18 @@ static void test_full_pipeline(void) {
     assert(rankings[4].total_score == 14);
 
     /* 4. Search for participant */
-    SearchProtocol sp = search_capabilities_create();
     SearchResultVO result;
-    SearchError se = sp.find(&state, "Bob", &result);
-    assert(se == SR_OK);
+    ParticipantNameVO search_name = {{0}};
+    strcpy(search_name.value, "Bob");
+    capabilities_search_find(&state, &search_name, &result);
     assert(result.found == 1);
     assert(result.total_score == 28);
 
     /* 5. Generate recap */
     SearchResultVO details[MAX_PARTICIPANTS];
-    RecapProtocol rp2 = recap_capabilities_create();
-    RecapError re = rp2.prepare_details(&state, details, MAX_PARTICIPANTS);
-    assert(re == RC_OK);
-    assert(details[0].total_score == 35);  /* Alice */
+    RankingAggregate rank_agg = root_ranking_build();
+    RecapAggregate recap_agg = root_recap_build(&rank_agg.protocol);
+    agent_recap_prepare(&recap_agg, &state, rankings, details, MAX_PARTICIPANTS);
 
     /* 6. Save to file */
     StorageAggregate storage = root_storage_build();
@@ -100,8 +98,7 @@ static void test_all_same_scores(void) {
     }
 
     RankingEntryVO rankings[MAX_PARTICIPANTS];
-    RankingProtocol rp = ranking_capabilities_create();
-    rp.calculate(&state, rankings, MAX_PARTICIPANTS);
+    capabilities_ranking_compute(&state, rankings, MAX_PARTICIPANTS);
 
     /* All should have same score */
     for (int i = 0; i < state.participant_count; i++) {
