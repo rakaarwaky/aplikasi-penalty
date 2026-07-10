@@ -202,7 +202,6 @@ static void show_help_screen(void) {
 int cli_surfaces_menu_run(RegistrationAggregate *reg,
                           ScoringAggregate *sc, RankingAggregate *rk,
                           SearchAggregate *sr, RecapAggregate *rc,
-                          StorageAggregate *st,
                           CompetitionState *state) {
     int selected = 1;
     int running = 1;

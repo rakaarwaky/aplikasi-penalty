@@ -12,13 +12,11 @@
 #include "ranking/module.ranking.h"
 #include "search/module.search.h"
 #include "recap/module.recap.h"
-#include "storage/module.storage.h"
 
 /* Loop menu utama. */
 int cli_surfaces_menu_run(RegistrationAggregate *reg,
                           ScoringAggregate *sc, RankingAggregate *rk,
                           SearchAggregate *sr, RecapAggregate *rc,
-                          StorageAggregate *st,
                           CompetitionState *state);
 
 /* Layar tiap fitur. */

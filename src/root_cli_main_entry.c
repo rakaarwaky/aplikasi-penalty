@@ -32,16 +32,12 @@ int main(void) {
     RankingAggregate rk = root_ranking_build();
     SearchAggregate sr = root_search_build();
     RecapAggregate rc = root_recap_build(rk.protocol);
-    StorageAggregate st = root_storage_build();
-
-    /* Muat data tersimpan jika ada */
-    agent_storage_load(&st, "lomba.penalty", &state);
 
     /* Hidupkan layar ncurses lalu tampilkan splash screen. */
     tui_init();
     tui_splash(50);
     flushinp();  /* buang sisa Enter agar tidak bocor ke menu utama */
-    cli_surfaces_menu_run(&reg, &sc, &rk, &sr, &rc, &st, &state);
+    cli_surfaces_menu_run(&reg, &sc, &rk, &sr, &rc, &state);
 
     /* D2: Ringkasan juara sebelum keluar — tampilkan di ncurses, tunggu Enter. */
     if (state.state == STATE_COMPLETED && state.participant_count > 0) {
