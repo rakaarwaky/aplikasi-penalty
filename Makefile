@@ -13,7 +13,7 @@ INCLUDES := -I$(SRC_DIR) -I$(SRC_DIR)/shared \
             -I$(SRC_DIR)/registration -I$(SRC_DIR)/scoring \
             -I$(SRC_DIR)/ranking -I$(SRC_DIR)/search \
             -I$(SRC_DIR)/recap -I$(SRC_DIR)/cli \
-            -I$(SRC_DIR)/tui -I$(SRC_DIR)/storage
+            -I$(SRC_DIR)/tui -I$(SRC_DIR)/storage -I$(SRC_DIR)/sanitizer
 
 LDFLAGS  := -lncurses
 
@@ -24,7 +24,7 @@ TEST_INC   := -I$(SRC_DIR) -I$(SRC_DIR)/shared \
               -I$(SRC_DIR)/registration -I$(SRC_DIR)/scoring \
               -I$(SRC_DIR)/ranking -I$(SRC_DIR)/search \
               -I$(SRC_DIR)/recap -I$(SRC_DIR)/cli -I$(SRC_DIR)/tui \
-              -I$(SRC_DIR)/storage
+              -I$(SRC_DIR)/storage -I$(SRC_DIR)/sanitizer
 TEST_LIB_SRC := $(filter-out $(SRC_DIR)/root_cli_main_entry.c \
                   $(SRC_DIR)/cli/surfaces_menu_command.c \
                   $(SRC_DIR)/cli/surfaces_registration_command.c \
