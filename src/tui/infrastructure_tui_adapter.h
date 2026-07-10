@@ -49,4 +49,8 @@ const char *tui_medal(int rank);
 int tui_getch(void);
 int tui_confirm(const char *prompt);
 
+/* ── Terminal info ── */
+int tui_get_lines(void);
+int tui_get_cols(void);
+
 #endif /* INFRASTRUCTURE_TUI_ADAPTER_H */

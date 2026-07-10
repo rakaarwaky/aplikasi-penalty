@@ -244,6 +244,10 @@ const char *tui_medal(int rank) {
     }
 }
 
+/* ── Terminal info ── */
+int tui_get_lines(void) { return LINES; }
+int tui_get_cols(void)  { return COLS;  }
+
 /* Konfirmasi ya/tidak. Tampilkan prompt, balik 1 bila user tekan y/Y. */
 int tui_confirm(const char *prompt) {
     if (prompt == NULL) return 0;
@@ -365,6 +369,10 @@ static void tui_draw_append_colored(int color, int bold, const char *text) {
 static void tui_screen_refresh(void) {
     refresh();
 }
+
+/* ── Terminal size ── */
+static int tui_dp_get_lines(void) { return LINES; }
+static int tui_dp_get_cols(void)  { return COLS;  }
 
 /**
  * Buat DisplayPort yang sudah terisi semua function pointer.
