@@ -26,8 +26,7 @@ static ScoringError read_zone(ZoneVO *out, char *raw_out, size_t raw_size) {
 
     /* Simpan input mentah untuk pesan error */
     if (raw_out != NULL && raw_size > 0) {
-        strncpy(raw_out, buf, raw_size - 1);
-        raw_out[raw_size - 1] = '\0';
+        snprintf(raw_out, raw_size, "%s", buf);
     }
 
     int i = 0;
@@ -164,7 +163,7 @@ void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state
                 draw_scoring_screen(part, ok_msg, 0);
             } else if (e == SC_INVALID_ZONE) {
                 char err_msg[96];
-                snprintf(err_msg, sizeof err_msg, "[GAGAL] Zona harus %d-%d. Anda memasukkan '%s'.", MIN_ZONE, MAX_ZONE, raw_input);
+                snprintf(err_msg, sizeof err_msg, "[GAGAL] Zona harus %d-%d. Anda memasukkan '%s'.", MIN_ZONE, MAX_ZONE, raw);
                 draw_scoring_screen(part, err_msg, 1);
             } else {
                 draw_scoring_screen(part, "[GAGAL] Kesalahan pencatatan!", 1);

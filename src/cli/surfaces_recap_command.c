@@ -5,6 +5,7 @@
 
 #include "cli/module.cli.h"
 #include "tui/infrastructure_tui_adapter.h"
+#include "export/module.export.h"
 
 #include <stdio.h>
 
@@ -126,8 +127,51 @@ void cli_surfaces_recap_execute(RecapAggregate *agg, CompetitionState *state) {
         attroff(COLOR_PAIR(COLOR_GOLD) | A_BOLD);
     }
 
-    tui_footer("Tekan ENTER untuk kembali ke menu utama");
+    /* Penjelasan tie-breaker */
+    if (state->participant_count >= 2) {
+        const RankingEntryVO *first = &ranking[0];
+        const RankingEntryVO *second = &ranking[1];
+        if (first->total_score == second->total_score) {
+            const char *n1 = state->participants[first->participant_id].name.value;
+            const char *n2 = state->participants[second->participant_id].name.value;
+            attron(COLOR_PAIR(COLOR_INFO));
+            mvprintw(box_row + 7 + state->participant_count, box_col + 2,
+                     "Seri! %s & %s sama-sama %d poin.", n1, n2, first->total_score);
+            int z;
+            for (z = 5; z >= 0; z--) {
+                if (first->zone_freq[z] != second->zone_freq[z]) {
+                    mvprintw(box_row + 8 + state->participant_count, box_col + 2,
+                             "%s menang: zona %d lebih banyak (%d vs %d)",
+                             n1, z, first->zone_freq[z], second->zone_freq[z]);
+                    break;
+                }
+            }
+            attroff(COLOR_PAIR(COLOR_INFO));
+        }
+    }
+
+    tui_footer("[ENTER] Kembali  [e] Ekspor ke file");
 
     refresh();
-    tui_getch();
+
+    /* Tunggu input user: ENTER atau 'e' untuk ekspor */
+    int key;
+    while ((key = tui_getch()) != TUI_KEY_ENTER) {
+        if (key == 'e' || key == 'E') {
+            /* Ekspor ke file (pakai wiring resmi root_export_build). */
+            ExportAggregate exp_agg = root_export_build();
+            ExportError exp_e = agent_export_ranking(&exp_agg, "ranking.txt", state, ranking, state->participant_count);
+            if (exp_e == EXP_OK) {
+                tui_clear();
+                tui_print_centered_colored(10, "[OK] Berhasil diekspor ke ranking.txt", COLOR_SUCCESS, 1);
+            } else {
+                tui_clear();
+                tui_print_centered_colored(10, "[GAGAL] Gagal mengekspor file!", COLOR_ERROR, 1);
+            }
+            tui_footer("[ENTER] Kembali");
+            refresh();
+            tui_getch();
+            break;
+        }
+    }
 }

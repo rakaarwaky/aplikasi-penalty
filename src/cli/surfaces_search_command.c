@@ -169,12 +169,41 @@ void cli_surfaces_search_execute(SearchAggregate *agg, CompetitionState *state) 
         mvprintw(BOX_ROW + 6, BOX_COL + 4, "Peserta '%s' tidak ditemukan.", buffer);
         attroff(COLOR_PAIR(COLOR_MENU));
 
-        attron(COLOR_PAIR(COLOR_DIM));
-        mvprintw(BOX_ROW + 8, BOX_COL + 4, "Pastikan nama yang dimasukkan benar.");
-        attroff(COLOR_PAIR(COLOR_DIM));
+        /* Fuzzy search: cari nama yang mirip */
+        attron(COLOR_PAIR(COLOR_INFO));
+        mvprintw(BOX_ROW + 8, BOX_COL + 4, "Mungkin maksud Anda:");
+        attroff(COLOR_PAIR(COLOR_INFO));
+
+        int suggestions = 0;
+        int si;
+        for (si = 0; si < state->participant_count && suggestions < 3; si++) {
+            const char *pname = state->participants[si].name.value;
+            /* Cek apakah salah satu huruf ada di input */
+            int match = 0;
+            size_t pi;
+            for (pi = 0; pname[pi] != '\0' && !match; pi++) {
+                char lower_p = tolower((unsigned char)pname[pi]);
+                size_t bi;
+                for (bi = 0; buffer[bi] != '\0' && !match; bi++) {
+                    if (tolower((unsigned char)buffer[bi]) == lower_p)
+                        match = 1;
+                }
+            }
+            if (match) {
+                attron(COLOR_PAIR(COLOR_SUCCESS));
+                mvprintw(BOX_ROW + 9 + suggestions, BOX_COL + 6, "- %s", pname);
+                attroff(COLOR_PAIR(COLOR_SUCCESS));
+                suggestions++;
+            }
+        }
+        if (suggestions == 0) {
+            attron(COLOR_PAIR(COLOR_DIM));
+            mvprintw(BOX_ROW + 9, BOX_COL + 6, "(tidak ada saran serupa)");
+            attroff(COLOR_PAIR(COLOR_DIM));
+        }
     }
 
-    tui_footer("Tekan ENTER untuk kembali ke menu utama");
+    tui_footer("[ENTER] Kembali ke menu");
     refresh();
     tui_getch();
 }

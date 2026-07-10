@@ -130,9 +130,30 @@ void cli_surfaces_ranking_execute(RankingAggregate *agg, CompetitionState *state
         attron(COLOR_PAIR(COLOR_GOLD) | A_BOLD);
         mvprintw(footer_sep_row + 1, 4, "JUARA: %s dengan %d poin!", winner, entries[0].total_score);
         attroff(COLOR_PAIR(COLOR_GOLD) | A_BOLD);
+
+        /* Penjelasan tie-breaker untuk posisi 1 vs 2 */
+        if (state->participant_count >= 2) {
+            const RankingEntryVO *first = &entries[0];
+            const RankingEntryVO *second = &entries[1];
+            if (first->total_score == second->total_score) {
+                const char *name2 = state->participants[second->participant_id].name.value;
+                attron(COLOR_PAIR(COLOR_INFO));
+                mvprintw(footer_sep_row + 2, 4, "Seri! %s & %s sama-sama %d poin.", winner, name2, first->total_score);
+                /* Cari zona penentu */
+                int z;
+                for (z = 5; z >= 0; z--) {
+                    if (first->zone_freq[z] != second->zone_freq[z]) {
+                        mvprintw(footer_sep_row + 3, 4, "%s menang: zona %d lebih banyak (%d vs %d)",
+                                 winner, z, first->zone_freq[z], second->zone_freq[z]);
+                        break;
+                    }
+                }
+                attroff(COLOR_PAIR(COLOR_INFO));
+            }
+        }
     }
 
-    tui_footer("Tekan ENTER untuk kembali ke menu utama");
+    tui_footer("[ENTER] Kembali ke menu");
 
     refresh();
     tui_getch();

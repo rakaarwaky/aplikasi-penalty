@@ -38,6 +38,39 @@ int main(void) {
     tui_splash(50);
     flushinp();  /* buang sisa Enter agar tidak bocor ke menu utama */
     cli_surfaces_menu_run(&reg, &sc, &rk, &sr, &rc, &state);
+
+    /* D2: Ringkasan juara sebelum keluar — tampilkan di ncurses, tunggu Enter. */
+    if (state.state == STATE_COMPLETED && state.participant_count > 0) {
+        RankingEntryVO entries[MAX_PARTICIPANTS];
+        if (agent_ranking_compute(&rk, &state, entries, MAX_PARTICIPANTS) == RK_OK) {
+            tui_clear();
+            tui_print_centered_colored(2, "* * * * * * * * * * * * * * * *", COLOR_GOLD, 1);
+            tui_print_centered_colored(3, "TERIMA KASIH TELAH BERLOMBA", COLOR_TITLE, 1);
+            tui_print_centered_colored(4, "* * * * * * * * * * * * * * * *", COLOR_GOLD, 1);
+
+            const char *winner = state.participants[entries[0].participant_id].name.value;
+            tui_print_centered_colored(7, "JUARA UMUM", COLOR_GOLD, 1);
+            char line[64];
+            snprintf(line, sizeof line, "%s  -  %d poin", winner, entries[0].total_score);
+            tui_print_centered_colored(8, line, COLOR_MENU, 1);
+
+            if (state.participant_count >= 2) {
+                const char *second = state.participants[entries[1].participant_id].name.value;
+                snprintf(line, sizeof line, "Juara 2: %s (%d poin)", second, entries[1].total_score);
+                tui_print_centered_colored(10, line, COLOR_MENU, 0);
+            }
+            if (state.participant_count >= 3) {
+                const char *third = state.participants[entries[2].participant_id].name.value;
+                snprintf(line, sizeof line, "Juara 3: %s (%d poin)", third, entries[2].total_score);
+                tui_print_centered_colored(11, line, COLOR_MENU, 0);
+            }
+
+            tui_footer("Tekan ENTER untuk keluar");
+            refresh();
+            tui_getch();
+        }
+    }
+
     tui_end();
 
     /* Pesan penutup di terminal biasa. */
