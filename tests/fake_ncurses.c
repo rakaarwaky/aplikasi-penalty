@@ -1,16 +1,12 @@
 /*
  * fake_ncurses.c — Stub ncurses untuk test headless (tanpa terminal).
  *
- * Tujuannya: agar infrastructure_tui_adapter.c dan surfaces_*_command.c
- * bisa di-compile & dijalankan di test (CI lokal) tanpa butuh terminal nyata.
- *
- * - Include ncurses.h untuk tipe yang benar, lalu #undef semua macro
- *   yang mengubah fungsi biasa jadi w* macro (attron, clear, getch, dll).
- * - Semua fungsi ncurses jadi no-op (return 0 / NULL).
- * - Antrian input global menyediakan data untuk getnstr/getch/confirm,
- *   sehingga alur interaktif surfaces bisa disimulasikan dari test.
- *
- * File ini HANYA di-link ke binary test (bukan ke app).
+ * Pendekatan:
+ * - Include ncurses.h untuk tipe yang benar.
+ * - #undef SEMUA macro ncurses yang mengubah nama fungsi
+ *   (attron→wattr_on, clear→wclear, getch→wgetch, dll).
+ * - Definisikan fungsi stub sendiri sebagai no-op.
+ * - Antrian input global menyediakan data untuk getnstr/getch.
  */
 #ifdef _WIN32
 #include <curses.h>
@@ -21,24 +17,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
-/*
- * ncurses.h mendefinisikan macro seperti:
- *   attron(a)   -> wattr_on(stdscr, ...)
- *   attroff(a)  -> wattr_off(stdscr, ...)
- *   clear()     -> wclear(stdscr)
- *   refresh()   -> wrefresh(stdscr)
- *   getch()     -> wgetch(stdscr)
- *   addstr(s)   -> waddnstr(stdscr, s, -1)
- *   mvaddch(y,x,c) -> wmove + waddch
- *   mvprintw(y,x,...) -> wmove + wprintw
- *   printw(...) -> wprintw(stdscr, ...)
- *   bkgd(c)     -> wbkgd(stdscr, c)
- *   getnstr(s,n)-> wgetnstr(stdscr, s, n)
- *
- * Kita #undef SEMUA macro ini agar bisa define fungsi stub kita sendiri
- * tanpa konflik. Adapter tetap compile karena macro sudah di-expand
- * saat preprocessing, dan w* fungsi kita menghandle panggilan.
- */
+/* ── Hapus SEMUA macro ncurses yang mengalihkan nama fungsi ── */
 #undef attron
 #undef attroff
 #undef clear
@@ -52,8 +31,25 @@
 #undef mvprintw
 #undef mvgetnstr
 #undef mvwprintw
+#undef keypad
+#undef has_colors
+#undef curs_set
+#undef wattron
+#undef wattroff
+#undef wattr_on
+#undef wattr_off
+#undef wmove
+#undef waddch
+#undef waddnstr
+#undef waddstr
+#undef wprintw
+#undef wrefresh
+#undef wclear
+#undef wbkgd
+#undef wgetch
+#undef wgetnstr
 
-/* ── Antrian input (dikendalikan dari test) ── */
+/* ── Antrian input ── */
 static int   *g_keys = NULL;
 static int    g_keys_len = 0;
 static int    g_keys_cap = 0;
@@ -90,7 +86,7 @@ int COLS  = 80;
 WINDOW *stdscr = NULL;
 chtype acs_map[256];
 
-/* ── Antrian input helpers ── */
+/* ── Input primitives (harus sebelum w* stubs) ── */
 int getch(void) {
     if (g_keys_len > 0) {
         int k = g_keys[0];
@@ -122,21 +118,20 @@ int getnstr(char *buf, int n) {
     return 0;
 }
 
+int confirm(const char *prompt) { (void)prompt; return 1; }
+
 /* ── Fungsi ncurses atas-nama (no-op) ── */
 WINDOW *initscr(void) { return NULL; }
 int cbreak(void) { return 0; }
 int noecho(void) { return 0; }
-int keypad(WINDOW *w, int b) { (void)w; (void)b; return 0; }
-int curs_set(int v) { (void)v; return 0; }
-int has_colors(void) { return 0; }
+int echo(void) { return 0; }
+int endwin(void) { return 0; }
+int napms(int ms) { (void)ms; return 0; }
 int start_color(void) { return 0; }
 int init_pair(short p, short f, short b) { (void)p;(void)f;(void)b; return 0; }
-int endwin(void) { return 0; }
-int echo(void) { return 0; }
-int napms(int ms) { (void)ms; return 0; }
 
-int attron(attr_t a) { (void)a; return 0; }
-int attroff(attr_t a) { (void)a; return 0; }
+int attron(int a) { (void)a; return 0; }
+int attroff(int a) { (void)a; return 0; }
 int clear(void) { return 0; }
 int refresh(void) { return 0; }
 int bkgd(chtype ch) { (void)ch; return 0; }
@@ -144,18 +139,23 @@ int addstr(const char *s) { (void)s; return 0; }
 int printw(const char *fmt, ...) { (void)fmt; return 0; }
 int mvprintw(int y, int x, const char *fmt, ...) { (void)y;(void)x;(void)fmt; return 0; }
 int mvaddch(int y, int x, chtype ch) { (void)y;(void)x;(void)ch; return 0; }
-int mvgetnstr(int y, int x, char *buf, int n) { (void)y; (void)x; return getnstr(buf, n); }
-int confirm(const char *prompt) { (void)prompt; return 1; }
+int mvgetnstr(int y, int x, char *buf, int n) { (void)y;(void)x; return getnstr(buf, n); }
 
-/* ── w* stubs (ncursesw macro expand targets) ── */
+int keypad(WINDOW *w, _Bool b) { (void)w;(void)b; return 0; }
+_Bool has_colors(void) { return 0; }
+int curs_set(int v) { (void)v; return 0; }
+
+/* ── w* stubs (target makro ncurses.h) ── */
 int wattr_on(WINDOW *w, attr_t a, void *opts) { (void)w;(void)a;(void)opts; return 0; }
 int wattr_off(WINDOW *w, attr_t a, void *opts) { (void)w;(void)a;(void)opts; return 0; }
+/* wattron/wattroff adalah macro di ncurses → sudah di-#undef di atas,
+   jadi stub berikut aman pakai int (bukan fungsi nyata). */
 int wattron(WINDOW *w, int a) { (void)w;(void)a; return 0; }
 int wattroff(WINDOW *w, int a) { (void)w;(void)a; return 0; }
 int wmove(WINDOW *w, int y, int x) { (void)w;(void)y;(void)x; return 0; }
 int waddch(WINDOW *w, chtype ch) { (void)w;(void)ch; return 0; }
 int waddnstr(WINDOW *w, const char *s, int n) { (void)w;(void)s;(void)n; return 0; }
-int waddstr(WINDOW *w, const char *s) { (void)w;(void)s; return 0; }
+/* waddstr adalah macro di ncurses (→ waddnstr(w,s,-1)); jangan definisikan ulang. */
 int wprintw(WINDOW *w, const char *fmt, ...) { (void)w;(void)fmt; return 0; }
 int mvwprintw(WINDOW *w, int y, int x, const char *fmt, ...) { (void)w;(void)y;(void)x;(void)fmt; return 0; }
 int wrefresh(WINDOW *w) { (void)w; return 0; }
