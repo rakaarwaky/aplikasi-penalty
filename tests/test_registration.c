@@ -14,9 +14,8 @@ static void test_empty_name(void) {
 static void test_name_too_long(void) {
     CompetitionState state = {0};
     state.state = STATE_INIT;
-    ParticipantNameVO name;
+    ParticipantNameVO name = {{0}};
     memset(name.value, 'A', 31);
-    name.value[31] = '\0';
     assert(capabilities_registration_validate_name(&state, &name) == REG_NAME_TOO_LONG);
     printf("  [PASS] test_name_too_long\n");
 }

@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Aplikasi Perhitungan Penalty
+Comment=Lomba Tendangan Penalti (TUI)
+Exec=gnome-terminal -- bash -c 'dir="$(cd "$(dirname "%k")" && pwd)"; "$dir/aplikasi_perhitungan_penalty"; echo; echo "Tekan Enter untuk keluar..."; read'
+Terminal=false
+Type=Application
+Categories=Game;
+Icon=utilities-terminal

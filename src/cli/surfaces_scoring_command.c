@@ -55,17 +55,14 @@ void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state
                      part->kick_count + 1, TOTAL_KICKS, part->total_score);
             attroff(COLOR_PAIR(COLOR_MENU));
 
-            /* Show previous kicks */
             int k;
-            int row = 7;
             attron(COLOR_PAIR(COLOR_MENU));
-            mvprintw(row, 4, "Riwayat: ");
+            mvprintw(7, 4, "Riwayat: ");
             for (k = 0; k < part->kick_count; k++) {
                 printw("Z%d ", part->kicks[k]);
             }
             attroff(COLOR_PAIR(COLOR_MENU));
 
-            /* Input zone */
             attron(COLOR_PAIR(COLOR_MENU));
             mvprintw(9, 4, "Masukkan zona (0-%d): ", MAX_ZONE);
             attroff(COLOR_PAIR(COLOR_MENU));
@@ -73,8 +70,13 @@ void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state
 
             ZoneVO z;
             if (read_zone(&z) != SC_OK || z.value < MIN_ZONE || z.value > MAX_ZONE) {
+                tui_clear();
+                attron(COLOR_PAIR(COLOR_TITLE) | A_BOLD);
+                tui_print_centered(1, "INPUT TENDANGAN DAN SKOR");
+                attroff(COLOR_PAIR(COLOR_TITLE) | A_BOLD);
+                tui_box(3, 2, 56, 12);
                 attron(COLOR_PAIR(COLOR_ERROR));
-                mvprintw(11, 4, "[GAGAL] Zona harus %d-%d.        ", MIN_ZONE, MAX_ZONE);
+                mvprintw(9, 4, "[GAGAL] Zona harus %d-%d.        ", MIN_ZONE, MAX_ZONE);
                 attroff(COLOR_PAIR(COLOR_ERROR));
                 refresh();
                 tui_getch();
@@ -82,24 +84,28 @@ void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state
             }
 
             ScoringError e = agent_scoring_record(agg, state, p, z);
+            tui_clear();
+            attron(COLOR_PAIR(COLOR_TITLE) | A_BOLD);
+            tui_print_centered(1, "INPUT TENDANGAN DAN SKOR");
+            attroff(COLOR_PAIR(COLOR_TITLE) | A_BOLD);
+            tui_box(3, 2, 56, 12);
             if (e == SC_OK) {
                 attron(COLOR_PAIR(COLOR_SUCCESS));
-                mvprintw(11, 4, "Zona %d -> %d poin               ", z.value, z.value);
+                mvprintw(9, 4, "Zona %d -> %d poin               ", z.value, z.value);
                 attroff(COLOR_PAIR(COLOR_SUCCESS));
             } else if (e == SC_INVALID_ZONE) {
                 attron(COLOR_PAIR(COLOR_ERROR));
-                mvprintw(11, 4, "[GAGAL] Zona harus %d-%d.        ", MIN_ZONE, MAX_ZONE);
+                mvprintw(9, 4, "[GAGAL] Zona harus %d-%d.        ", MIN_ZONE, MAX_ZONE);
                 attroff(COLOR_PAIR(COLOR_ERROR));
             } else {
                 attron(COLOR_PAIR(COLOR_ERROR));
-                mvprintw(11, 4, "[GAGAL] Kesalahan pencatatan.    ");
+                mvprintw(9, 4, "[GAGAL] Kesalahan pencatatan.    ");
                 attroff(COLOR_PAIR(COLOR_ERROR));
             }
             refresh();
             tui_getch();
         }
 
-        /* Show completion for this participant */
         tui_clear();
         attron(COLOR_PAIR(COLOR_SUCCESS) | A_BOLD);
         mvprintw(5, 4, "[SELESAI] %s — Total: %d poin",
@@ -109,7 +115,6 @@ void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state
         tui_getch();
     }
 
-    /* All done */
     tui_clear();
     if (state->state == STATE_COMPLETED) {
         attron(COLOR_PAIR(COLOR_SUCCESS) | A_BOLD);

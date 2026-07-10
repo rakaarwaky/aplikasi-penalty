@@ -1,7 +1,7 @@
 # Makefile untuk C-AES Penalty Shootout (C99, AES v3.0)
 CC      ?= gcc
 CFLAGS  ?= -std=c99 -Wall -Wextra -Wpedantic -O2 -g
-TARGET  := penalty_shootout
+TARGET  := aplikasi_perhitungan_penalty
 
 SRC_DIR   := src
 BUILD_DIR := build

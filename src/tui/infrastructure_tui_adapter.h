@@ -1,7 +1,11 @@
 #ifndef INFRASTRUCTURE_TUI_ADAPTER_H
 #define INFRASTRUCTURE_TUI_ADAPTER_H
 
-#include <ncurses.h>
+#ifdef _WIN32
+#include <curses.h>   /* PDCurses di Windows */
+#else
+#include <ncurses.h>  /* ncurses di Linux */
+#endif
 
 /* ncurses initialization and teardown */
 void tui_init(void);

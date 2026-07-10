@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build penalty_shootout untuk distribusi Linux (dynamic, ncurses shared).
+# Build aplikasi_perhitungan_penalty untuk distribusi Linux (dynamic, ncurses shared).
 # ncurses sudah ada di hampir semua distro Linux -> user tak perlu install apa-apa.
 set -e
 
@@ -10,8 +10,8 @@ gcc -std=c99 -O2 \
   -I src -I src/shared -I src/registration -I src/scoring \
   -I src/ranking -I src/search -I src/recap -I src/cli -I src/tui \
   $(pkg-config --libs ncurses) \
-  -o penalty_shootout
+  -o aplikasi_perhitungan_penalty
 
-echo "Build selesai: ./penalty_shootout"
+echo "Build selesai: ./aplikasi_perhitungan_penalty"
 echo "Cek dependensi:"
-ldd penalty_shootout | grep -i ncurses || echo "(ncurses ter-link static? bukan)"
+ldd aplikasi_perhitungan_penalty | grep -i ncurses || echo "(ncurses ter-link static? bukan)"

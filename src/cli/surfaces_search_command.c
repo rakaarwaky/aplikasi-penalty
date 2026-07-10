@@ -42,8 +42,9 @@ void cli_surfaces_search_execute(SearchAggregate *agg, CompetitionState *state) 
         buffer[--len] = '\0';
 
     if (len == 0) {
+        tui_clear();
         attron(COLOR_PAIR(COLOR_ERROR));
-        mvprintw(7, 4, "[GAGAL] Nama pencarian kosong.");
+        tui_print_centered(10, "[GAGAL] Nama pencarian kosong.");
         attroff(COLOR_PAIR(COLOR_ERROR));
         refresh();
         tui_getch();
@@ -57,30 +58,38 @@ void cli_surfaces_search_execute(SearchAggregate *agg, CompetitionState *state) 
     SearchResultVO r;
     SearchError e = agent_search_find(agg, state, &name, &r);
 
+    tui_clear();
+
+    attron(COLOR_PAIR(COLOR_TITLE) | A_BOLD);
+    tui_print_centered(1, "HASIL PENCARIAN");
+    attroff(COLOR_PAIR(COLOR_TITLE) | A_BOLD);
+
+    tui_box(3, 2, 56, 14);
+
     if (e == SR_OK) {
         attron(COLOR_PAIR(COLOR_SUCCESS) | A_BOLD);
-        mvprintw(7, 4, "[DITEMUKAN]");
+        mvprintw(4, 4, "[DITEMUKAN]");
         attroff(COLOR_PAIR(COLOR_SUCCESS) | A_BOLD);
 
         attron(COLOR_PAIR(COLOR_MENU));
-        mvprintw(9, 4, "Nama       : %s", r.name);
-        mvprintw(10, 4, "Total Skor : %d", r.total_score);
-        mvprintw(11, 4, "Tendangan  : ");
+        mvprintw(6, 4, "Nama       : %s", r.name);
+        mvprintw(7, 4, "Total Skor : %d", r.total_score);
+        mvprintw(8, 4, "Tendangan  : ");
         int k;
         for (k = 0; k < TOTAL_KICKS; k++) printw("%d ", r.kicks[k]);
         printw("\n");
-        mvprintw(12, 4, "Zona       : ");
+        mvprintw(9, 4, "Zona       : ");
         int z;
         for (z = 0; z <= MAX_ZONE; z++) printw("Z%d:%d ", z, r.zone_freq[z]);
         attroff(COLOR_PAIR(COLOR_MENU));
     } else {
         attron(COLOR_PAIR(COLOR_ERROR));
-        mvprintw(7, 4, "Peserta '%s' tidak ditemukan.", buffer);
+        mvprintw(6, 4, "Peserta '%s' tidak ditemukan.", buffer);
         attroff(COLOR_PAIR(COLOR_ERROR));
     }
 
     attron(COLOR_PAIR(COLOR_MENU));
-    mvprintw(15, 4, "Tekan Enter untuk kembali...");
+    mvprintw(11, 4, "Tekan Enter untuk kembali...");
     attroff(COLOR_PAIR(COLOR_MENU));
     refresh();
     tui_getch();

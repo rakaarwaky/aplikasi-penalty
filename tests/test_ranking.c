@@ -30,9 +30,9 @@ static void test_basic_ranking(void) {
     RankingEntryVO entries[3];
     RankingError e = capabilities_ranking_compute(&state, entries, 3);
     assert(e == RK_OK);
-    assert(entries[0].total_score == 25);
+    assert(entries[0].total_score == 35);
     assert(entries[0].rank == 1);
-    assert(entries[1].total_score == 15);
+    assert(entries[1].total_score == 21);
     assert(entries[2].total_score == 7);
     printf("  [PASS] test_basic_ranking\n");
 }

@@ -1,5 +1,10 @@
 #include "infrastructure_tui_adapter.h"
-#include <ncurses.h>
+
+#ifdef _WIN32
+#include <curses.h>   /* PDCurses di Windows */
+#else
+#include <ncurses.h>  /* ncurses di Linux */
+#endif
 #include <string.h>
 
 void tui_init(void) {
@@ -25,8 +30,7 @@ void tui_end(void) {
 }
 
 void tui_clear(void) {
-    clear();
-    refresh();
+    erase();
 }
 
 void tui_print(int row, int col, const char *text) {

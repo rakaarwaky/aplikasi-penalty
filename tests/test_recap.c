@@ -8,9 +8,8 @@
 static void test_recap_not_ready(void) {
     CompetitionState state = {0};
     state.state = STATE_INIT;
-    RankingEntryVO ranking[1];
     SearchResultVO details[1];
-    assert(capabilities_recap_prepare(&state, ranking, details, 1) == RC_NOT_READY);
+    assert(capabilities_recap_prepare_details(&state, details, 1) == RC_NOT_READY);
     printf("  [PASS] test_recap_not_ready\n");
 }
 
@@ -31,12 +30,10 @@ static void test_recap_ready(void) {
         }
     }
 
-    RankingEntryVO ranking[MAX_PARTICIPANTS];
     SearchResultVO details[MAX_PARTICIPANTS];
-    RecapError e = capabilities_recap_prepare(&state, ranking, details, MAX_PARTICIPANTS);
+    RecapError e = capabilities_recap_prepare_details(&state, details, MAX_PARTICIPANTS);
     assert(e == RC_OK);
-    /* Highest score should be first */
-    assert(ranking[0].total_score >= ranking[1].total_score);
+    assert(details[0].found == 1);
     printf("  [PASS] test_recap_ready\n");
 }
 

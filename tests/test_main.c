@@ -11,9 +11,6 @@ int main(void) {
     printf("  UNIT TESTS — C-AES Penalty Shootout\n");
     printf("========================================\n\n");
 
-    int passed = 0;
-    int failed = 0;
-
     run_registration_tests();
     run_scoring_tests();
     run_ranking_tests();

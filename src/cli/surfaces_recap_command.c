@@ -36,12 +36,10 @@ void cli_surfaces_recap_execute(RecapAggregate *agg, CompetitionState *state) {
 
     tui_box(3, 1, 64, state->participant_count + 4);
 
-    /* Header */
     attron(COLOR_PAIR(COLOR_HIGHLIGHT));
     mvprintw(4, 2, "%-4s %-24s %-6s %s", "Rank", "Nama", "Skor", "Zona(0 1 2 3 4 5)");
     attroff(COLOR_PAIR(COLOR_HIGHLIGHT));
 
-    /* Entries */
     int i;
     for (i = 0; i < state->participant_count; i++) {
         const RankingEntryVO *r = &ranking[i];

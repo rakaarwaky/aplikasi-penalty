@@ -18,7 +18,6 @@ static void show_error(RegistrationError e) {
     attron(COLOR_PAIR(COLOR_ERROR));
     mvprintw(20, 4, "[GAGAL] %s          ", msg);
     attroff(COLOR_PAIR(COLOR_ERROR));
-    refresh();
 }
 
 void cli_surfaces_registration_execute(RegistrationAggregate *agg, CompetitionState *state) {
@@ -44,6 +43,8 @@ void cli_surfaces_registration_execute(RegistrationAggregate *agg, CompetitionSt
         attroff(COLOR_PAIR(COLOR_SUCCESS));
     }
 
+    refresh();
+
     int row = 7 + state->participant_count + 1;
     char buffer[64];
     while (state->participant_count < MAX_PARTICIPANTS) {
@@ -66,6 +67,7 @@ void cli_surfaces_registration_execute(RegistrationAggregate *agg, CompetitionSt
         if (len == 0) {
             if (state->participant_count >= MIN_PARTICIPANTS) break;
             show_error(REG_TOO_FEW);
+            refresh();
             continue;
         }
 
@@ -78,6 +80,7 @@ void cli_surfaces_registration_execute(RegistrationAggregate *agg, CompetitionSt
         if (strcmp(lower, "selesai") == 0) {
             if (state->participant_count >= MIN_PARTICIPANTS) break;
             show_error(REG_TOO_FEW);
+            refresh();
             continue;
         }
 
@@ -94,6 +97,7 @@ void cli_surfaces_registration_execute(RegistrationAggregate *agg, CompetitionSt
         } else {
             show_error(e);
         }
+        refresh();
     }
 
     attron(COLOR_PAIR(COLOR_MENU));
