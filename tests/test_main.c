@@ -1,0 +1,28 @@
+#include <stdio.h>
+
+extern void run_registration_tests(void);
+extern void run_scoring_tests(void);
+extern void run_ranking_tests(void);
+extern void run_search_tests(void);
+extern void run_recap_tests(void);
+
+int main(void) {
+    printf("========================================\n");
+    printf("  UNIT TESTS — C-AES Penalty Shootout\n");
+    printf("========================================\n\n");
+
+    int passed = 0;
+    int failed = 0;
+
+    run_registration_tests();
+    run_scoring_tests();
+    run_ranking_tests();
+    run_search_tests();
+    run_recap_tests();
+
+    printf("========================================\n");
+    printf("  ALL TESTS PASSED!\n");
+    printf("========================================\n");
+
+    return 0;
+}

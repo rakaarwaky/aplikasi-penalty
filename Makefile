@@ -17,7 +17,24 @@ INCLUDES := -I$(SRC_DIR) -I$(SRC_DIR)/shared \
 
 LDFLAGS  := -lncurses
 
-.PHONY: all clean run
+# Test
+TEST_DIR   := tests
+TEST_SRCS  := $(wildcard $(TEST_DIR)/*.c)
+TEST_INC   := -I$(SRC_DIR) -I$(SRC_DIR)/shared \
+              -I$(SRC_DIR)/registration -I$(SRC_DIR)/scoring \
+              -I$(SRC_DIR)/ranking -I$(SRC_DIR)/search \
+              -I$(SRC_DIR)/recap
+TEST_LIB_SRC := $(filter-out $(SRC_DIR)/root_cli_main_entry.c \
+                  $(SRC_DIR)/cli/surfaces_menu_command.c \
+                  $(SRC_DIR)/cli/surfaces_registration_command.c \
+                  $(SRC_DIR)/cli/surfaces_scoring_command.c \
+                  $(SRC_DIR)/cli/surfaces_ranking_command.c \
+                  $(SRC_DIR)/cli/surfaces_search_command.c \
+                  $(SRC_DIR)/cli/surfaces_recap_command.c \
+                  $(SRC_DIR)/tui/infrastructure_tui_adapter.c, $(C_SOURCES))
+TEST_BIN   := run_tests
+
+.PHONY: all clean run test
 
 all: $(TARGET)
 
@@ -31,5 +48,11 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 run: $(TARGET)
 	./$(TARGET)
 
+test: $(TEST_BIN)
+	./$(TEST_BIN)
+
+$(TEST_BIN): $(TEST_LIB_SRC) $(TEST_SRCS)
+	$(CC) $(CFLAGS) $(TEST_INC) -o $@ $^
+
 clean:
-	rm -rf $(BUILD_DIR) $(TARGET)
+	rm -rf $(BUILD_DIR) $(TARGET) $(TEST_BIN)
