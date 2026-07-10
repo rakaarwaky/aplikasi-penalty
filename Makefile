@@ -14,12 +14,14 @@ INCLUDES := -I$(SRC_DIR) -I$(SRC_DIR)/shared \
             -I$(SRC_DIR)/ranking -I$(SRC_DIR)/search \
             -I$(SRC_DIR)/recap -I$(SRC_DIR)/cli
 
+LDFLAGS  := -lncurses
+
 .PHONY: all clean run
 
 all: $(TARGET)
 
 $(TARGET): $(C_OBJECTS)
-	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $(C_OBJECTS)
+	$(CC) $(CFLAGS) -o $@ $(C_OBJECTS) $(LDFLAGS)
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 	@mkdir -p $(dir $@)

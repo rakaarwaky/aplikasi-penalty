@@ -19,11 +19,13 @@ Fitur utama: pendaftaran peserta, pencatatan tendangan, kalkulasi skor, penentua
 Proyek menggunakan **AES v3.0** (Agentic Engineering System) yang diadaptasi ke C, dengan pendekatan *feature-based vertical slicing* dan 7 lapisan terstruktur.
 
 **Arah dependency (bottom-up):**
+
 ```
 taxonomy → contract → capabilities / infrastructure → agent → surface → root (wiring only)
 ```
 
 > **Catatan:** Urutan di atas adalah **arah dependency**, bukan urutan eksekusi atau hierarki kontrol.
+>
 > - `root_*_entry.c` adalah titik masuk eksekusi yang berada di puncak kode (dipanggil pertama oleh OS).
 > - `root_*_container.c` ada di setiap folder fitur sebagai tempat perakitan (wiring) layer — bukan lapisan domain.
 > - Layer `root` **tidak berisi** business logic apa pun; ia hanya merakit dan menghubungkan semua layer di atasnya.
@@ -49,19 +51,19 @@ src/
 
 Semua kode **wajib** mematuhi aturan AES yang mencakup:
 
-| Kelompok | Kode Aturan | Topik |
-|----------|-------------|-------|
-| Naming   | AES101, AES102 | Konvensi nama file dan suffix per layer |
-| Import   | AES201–AES205  | Batas dependency antar layer, larangan circular import |
-| Quality  | AES301–AES305  | Batas ukuran file, mandatory definition, bypass comment |
-| Role     | AES401–AES406  | Penegakan peran tiap layer (taxonomy, contract, capabilities, dst.) |
-| Orphan   | AES501–AES506  | Deteksi kode yang tidak terhubung ke graph import |
+| Kelompok | Kode Aturan    | Topik                                                               |
+| -------- | -------------- | ------------------------------------------------------------------- |
+| Naming   | AES101, AES102 | Konvensi nama file dan suffix per layer                             |
+| Import   | AES201–AES205 | Batas dependency antar layer, larangan circular import              |
+| Quality  | AES301–AES305 | Batas ukuran file, mandatory definition, bypass comment             |
+| Role     | AES401–AES406 | Penegakan peran tiap layer (taxonomy, contract, capabilities, dst.) |
+| Orphan   | AES501–AES506 | Deteksi kode yang tidak terhubung ke graph import                   |
 
 > **Baca selengkapnya:** [`RULES_AES.md`](RULES_AES.md) — definisi lengkap setiap kode aturan, severity, dan cara memperbaikinya.
 
 ---
 
-## 4. Instruksi untuk AI Agent
+## 4. Instruksi untuk Developer
 
 Sebelum menulis atau memodifikasi kode, lakukan langkah berikut:
 
@@ -86,8 +88,8 @@ Sebelum menulis atau memodifikasi kode, lakukan langkah berikut:
 
 ## 6. Dokumen Rujukan
 
-| Dokumen | Isi |
-|---------|-----|
-| [`PRD.md`](PRD.md) | Requirement produk, aturan bisnis, state machine, library yang diizinkan |
+| Dokumen                               | Isi                                                                             |
+| ------------------------------------- | ------------------------------------------------------------------------------- |
+| [`PRD.md`](PRD.md)                   | Requirement produk, aturan bisnis, state machine, library yang diizinkan        |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | Definisi layer AES, naming convention, diagram dependency, contoh struktur file |
-| [`RULES_AES.md`](RULES_AES.md) | Seluruh kode aturan AES beserta severity dan cara perbaikan |
+| [`RULES_AES.md`](RULES_AES.md)       | Seluruh kode aturan AES beserta severity dan cara perbaikan                     |
