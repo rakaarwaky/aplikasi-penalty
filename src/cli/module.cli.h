@@ -4,11 +4,20 @@
 #ifndef MODULE_CLI_H
 #define MODULE_CLI_H
 
-#include "shared/contract_registration_aggregate.h"
-#include "shared/contract_scoring_aggregate.h"
-#include "shared/contract_ranking_aggregate.h"
-#include "shared/contract_search_aggregate.h"
-#include "shared/contract_recap_aggregate.h"
+/* Feature module: deklarasi capabilities/agent/root tiap fitur.
+   Termasuk shared contract (aggregate) sehingga type aggregate & fungsi
+   agent terlihat oleh seluruh surface. */
+#include "registration/module.registration.h"
+#include "scoring/module.scoring.h"
+#include "ranking/module.ranking.h"
+#include "search/module.search.h"
+#include "recap/module.recap.h"
+
+/* Menu surfaces — TUI main loop */
+int cli_surfaces_menu_run(RegistrationAggregate *reg,
+                          ScoringAggregate *sc, RankingAggregate *rk,
+                          SearchAggregate *sr, RecapAggregate *rc,
+                          CompetitionState *state);
 
 /* Feature surfaces */
 void cli_surfaces_registration_execute(RegistrationAggregate *agg, CompetitionState *state);
