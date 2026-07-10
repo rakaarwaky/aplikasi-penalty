@@ -59,11 +59,24 @@ run: $(TARGET)
 test: $(TEST_BIN)
 	./$(TEST_BIN)
 
+# Coverage: bangun test dengan instrumentasi --coverage, jalankan, lalu
+# pindahkan semua artefak (.gcno/.gcda) ke folder coverage/ agar tidak
+# berserakan di root. jalankan gcov dari dalam coverage/ untuk ringkasan.
+COV_DIR := coverage
+coverage: CFLAGS += --coverage
+coverage: LDFLAGS += --coverage
+coverage: $(TEST_BIN)
+	@mkdir -p $(COV_DIR)
+	./$(TEST_BIN)
+	@mv -f run_tests-*.gcno run_tests-*.gcda $(COV_DIR)/ 2>/dev/null || true
+	@cd $(COV_DIR) && for f in run_tests-*.gcno; do gcov -n "$$f" >/dev/null 2>&1; done
+	@echo "Coverage artefacts in ./$(COV_DIR)/ — jalankan: cd $(COV_DIR) && gcov run_tests-*.gcno"
+
 $(TEST_BIN): $(TEST_LIB_SRC) $(TEST_SRCS)
 	$(CC) $(CFLAGS) $(TEST_INC) -o $@ $^ $(LDFLAGS)
 
 clean:
-	rm -rf $(BUILD_DIR) $(TARGET) $(TEST_BIN)
+	rm -rf $(BUILD_DIR) $(TARGET) $(TEST_BIN) $(COV_DIR)
 
 # Lint (cppcheck)
 lint:
