@@ -8,7 +8,8 @@ Pipeline:
 import base64, re, os, subprocess, tempfile, shutil
 
 SRC = 'Laporan-Project.md'
-OUT = 'Laporan-Project.pdf'
+# Export PDF ke direktori induk proyek (sesuai permintaan).
+OUT = '/home/raka/Study/PengantarCoding/Laporan-Project.pdf'
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)  # project root (scripts/ is one level down)
 os.chdir(ROOT)
