@@ -36,10 +36,13 @@ void cli_surfaces_recap_execute(RecapAggregate *agg, CompetitionState *state) {
 
     tui_clear();
 
+    /* Breadcrumb */
+    tui_print_centered_colored(0, "Menu Utama > Rekapitulasi Lengkap", COLOR_DIM, 0);
+
     /* Judul dengan dekorasi */
-    tui_print_centered_colored(0, "============================================", COLOR_GOLD, 1);
-    tui_print_centered_colored(1, "REKAPITULASI LENGKAP", COLOR_TITLE, 1);
-    tui_print_centered_colored(2, "============================================", COLOR_GOLD, 1);
+    tui_print_centered_colored(1, "============================================", COLOR_GOLD, 1);
+    tui_print_centered_colored(2, "REKAPITULASI LENGKAP", COLOR_TITLE, 1);
+    tui_print_centered_colored(3, "============================================", COLOR_GOLD, 1);
 
     /* Dimensi & bingkai */
     int box_col = 1;
@@ -72,17 +75,20 @@ void cli_surfaces_recap_execute(RecapAggregate *agg, CompetitionState *state) {
 
         attron(COLOR_PAIR(row_color) | (r->rank <= 3 ? A_BOLD : 0));
         mvprintw(row, box_col + 2, " %-4d %-22s %-6d ", r->rank, d->name, d->total_score);
+        attroff(COLOR_PAIR(row_color) | (r->rank <= 3 ? A_BOLD : 0));
+
+        /* B2: Cetak frekuensi zona dengan warna — zona 5 hijau, zona 0 merah, lainnya normal. */
         int z;
         for (z = 0; z <= MAX_ZONE; z++) {
-            int zc = COLOR_DIM;
-            if (z == 5) zc = COLOR_SUCCESS;
-            else if (z == 0) zc = COLOR_ERROR;
-            else if (z == 4) zc = COLOR_WARNING;
-            attron(COLOR_PAIR(zc) | (r->rank <= 3 ? A_BOLD : 0));
+            int zcolor;
+            if (z == MAX_ZONE)  zcolor = COLOR_SUCCESS;
+            else if (z == 0)    zcolor = COLOR_ERROR;
+            else                zcolor = COLOR_MENU;
+            int zbold = (z == MAX_ZONE) ? A_BOLD : 0;
+            attron(COLOR_PAIR(zcolor) | zbold);
             printw("%d ", d->zone_freq[z]);
-            attroff(COLOR_PAIR(zc) | (r->rank <= 3 ? A_BOLD : 0));
+            attroff(COLOR_PAIR(zcolor) | zbold);
         }
-        attroff(COLOR_PAIR(row_color) | (r->rank <= 3 ? A_BOLD : 0));
 
         /* Garis pemisah antar baris */
         if (i < state->participant_count - 1) {

@@ -1,8 +1,15 @@
 #!/usr/bin/env python3
-"""Export a selected feature crate into a single consolidated Markdown file.
+"""Export a selected AES feature directory into a single consolidated Markdown file.
 
-The output includes the crate's own source, its Cargo.toml, and any shared
-crate modules transitively reachable through `shared::...` import paths.
+Proyek ini menggunakan arsitektur C99 AES (Agentic Engineering System).
+Feature directories berada di src/<feature>/ dengan konvensi penamaan:
+  [layer]_[konsep]_[suffix].[c|h]
+
+Output mencakup:
+  - Semua file C/H dalam feature directory yang dipilih
+  - File shared yang di-#include dari feature tersebut
+  - Header module.<feature>.h jika ada
+  - Output lint scan jika lint-arwaky-cli tersedia
 """
 
 import re
@@ -10,286 +17,266 @@ import subprocess
 import sys
 from pathlib import Path
 
-CARGO_TOML = "Cargo.toml"
-VERSION_PATTERN = re.compile(
-    r'(?m)^\[package\].*?^version\s*=\s*"([^"]+)"', re.MULTILINE | re.DOTALL
-)
-WORKSPACE_VERSION_PATTERN = re.compile(
-    r"(?m)^\[package\].*?version\.workspace\s*=\s*true", re.MULTILINE | re.DOTALL
-)
-DECL_PATTERN = re.compile(
-    r"\bpub(?:\([^)]+\))?\s+(struct|enum|trait|type|fn|const|static|mod)\s+(\w+)"
-)
-MACRO_PATTERN = re.compile(r"\bmacro_rules!\s+(\w+)")
-SHARED_PATH_PATTERN = re.compile(r"\bshared::([a-zA-Z0-9_:]+)")
+# ---------------------------------------------------------------------------
+# Konstanta & pola regex
+# ---------------------------------------------------------------------------
 
-# Sanitize version strings to a safe filename fragment (CWE-22 mitigation).
+# Layer prefix AES yang valid (dipakai untuk deteksi file AES)
+AES_LAYER_PREFIXES = (
+    "taxonomy_",
+    "contract_",
+    "capabilities_",
+    "infrastructure_",
+    "agent_",
+    "surfaces_",
+    "root_",
+    "module.",
+)
+
+# Ekstensi file yang akan dikumpulkan dari feature directory
+C_EXTENSIONS = {".c", ".h"}
+
+# Pola #include "shared/..." atau #include "../shared/..."
+INCLUDE_SHARED_PATTERN = re.compile(
+    r'#\s*include\s+"(?:\.\./)*shared/([^"]+)"'
+)
+
+# Sanitasi versi untuk nama file (CWE-22 mitigation)
 SAFE_VERSION_CHARS = re.compile(r"[^0-9A-Za-z.\-]")
 
 
+# ---------------------------------------------------------------------------
+# Resolusi workspace
+# ---------------------------------------------------------------------------
+
 def resolve_workspace() -> tuple[Path, Path, Path]:
-    """Return (workspace_root, crates_dir, docs_finding_dir). Exit on missing crates/."""
+    """Kembalikan (workspace_root, src_dir, docs_finding_dir).
+
+    Keluar dengan error jika direktori src/ tidak ditemukan.
+    """
     workspace_root = Path(__file__).resolve().parent.parent
-    crates_dir = workspace_root / "crates"
+    src_dir = workspace_root / "src"
     docs_finding_dir = workspace_root / ".agents" / "finding"
 
-    if not crates_dir.exists():
-        print(f"Error: 'crates' directory not found at {crates_dir}", file=sys.stderr)
+    if not src_dir.exists():
+        print(
+            f"Error: direktori 'src' tidak ditemukan di {src_dir}",
+            file=sys.stderr,
+        )
         sys.exit(1)
-    return workspace_root, crates_dir, docs_finding_dir
+
+    return workspace_root, src_dir, docs_finding_dir
 
 
-def list_feature_crates(crates_dir: Path) -> list[str]:
-    """Sorted list of crate directory names that contain a Cargo.toml."""
-    feature_crates = []
-    for entry in crates_dir.iterdir():
-        if entry.is_dir() and (entry / CARGO_TOML).exists():
-            feature_crates.append(entry.name)
-    return sorted(feature_crates)
+# ---------------------------------------------------------------------------
+# Listing feature
+# ---------------------------------------------------------------------------
+
+def list_feature_dirs(src_dir: Path) -> list[str]:
+    """Daftar subdirektori src/ yang berisi minimal satu file .c atau .h."""
+    features: list[str] = []
+    for entry in src_dir.iterdir():
+        if not entry.is_dir():
+            continue
+        has_source = any(
+            f.suffix in C_EXTENSIONS
+            for f in entry.iterdir()
+            if f.is_file()
+        )
+        if has_source:
+            features.append(entry.name)
+    return sorted(features)
 
 
-def prompt_crate(feature_crates: list[str]) -> str:
-    """Show numbered list, prompt for selection, return the chosen crate name."""
-    print("Available feature crates:")
-    for i, name in enumerate(feature_crates, 1):
-        print(f"{i:2d}) {name}")
+# ---------------------------------------------------------------------------
+# Prompt pemilihan feature
+# ---------------------------------------------------------------------------
+
+def prompt_feature(features: list[str]) -> str:
+    """Tampilkan daftar bernomor, minta pilihan, kembalikan nama feature."""
+    print("Feature directory yang tersedia:")
+    for i, name in enumerate(features, 1):
+        print(f"  {i:2d}) {name}")
     print()
 
     while True:
         try:
             choice = input(
-                f"Select a crate (1-{len(feature_crates)}) or 'q' to quit: "
+                f"Pilih feature (1-{len(features)}) atau 'q' untuk keluar: "
             ).strip()
         except (EOFError, KeyboardInterrupt):
-            print("\nExiting.")
+            print("\nKeluar.")
             sys.exit(0)
 
         if choice.lower() == "q":
-            print("Exiting.")
+            print("Keluar.")
             sys.exit(0)
 
         try:
             idx = int(choice) - 1
         except ValueError:
-            print("Error: Invalid input. Please enter a valid number or 'q'.")
+            print("Error: Input tidak valid. Masukkan angka atau 'q'.")
             continue
 
-        if 0 <= idx < len(feature_crates):
-            return feature_crates[idx]
-        print(f"Error: Please choose a number between 1 and {len(feature_crates)}.")
+        if 0 <= idx < len(features):
+            return features[idx]
+
+        print(f"Error: Pilih angka antara 1 dan {len(features)}.")
 
 
-def read_crate_version(crate_path: Path, fallback: str = "0.1.0") -> str:
-    cargo_toml_path = crate_path / CARGO_TOML
-    if not cargo_toml_path.exists():
-        return fallback
+# ---------------------------------------------------------------------------
+# Deteksi versi
+# ---------------------------------------------------------------------------
 
-    try:
-        content = cargo_toml_path.read_text(encoding="utf-8", errors="replace")
-    except OSError as e:
-        print(
-            f"Warning: Could not read {cargo_toml_path} ({e}). Defaulting to {fallback}."
-        )
-        return fallback
+def read_project_version(workspace_root: Path, fallback: str = "0.1.0") -> str:
+    """Baca versi proyek dari Makefile atau file VERSION.
 
-    if WORKSPACE_VERSION_PATTERN.search(content):
-        print(f"Note: Using workspace version for {crate_path.name}")
-        return "workspace"
+    Urutan pencarian:
+      1. Makefile — baris ``VERSION ?= x.y.z`` atau ``VERSION = x.y.z``
+      2. File VERSION di workspace root
+      3. fallback
+    """
+    makefile = workspace_root / "Makefile"
+    if makefile.exists():
+        try:
+            content = makefile.read_text(encoding="utf-8", errors="replace")
+            m = re.search(r"^VERSION\s*[\?:]?=\s*([^\s#]+)", content, re.MULTILINE)
+            if m:
+                return m.group(1).strip()
+        except OSError:
+            pass
 
-    in_package = False
-    for line in content.splitlines():
-        stripped = line.strip()
-        if stripped == "[package]":
-            in_package = True
-            continue
-        if stripped.startswith("[") and in_package:
-            in_package = False
-            continue
-        if in_package:
-            match = re.match(r'^version\s*=\s*"([^"]+)"', stripped)
-            if match:
-                return match.group(1)
+    version_file = workspace_root / "VERSION"
+    if version_file.exists():
+        try:
+            ver = version_file.read_text(encoding="utf-8").strip()
+            if ver:
+                return ver
+        except OSError:
+            pass
 
     return fallback
 
 
 def sanitize_version(version: str) -> str:
-    """CWE-22: strip any character that could escape the .agents/finding directory."""
+    """Hapus karakter yang bisa melarikan diri dari direktori output (CWE-22)."""
     safe = SAFE_VERSION_CHARS.sub("_", version)
     return safe or "0.0.0"
 
 
-def index_shared_module(
-    shared_src_dir: Path,
-) -> tuple[dict[str, list[Path]], dict[str, list[Path]]]:
-    module_to_files: dict[str, list[Path]] = {}
-    symbol_to_files: dict[str, list[Path]] = {}
+# ---------------------------------------------------------------------------
+# Indexing shared
+# ---------------------------------------------------------------------------
 
-    if not shared_src_dir.exists():
+def index_shared_dir(shared_dir: Path) -> dict[str, Path]:
+    """Buat peta {basename → Path} untuk semua file C/H di src/shared/.
+
+    Digunakan untuk meresolusi path nyata dari baris #include "shared/...".
+    """
+    index: dict[str, Path] = {}
+    if not shared_dir.exists():
         print(
-            "Warning: 'crates/shared/src' directory not found. Shared dependencies cannot be resolved."
+            "Warning: direktori 'src/shared' tidak ditemukan. "
+            "Dependensi shared tidak dapat diresolusi."
         )
-        return module_to_files, symbol_to_files
+        return index
 
-    print("Indexing shared crate for resolving dependencies...")
-    for f in shared_src_dir.rglob("*.rs"):
-        if f.name == "mod.rs":
-            mod_name = f.parent.name.replace("-", "_")
-        else:
-            mod_name = f.stem.replace("-", "_")
-        module_to_files.setdefault(mod_name, []).append(f)
-
-        try:
-            content = f.read_text(encoding="utf-8", errors="replace")
-        except OSError as e:
-            print(f"Warning: Failed to index file {f} ({e})")
-            continue
-
-        for match in DECL_PATTERN.finditer(content):
-            decl_type, decl_name = match.group(1), match.group(2)
-            if decl_type == "mod":
-                module_to_files.setdefault(decl_name, []).append(f)
-            else:
-                symbol_to_files.setdefault(decl_name, []).append(f)
-
-        for match in MACRO_PATTERN.finditer(content):
-            symbol_to_files.setdefault(match.group(1), []).append(f)
-
-    return module_to_files, symbol_to_files
+    for f in shared_dir.rglob("*"):
+        if f.is_file() and f.suffix in C_EXTENSIONS:
+            index[f.name] = f
+    return index
 
 
-def resolve_dependency_files(
-    components: list[str],
-    module_to_files: dict[str, list[Path]],
-    symbol_to_files: dict[str, list[Path]],
-) -> set[Path]:
-    resolved: set[Path] = set()
-    for comp in components:
-        if comp in module_to_files:
-            files = module_to_files[comp]
-            if len(files) == 1:
-                resolved.add(files[0])
-            else:
-                scored = _score_files(files, components)
-                scored.sort(key=lambda item: item[0], reverse=True)
-                if scored and scored[0][0] > 0:
-                    best_score = scored[0][0]
-                    resolved.update(f for score, f in scored if score == best_score)
-                else:
-                    resolved.add(files[0])
+# ---------------------------------------------------------------------------
+# Pengumpulan file feature
+# ---------------------------------------------------------------------------
 
-        if comp in symbol_to_files:
-            files = symbol_to_files[comp]
-            if len(files) == 1:
-                resolved.add(files[0])
-            else:
-                scored = _score_files(files, components)
-                scored.sort(key=lambda item: item[0], reverse=True)
-                if scored and scored[0][0] > 0:
-                    best_score = scored[0][0]
-                    resolved.update(f for score, f in scored if score == best_score)
-                else:
-                    resolved.add(files[0])
-    return resolved
-
-
-def _score_files(files: list[Path], components: list[str]) -> list[tuple[int, Path]]:
-    scored: list[tuple[int, Path]] = []
-    for f in files:
-        f_parts = [p.replace("-", "_") for p in f.parts]
-        score = 0
-        for i, c in enumerate(components):
-            if c in f_parts:
-                score += len(components) - i
-        scored.append((score, f))
-    return scored
-
-
-def collect_crate_files(crate_path: Path) -> set[Path]:
+def collect_feature_files(feature_dir: Path) -> set[Path]:
+    """Kumpulkan semua file .c dan .h (plus README/FRD) dari feature directory."""
     files: set[Path] = set()
-    src_dir = crate_path / "src"
-    important_files = {
-        CARGO_TOML,
-        "build.rs",
-        "README.md",
-        "FRD.md",
-        "LICENSE",
-        "LICENSE-MIT",
-        "LICENSE-APACHE",
-    }
+    important_extras = {"README.md", "FRD.md"}
 
-    for f in crate_path.iterdir():
-        if f.is_file() and f.name in important_files:
+    for f in feature_dir.iterdir():
+        if not f.is_file():
+            continue
+        if f.suffix in C_EXTENSIONS:
             files.add(f)
-
-    if src_dir.exists():
-        for f in src_dir.rglob("*"):
-            if f.is_file():
-                files.add(f)
+        elif f.name in important_extras:
+            files.add(f)
 
     return files
 
 
-def add_shared_feature_dir(
-    files: set[Path],
-    shared_src_dir: Path,
-    feature_dashed: str,
-) -> None:
-    """Add crates/shared/src/<feature>/**/*.rs when the per-feature folder exists."""
-    feature_dir = shared_src_dir / feature_dashed
-    if not (feature_dir.exists() and feature_dir.is_dir()):
-        return
-    for f in feature_dir.rglob("*.rs"):
-        if f.is_file():
-            files.add(f)
+# ---------------------------------------------------------------------------
+# Resolusi #include shared
+# ---------------------------------------------------------------------------
 
-
-def scan_shared_imports(
+def resolve_shared_includes(
     files: set[Path],
-    module_to_files: dict[str, list[Path]],
-    symbol_to_files: dict[str, list[Path]],
+    shared_index: dict[str, Path],
 ) -> set[Path]:
-    print("Scanning source files for imported shared dependencies...")
-    extra: set[Path] = set()
-    scanned: set[Path] = set()
+    """Scan file-file feature, temukan #include "shared/..." dan tambahkan ke set.
 
-    for f in files:
-        if f.suffix != ".rs" or f in scanned:
+    Transitive: jika file shared juga meng-include shared lainnya,
+    file tersebut turut ditambahkan.
+    """
+    print("Memindai #include shared dari file feature...")
+    resolved: set[Path] = set()
+    queue: list[Path] = list(files)
+    visited: set[Path] = set(files)
+
+    while queue:
+        current = queue.pop()
+        if current.suffix not in C_EXTENSIONS:
             continue
-        scanned.add(f)
         try:
-            content = f.read_text(encoding="utf-8", errors="replace")
+            content = current.read_text(encoding="utf-8", errors="replace")
         except OSError as e:
-            print(f"Warning: Failed to read file {f} for dependency analysis ({e})")
+            print(f"  Warning: Gagal membaca {current} ({e})")
             continue
-        for path_str in SHARED_PATH_PATTERN.findall(content):
-            components = path_str.split("::")
-            extra.update(
-                resolve_dependency_files(components, module_to_files, symbol_to_files)
-            )
-    return extra
+
+        for match in INCLUDE_SHARED_PATTERN.finditer(content):
+            included_name = Path(match.group(1)).name  # basename saja
+            target = shared_index.get(included_name)
+            if target and target not in visited:
+                visited.add(target)
+                resolved.add(target)
+                queue.append(target)  # transitive scan
+
+    if resolved:
+        print(f"  -> {len(resolved)} file shared ditemukan.")
+    else:
+        print("  -> Tidak ada dependensi shared ditemukan.")
+
+    return resolved
 
 
-def run_lint_scan(workspace_root: Path, crate_path: Path) -> str:
+# ---------------------------------------------------------------------------
+# Lint scan
+# ---------------------------------------------------------------------------
+
+def run_lint_scan(workspace_root: Path, feature_dir: Path) -> str:
+    """Jalankan lint-arwaky-cli scan pada feature directory jika tersedia."""
     import shutil
 
-    cli_bin = shutil.which("lint-arwaky-cli")
+    cli_bin: str | None = shutil.which("lint-arwaky-cli")
     if not cli_bin:
-        cli_bin_candidate = workspace_root / "target" / "release" / "lint-arwaky-cli"
-        if cli_bin_candidate.exists():
-            cli_bin = str(cli_bin_candidate)
-        else:
-            cli_bin_candidate = workspace_root / "target" / "debug" / "lint-arwaky-cli"
-            if cli_bin_candidate.exists():
-                cli_bin = str(cli_bin_candidate)
+        for build_type in ("release", "debug"):
+            candidate = workspace_root / "target" / build_type / "lint-arwaky-cli"
+            if candidate.exists():
+                cli_bin = str(candidate)
+                break
 
     if not cli_bin:
-        print("Warning: lint-arwaky-cli not found. Run install.local.sh first.")
+        print(
+            "Warning: lint-arwaky-cli tidak ditemukan. "
+            "Jalankan install.local.sh terlebih dahulu."
+        )
         return ""
 
     try:
         result = subprocess.run(
-            [cli_bin, "scan", str(crate_path)],
+            [cli_bin, "scan", str(feature_dir)],
             capture_output=True,
             text=True,
             timeout=120,
@@ -299,51 +286,100 @@ def run_lint_scan(workspace_root: Path, crate_path: Path) -> str:
         lines = [line.rstrip() for line in output.splitlines() if line.strip()]
         return "\n".join(lines) if lines else ""
     except subprocess.TimeoutExpired:
-        print("Warning: lint scan timed out after 120s.")
+        print("Warning: Lint scan timeout setelah 120s.")
         return ""
     except OSError as e:
-        print(f"Warning: Failed to run lint scan ({e}).")
+        print(f"Warning: Gagal menjalankan lint scan ({e}).")
         return ""
+
+
+# ---------------------------------------------------------------------------
+# Penulisan Markdown
+# ---------------------------------------------------------------------------
+
+def _language_for(path: Path) -> str:
+    """Kembalikan identifier bahasa untuk fenced code block berdasarkan ekstensi."""
+    if path.suffix in (".h", ".c"):
+        return "c"
+    if path.suffix == ".md":
+        return "markdown"
+    if path.name == "Makefile":
+        return "makefile"
+    return "text"
+
+
+def _aes_layer_of(path: Path) -> str:
+    """Deteksi layer AES dari nama file untuk dipakai sebagai label."""
+    name = path.name
+    for prefix in AES_LAYER_PREFIXES:
+        if name.startswith(prefix):
+            return prefix.rstrip("_.").rstrip("_")
+    return "unknown"
 
 
 def write_markdown(
     output_path: Path,
-    sorted_files: list[Path],
+    feature_name: str,
+    all_files: list[Path],
+    sorted_feature: list[Path],
+    sorted_shared: list[Path],
     workspace_root: Path,
-    selected_crate: str,
     safe_version: str,
     lint_output: str,
 ) -> None:
+    """Tulis consolidated Markdown ke output_path."""
     with open(output_path, "w", encoding="utf-8") as out:
-        out.write(f"# Crate: {selected_crate} (v{safe_version})\n\n")
+        # --- Header ---
+        out.write(f"# Feature: `{feature_name}` (v{safe_version})\n\n")
         out.write(
-            f"This document contains the source code for feature crate `{selected_crate}` "
+            f"Dokumen ini berisi source code fitur `{feature_name}` beserta "
+            "definisi shared yang diimport oleh feature tersebut.\n\n"
         )
         out.write(
-            "along with its corresponding and imported definitions from the `shared` crate.\n\n"
+            "Arsitektur: **AES C99** — layer prefix: "
+            "`taxonomy_` -> `contract_` -> `capabilities_` / `infrastructure_` "
+            "-> `agent_` -> `surfaces_` -> `root_`\n\n"
         )
 
+        # --- Lint ---
         if lint_output:
             out.write("## Problem Statement\n\n")
             out.write(
-                "The following issues were detected by `lint-arwaky-cli scan`:\n\n"
+                "Isu berikut terdeteksi oleh `lint-arwaky-cli scan`:\n\n"
             )
             out.write("```\n")
             out.write(lint_output)
             if not lint_output.endswith("\n"):
                 out.write("\n")
-            out.write("```\n\n")
-            out.write("---\n\n")
+            out.write("```\n\n---\n\n")
 
-        out.write("## File List\n\n")
-        for f in sorted_files:
-            rel = f.relative_to(workspace_root)
-            out.write(f"- [{rel}]({f.as_uri()})\n")
-        out.write("\n---\n\n")
+        # --- Daftar file ---
+        out.write("## Daftar File\n\n")
 
-        for f in sorted_files:
+        if sorted_feature:
+            out.write(f"### Feature: `src/{feature_name}/`\n\n")
+            for f in sorted_feature:
+                rel = f.relative_to(workspace_root)
+                layer = _aes_layer_of(f)
+                out.write(f"- [{rel}]({f.as_uri()}) — layer: `{layer}`\n")
+            out.write("\n")
+
+        if sorted_shared:
+            out.write("### Shared (`src/shared/`)\n\n")
+            for f in sorted_shared:
+                rel = f.relative_to(workspace_root)
+                layer = _aes_layer_of(f)
+                out.write(f"- [{rel}]({f.as_uri()}) — layer: `{layer}`\n")
+            out.write("\n")
+
+        out.write("---\n\n")
+
+        # --- Isi file ---
+        for f in all_files:
             rel = f.relative_to(workspace_root)
-            out.write(f"## File: {rel}\n\n")
+            layer = _aes_layer_of(f)
+            out.write(f"## `{rel}`\n\n")
+            out.write(f"> **Layer AES:** `{layer}`\n\n")
             lang = _language_for(f)
             out.write(f"```{lang}\n")
             try:
@@ -353,85 +389,88 @@ def write_markdown(
                 if not content.endswith("\n"):
                     out.write("\n")
             except OSError as e:
-                out.write(f"/* Error reading file: {e} */\n")
+                out.write(f"/* Error membaca file: {e} */\n")
             out.write("```\n\n---\n\n")
 
 
-def _language_for(path: Path) -> str:
-    """Pick a fenced-code-block language identifier based on file extension."""
-    if path.name == CARGO_TOML:
-        return "toml"
-    if path.suffix == ".py":
-        return "python"
-    if path.suffix in (".js", ".ts"):
-        return "javascript"
-    return "rust"
-
+# ---------------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------------
 
 def main() -> None:
     while True:
-        print("\n=== Lint Arwaky Feature Exporter ===")
+        print("\n=== AES Feature Exporter (C99) ===")
 
-        workspace_root, crates_dir, docs_finding_dir = resolve_workspace()
+        workspace_root, src_dir, docs_finding_dir = resolve_workspace()
 
-        feature_crates = list_feature_crates(crates_dir)
-        if not feature_crates:
+        features = list_feature_dirs(src_dir)
+        if not features:
             print(
-                "Error: No feature crates found in 'crates' directory.", file=sys.stderr
+                "Error: Tidak ada feature directory ditemukan di 'src/'.",
+                file=sys.stderr,
             )
             sys.exit(1)
 
-        selected_crate = prompt_crate(feature_crates)
-        print(f"\nProcessing crate: {selected_crate}...")
+        selected = prompt_feature(features)
+        print(f"\nMemproses feature: {selected}...")
 
-        crate_path = crates_dir / selected_crate
-        version = read_crate_version(crate_path)
+        # Versi
+        version = read_project_version(workspace_root)
         safe_version = sanitize_version(version)
-        print(f"Version resolved: {version} (filename-safe: {safe_version})")
+        print(f"Versi proyek: {version} (nama file: {safe_version})")
 
-        shared_src_dir = crates_dir / "shared" / "src"
-        module_to_files, symbol_to_files = index_shared_module(shared_src_dir)
+        # Kumpulkan file feature
+        feature_dir = src_dir / selected
+        feature_files = collect_feature_files(feature_dir)
+        print(f"File feature ditemukan: {len(feature_files)}")
 
-        files_to_export = collect_crate_files(crate_path)
-        feature_dashed = selected_crate.replace("_", "-")
-        add_shared_feature_dir(files_to_export, shared_src_dir, feature_dashed)
-        files_to_export.update(
-            scan_shared_imports(files_to_export, module_to_files, symbol_to_files)
-        )
+        # Index shared & resolve include
+        shared_dir = src_dir / "shared"
+        shared_index = index_shared_dir(shared_dir)
+        shared_files = resolve_shared_includes(feature_files, shared_index)
 
-        print("Running lint-arwaky-cli scan...")
-        lint_output = run_lint_scan(workspace_root, crate_path)
+        # Susun semua file: feature dulu (sorted), lalu shared (sorted)
+        sorted_feature = sorted(feature_files)
+        sorted_shared = sorted(shared_files)
+        all_files = sorted_feature + sorted_shared
+
+        # Lint scan
+        print("Menjalankan lint-arwaky-cli scan...")
+        lint_output = run_lint_scan(workspace_root, feature_dir)
         if lint_output:
-            print("Lint scan completed.")
+            print("Lint scan selesai.")
         else:
-            print("No lint output (clean or scan failed).")
+            print("Tidak ada output lint (bersih atau scan tidak tersedia).")
 
+        # Tulis output
         docs_finding_dir.mkdir(parents=True, exist_ok=True)
-        output_filename = f"{selected_crate}_v{safe_version}.md"
+        output_filename = f"{selected}_v{safe_version}.md"
         output_path = docs_finding_dir / output_filename
 
-        print(f"Writing export to {output_path}...")
-        sorted_files = sorted(files_to_export)
+        print(f"Menulis export ke {output_path}...")
         write_markdown(
             output_path,
-            sorted_files,
+            selected,
+            all_files,
+            sorted_feature,
+            sorted_shared,
             workspace_root,
-            selected_crate,
             safe_version,
             lint_output,
         )
 
-        print(f"\nSuccess! Consolidate markdown file created: {output_path}")
+        print(f"\nBerhasil! File Markdown konsolidasi dibuat: {output_path}")
 
         try:
-            again = input("\nExport another crate? (y/n): ").strip().lower()
+            again = input("\nExport feature lain? (y/n): ").strip().lower()
         except (EOFError, KeyboardInterrupt):
-            print("\nExiting.")
+            print("\nKeluar.")
             break
+
         if again != "y":
             break
 
-    print("Done.")
+    print("Selesai.")
 
 
 if __name__ == "__main__":

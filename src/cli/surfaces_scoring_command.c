@@ -42,7 +42,8 @@ static ScoringError read_zone(ZoneVO *out, char *raw_out, size_t raw_size) {
 }
 
 static void draw_scoring_screen(ParticipantEntity *part, const char *msg, int msg_is_error) {
-    tui_clear();
+    /* A3: Hanya clear bila bukan pesan error, agar tidak flicker saat validasi zona. */
+    if (!msg_is_error) tui_clear();
 
     /* Breadcrumb */
     tui_print_centered_colored(0, "Menu Utama > Input Tendangan", COLOR_DIM, 0);
@@ -162,8 +163,8 @@ void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state
                 snprintf(ok_msg, sizeof ok_msg, "[OK] Zona %d -> %d poin", z.value, z.value);
                 draw_scoring_screen(part, ok_msg, 0);
             } else if (e == SC_INVALID_ZONE) {
-                char err_msg[80];
-                snprintf(err_msg, sizeof err_msg, "[GAGAL] Zona harus %d-%d. Anda masukkan: '%s'", MIN_ZONE, MAX_ZONE, raw_input);
+                char err_msg[96];
+                snprintf(err_msg, sizeof err_msg, "[GAGAL] Zona harus %d-%d. Anda memasukkan '%s'.", MIN_ZONE, MAX_ZONE, raw_input);
                 draw_scoring_screen(part, err_msg, 1);
             } else {
                 draw_scoring_screen(part, "[GAGAL] Kesalahan pencatatan!", 1);
@@ -185,7 +186,7 @@ void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state
         mvprintw(9, BOX_COL + 4, "Total Skor: %d poin", part->total_score);
         attroff(COLOR_PAIR(COLOR_SUCCESS) | A_BOLD);
 
-        tui_footer("Tekan ENTER untuk melanjutkan ke peserta berikutnya");
+        tui_footer("[ENTER] Lanjut");
         refresh();
         tui_getch();
     }
@@ -196,7 +197,7 @@ void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state
         tui_print_centered_colored(5, "SEMUA TENDANGAN SELESAI!", COLOR_SUCCESS, 1);
         tui_print_centered_colored(6, "* * * * * * * * * * * * * * * *", COLOR_GOLD, 1);
     }
-    tui_footer("Tekan ENTER untuk kembali ke menu utama");
+    tui_footer("[ENTER] Kembali ke menu");
     refresh();
     tui_getch();
 }

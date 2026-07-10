@@ -27,16 +27,16 @@ static ExportError export_ranking_txt(const char *filename,
 
     /* Judul. */
     fprintf(file, "========================================\n");
-    fprintf(file, "  RANKING — C-AES Penalty Shootout\n");
+    fprintf(file, "  RANKING — Lomba Tendangan Penalti\n");
     fprintf(file, "========================================\n\n");
 
-    fprintf(file, "%-6s %-20s %s\n", "Rank", "Name", "Score");
+    fprintf(file, "%-6s %-20s %s\n", "Rank", "Nama", "Skor");
     fprintf(file, "------ -------------------- -----\n");
 
     /* Satu baris per peserta. */
     for (int i = 0; i < count; i++) {
         int pid = entries[i].participant_id;
-        const char *name = "Unknown";
+        const char *name = "Tidak diketahui";
         if (pid >= 0 && pid < state->participant_count) {
             name = state->participants[pid].name.value;
         }
@@ -48,7 +48,7 @@ static ExportError export_ranking_txt(const char *filename,
 
     /* Jumlah peserta. */
     fprintf(file, "\n========================================\n");
-    fprintf(file, "  Total participants: %d\n", count);
+    fprintf(file, "  Total peserta: %d\n", count);
     fprintf(file, "========================================\n");
 
     fclose(file);

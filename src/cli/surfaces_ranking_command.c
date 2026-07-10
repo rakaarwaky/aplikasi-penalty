@@ -44,7 +44,7 @@ void cli_surfaces_ranking_execute(RankingAggregate *agg, CompetitionState *state
     tui_print_centered_colored(3, "============================================", COLOR_GOLD, 1);
 
     /* Bingkai */
-    int box_height = state->participant_count + 8;
+    int box_height = state->participant_count + 8 + 2; /* +2 untuk baris bar chart */
     tui_box(4, 2, 64, box_height);
 
     /* Separator header */
@@ -58,12 +58,20 @@ void cli_surfaces_ranking_execute(RankingAggregate *agg, CompetitionState *state
     /* Separator setelah header */
     tui_separator(7, 2, 64);
 
+    /* Hitung skor maksimum untuk normalisasi bar chart (B1). */
+    int max_score = 1;
+    {
+        int ms;
+        for (ms = 0; ms < state->participant_count; ms++)
+            if (entries[ms].total_score > max_score) max_score = entries[ms].total_score;
+    }
+
     /* Satu baris per peserta */
     int i;
     for (i = 0; i < state->participant_count; i++) {
         const RankingEntryVO *r = &entries[i];
         const char *name = state->participants[r->participant_id].name.value;
-        int row = 8 + i;
+        int row = 8 + i * 2; /* *2 karena tiap peserta 2 baris: teks + bar */
 
         /* Pilih warna berdasarkan peringkat */
         int row_color = COLOR_MENU;
@@ -84,31 +92,43 @@ void cli_surfaces_ranking_execute(RankingAggregate *agg, CompetitionState *state
             row_color = COLOR_DIM;
 
         attron(COLOR_PAIR(row_color) | (r->rank <= 3 ? A_BOLD : 0));
-        mvprintw(row, 4, " %-5d %-6s %-22s %-6d %d|%d|%d|%d|%d|%d",
-                 r->rank, medal, name, r->total_score,
-                 r->zone_freq[5], r->zone_freq[4], r->zone_freq[3],
-                 r->zone_freq[2], r->zone_freq[1], r->zone_freq[0]);
+        mvprintw(row, 4, " %-5d %-6s %-22s %-6d ",
+                 r->rank, medal, name, r->total_score);
         attroff(COLOR_PAIR(row_color) | (r->rank <= 3 ? A_BOLD : 0));
 
-        /* Bar skor relatif terhadap skor tertinggi. */
-        int max_score = entries[0].total_score;
-        int score_pct = (max_score > 0) ? (r->total_score * 100) / max_score : 0;
-        tui_progress_bar(row, 52, 10, score_pct, COLOR_SUCCESS);
+        /* B2: Cetak frekuensi zona dengan warna berbeda. */
+        int z;
+        for (z = 5; z >= 0; z--) {
+            int zcolor;
+            if (z == 5)      zcolor = COLOR_SUCCESS;
+            else if (z == 0) zcolor = COLOR_ERROR;
+            else             zcolor = COLOR_MENU;
+            int zbold = (z == 5) ? A_BOLD : 0;
+            attron(COLOR_PAIR(zcolor) | zbold);
+            printw("%d", r->zone_freq[z]);
+            attroff(COLOR_PAIR(zcolor) | zbold);
+            if (z > 0) printw("|");
+        }
 
-        /* Separator antar baris */
+        /* B1: Bar chart skor di baris kedua. */
+        int bar_pct = (max_score > 0) ? (r->total_score * 100) / max_score : 0;
+        tui_progress_bar(row + 1, 10, 30, bar_pct, (r->rank == 1) ? COLOR_GOLD : COLOR_SUCCESS);
+
+        /* Separator antar peserta */
         if (i < state->participant_count - 1) {
-            tui_separator(row + 1, 2, 64);
+            tui_separator(row + 2, 2, 64);
         }
     }
 
     /* Footer */
-    tui_separator(8 + state->participant_count, 2, 64);
+    int footer_sep_row = 8 + state->participant_count * 2;
+    tui_separator(footer_sep_row, 2, 64);
 
     /* Tampilkan juara jika ada */
     if (state->participant_count > 0) {
         const char *winner = state->participants[entries[0].participant_id].name.value;
         attron(COLOR_PAIR(COLOR_GOLD) | A_BOLD);
-        mvprintw(8 + state->participant_count + 1, 4, "JUARA: %s dengan %d poin!", winner, entries[0].total_score);
+        mvprintw(footer_sep_row + 1, 4, "JUARA: %s dengan %d poin!", winner, entries[0].total_score);
         attroff(COLOR_PAIR(COLOR_GOLD) | A_BOLD);
     }
 

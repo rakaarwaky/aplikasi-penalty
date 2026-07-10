@@ -111,40 +111,55 @@ static void draw_menu(int selected, CompetitionStateKind state) {
     tui_print_colored(BOX_START_ROW + MENU_ITEMS + 3, BOX_START_COL + 2, state_text, state_color);
 
     /* Petunjuk navigasi */
-    tui_footer("[v/^] Pilih  [ENTER] OK  [1-5] Langsung  [h] Bantuan  [q/0/ESC] Keluar");
+    tui_footer("[↑/↓] Pilih  [ENTER] OK  [1-5] Shortcut  [h] Bantuan  [q/0/ESC] Keluar");
 
     refresh();
 }
 
-/* Layar bantuan singkat "Cara Bermain". */
-static void draw_help(void) {
+/* C1: Layar bantuan "Cara Bermain" — tampilkan aturan & navigasi. */
+static void show_help_screen(void) {
     tui_clear();
-    tui_print_centered_colored(1, "CARA BERMAIN", COLOR_TITLE, 1);
-    tui_box(3, 2, 70, 18);
-    tui_separator(4, 2, 70);
+
+    tui_print_centered_colored(0, "+----------------------------------------------------------+", COLOR_BORDER, 0);
+    tui_print_centered_colored(1, "  PANDUAN PENGGUNAAN   ", COLOR_TITLE, 1);
+    tui_print_centered_colored(2, "+----------------------------------------------------------+", COLOR_BORDER, 0);
+
+    int box_col = 2;
+    int box_width = BOX_WIDTH;
+    tui_box(3, box_col, box_width, 18);
+    tui_separator(4, box_col, box_width);
+
+    attron(COLOR_PAIR(COLOR_GOLD) | A_BOLD);
+    mvprintw(5, box_col + 2, "ATURAN LOMBA:");
+    attroff(COLOR_PAIR(COLOR_GOLD) | A_BOLD);
 
     attron(COLOR_PAIR(COLOR_MENU));
-    mvprintw(5, 4, "1. Daftar 5-7 peserta (Menu 1). Nama huruf & spasi, maks 30.");
-    mvprintw(6, 4, "2. Tiap peserta menendang 7 kali (Menu 2). Zona 0-5 = poin.");
-    mvprintw(7, 4, "3. Zona tinggi (5) dapat lebih banyak poin.");
-    mvprintw(8, 4, "4. Setelah semua selesai, lihat Ranking (Menu 3) & Rekap (Menu 5).");
-    mvprintw(9, 4, "5. Cari peserta tertentu lewat Menu 4.");
+    mvprintw(6,  box_col + 4, "- Jumlah peserta : 5 sampai 7 orang");
+    mvprintw(7,  box_col + 4, "- Setiap peserta : 7 tendangan penalti");
+    mvprintw(8,  box_col + 4, "- Nilai zona     : 0=Miss  1=Mudah  2=Sedang");
+    mvprintw(9,  box_col + 4, "                   3=Sulit 4=Sangat Sulit  5=Top!");
+    mvprintw(10, box_col + 4, "- Pemenang       : peserta dengan total skor tertinggi");
     attroff(COLOR_PAIR(COLOR_MENU));
 
-    tui_separator(10, 2, 70);
+    tui_separator(11, box_col, box_width);
 
-    attron(COLOR_PAIR(COLOR_WARNING) | A_BOLD);
-    mvprintw(11, 4, "Navigasi:");
-    attroff(COLOR_PAIR(COLOR_WARNING) | A_BOLD);
+    attron(COLOR_PAIR(COLOR_GOLD) | A_BOLD);
+    mvprintw(12, box_col + 2, "NAVIGASI:");
+    attroff(COLOR_PAIR(COLOR_GOLD) | A_BOLD);
+
     attron(COLOR_PAIR(COLOR_MENU));
-    mvprintw(12, 4, "  ^ / v        : pindah pilihan");
-    mvprintw(13, 4, "  ENTER / 1-5 : pilih menu");
-    mvprintw(14, 4, "  h           : layar bantuan ini");
-    mvprintw(15, 4, "  q / 0 / ESC : keluar (dengan konfirmasi)");
+    mvprintw(13, box_col + 4, "[Panah ↑/↓]  : Pindah pilihan menu");
+    mvprintw(14, box_col + 4, "[1-5]        : Langsung pilih menu 1-5");
+    mvprintw(15, box_col + 4, "[ENTER]      : Konfirmasi pilihan");
+    mvprintw(16, box_col + 4, "[q / 0]      : Keluar dari aplikasi");
+    mvprintw(17, box_col + 4, "[h]          : Tampilkan layar bantuan ini");
     attroff(COLOR_PAIR(COLOR_MENU));
 
-    tui_footer("Tekan tombol apa saja untuk kembali");
+    tui_separator(18, box_col, box_width);
+
+    tui_footer("Tekan sembarang tombol untuk kembali ke menu");
     refresh();
+    tui_getch();
 }
 
 /**
@@ -173,17 +188,16 @@ int cli_surfaces_menu_run(RegistrationAggregate *reg,
                 selected++;
                 if (selected >= MENU_ITEMS) selected = 0;
                 break;
-            case 'h':
-            case 'H':
-                draw_help();
-                tui_getch();
-                break;
-            case '1': case '2': case '3': case '4': case '5':
-                if (key >= '1' && key <= '5')
-                    selected = key - '0';
-                /* lanjut ke penanganan seperti ENTER di bawah */
-                /* fallthrough */
+
+            /* C3: Shortcut angka langsung aktifkan menu (1-5). */
+            case '1': selected = 1; goto do_enter;
+            case '2': selected = 2; goto do_enter;
+            case '3': selected = 3; goto do_enter;
+            case '4': selected = 4; goto do_enter;
+            case '5': selected = 5; goto do_enter;
+
             case TUI_KEY_ENTER:
+            do_enter:
                 if (selected == 0) {
                     if (tui_confirm("Yakin ingin keluar?"))
                         running = 0;
@@ -204,8 +218,11 @@ int cli_surfaces_menu_run(RegistrationAggregate *reg,
                         cli_surfaces_recap_execute(rc, state);
                 }
                 break;
+
+            /* A2: Konfirmasi sebelum keluar via ESC. */
             case TUI_KEY_ESC:
-                running = 0;
+                if (tui_confirm("Yakin ingin keluar?"))
+                    running = 0;
                 break;
             case '0':
                 if (tui_confirm("Yakin ingin keluar?"))
@@ -214,6 +231,12 @@ int cli_surfaces_menu_run(RegistrationAggregate *reg,
             case 'q':
                 if (tui_confirm("Yakin ingin keluar?"))
                     running = 0;
+                break;
+
+            /* C1: Tampilkan layar bantuan. */
+            case 'h':
+            case 'H':
+                show_help_screen();
                 break;
         }
     }

@@ -8,6 +8,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 
 #define BOX_WIDTH 58
 #define BOX_HEIGHT 16

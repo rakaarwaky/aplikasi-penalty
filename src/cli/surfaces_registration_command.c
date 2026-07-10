@@ -48,11 +48,17 @@ static void draw_registration_screen(CompetitionState *state) {
     attroff(COLOR_PAIR(COLOR_MENU));
     tui_progress_bar(BOX_ROW + 3, BOX_COL + 2, 30, pct, COLOR_SUCCESS);
 
+    /* C2: Label kuota permanen agar pengguna baru tahu batas minimal/maksimal. */
+    attron(COLOR_PAIR(COLOR_WARNING));
+    mvprintw(BOX_ROW + 4, BOX_COL + 2, "Minimal 5, maksimal %d peserta", MAX_PARTICIPANTS);
+    attroff(COLOR_PAIR(COLOR_WARNING));
+
     attron(COLOR_PAIR(COLOR_DIM));
     mvprintw(BOX_ROW + 5, BOX_COL + 2, "Ketik nama lalu Enter. Kosongkan untuk selesai.");
+    mvprintw(BOX_ROW + 6, BOX_COL + 2, "Minimal 5, maksimal 7 peserta.");
     attroff(COLOR_PAIR(COLOR_DIM));
 
-    tui_separator(BOX_ROW + 6, BOX_COL, BOX_WIDTH);
+    tui_separator(BOX_ROW + 7, BOX_COL, BOX_WIDTH);
 
     attron(COLOR_PAIR(COLOR_WARNING) | A_BOLD);
     mvprintw(BOX_ROW + 7, BOX_COL + 2, "Peserta terdaftar:");
