@@ -41,9 +41,14 @@ static void draw_scoring_screen(DisplayPort *dp, ParticipantEntity *part,
     /* A3: Hanya clear bila bukan pesan error, agar tidak flicker saat validasi zona. */
     if (!msg_is_error) dp->cls();
 
-    /* Breadcrumb */
+    /* Breadcrumb — warna redup */
     dp->print_centered_colored(0, "Menu Utama > Input Tendangan", COLOR_DIM, 0);
-    dp->print_centered_colored(1, "INPUT TENDANGAN DAN SKOR", COLOR_TITLE, 1);
+
+    /* Header konsisten dengan UTF-8 escape sequences */
+    dp->print_centered_colored(1, UTF_DOUBLE_H_32, COLOR_DIM, 0);
+    dp->print_centered_colored(2, "       INPUT TENDANGAN DAN SKOR       ", COLOR_TITLE, 1);
+    dp->print_centered_colored(3, UTF_DOUBLE_H_32, COLOR_DIM, 0);
+
     dp->box(BOX_ROW, BOX_COL, BOX_WIDTH, BOX_HEIGHT);
     dp->separator(BOX_ROW + 1, BOX_COL, BOX_WIDTH);
 

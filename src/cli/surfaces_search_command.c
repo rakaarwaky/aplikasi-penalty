@@ -32,9 +32,13 @@ void cli_surfaces_search_execute(SearchAggregate *agg, CompetitionState *state,
 
     dp->cls();
 
-    /* Breadcrumb */
+    /* Breadcrumb — warna redup */
     dp->print_centered_colored(0, "Menu Utama > Cari Peserta", COLOR_DIM, 0);
-    dp->print_centered_colored(1, "CARI PESERTA", COLOR_TITLE, 1);
+
+    /* Header konsisten dengan UTF-8 escape sequences */
+    dp->print_centered_colored(1, UTF_DOUBLE_H_32, COLOR_DIM, 0);
+    dp->print_centered_colored(2, "          CARI PESERTA          ", COLOR_TITLE, 1);
+    dp->print_centered_colored(3, UTF_DOUBLE_H_32, COLOR_DIM, 0);
 
     /* Bingkai */
     dp->box(BOX_ROW, BOX_COL, BOX_WIDTH, BOX_HEIGHT);

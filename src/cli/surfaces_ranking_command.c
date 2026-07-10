@@ -39,10 +39,10 @@ void cli_surfaces_ranking_execute(RankingAggregate *agg, CompetitionState *state
     /* Breadcrumb — warna redup */
     dp->print_centered_colored(0, "Menu Utama > Ranking Peserta", COLOR_DIM, 0);
 
-    /* Header dengan Unicode solid — konsisten */
-    dp->print_centered_colored(1, "══════════════════════════════════════════", COLOR_DIM, 0);
+    /* Header konsisten dengan UTF-8 escape sequences */
+    dp->print_centered_colored(1, UTF_DOUBLE_H_40, COLOR_DIM, 0);
     dp->print_centered_colored(2, "             RANKING PESERTA              ", COLOR_TITLE, 1);
-    dp->print_centered_colored(3, "══════════════════════════════════════════", COLOR_DIM, 0);
+    dp->print_centered_colored(3, UTF_DOUBLE_H_40, COLOR_DIM, 0);
 
     /* Bingkai — cap height agar tidak overflow terminal */
     int box_height = state->participant_count + 8 + 2;
@@ -51,7 +51,7 @@ void cli_surfaces_ranking_execute(RankingAggregate *agg, CompetitionState *state
     dp->box(4, 2, 64, box_height);
 
     /* Header kolom: teks tebal berjarak presisi, tanpa blok warna */
-    snprintf(buf, sizeof buf, " %-4s │ %-6s │ %-20s │ %-5s │ %s",
+    snprintf(buf, sizeof buf, " %-4s " UTF_LIGHT_VLINE " %-6s " UTF_LIGHT_VLINE " %-20s " UTF_LIGHT_VLINE " %-5s " UTF_LIGHT_VLINE " %s",
              "No", "Medali", "Nama Peserta", "Skor", "Zona (5|4|3|2|1|0)");
     dp->draw_colored(5, 4, COLOR_INFO, 1, buf);
 
@@ -91,7 +91,7 @@ void cli_surfaces_ranking_execute(RankingAggregate *agg, CompetitionState *state
         if (r->rank > 3 && i % 2 == 0)
             row_color = COLOR_DIM;
 
-        snprintf(buf, sizeof buf, " %-4d │ %-6s │ %-20s │ %-5d │ ",
+        snprintf(buf, sizeof buf, " %-4d " UTF_LIGHT_VLINE " %-6s " UTF_LIGHT_VLINE " %-20s " UTF_LIGHT_VLINE " %-5d " UTF_LIGHT_VLINE " ",
                  r->rank, medal, name, r->total_score);
         dp->draw_colored(row, 4, row_color, (r->rank <= 3), buf);
 
