@@ -32,20 +32,21 @@ void cli_surfaces_registration_execute(RegistrationAggregate *agg, CompetitionSt
     tui_box(3, 2, 56, 16);
 
     attron(COLOR_PAIR(COLOR_MENU));
-    mvprintw(4, 4, "Kuota: 5 - 7 peserta. Ketik nama atau SELESAI.");
-    mvprintw(5, 4, "Peserta terdaftar: %d", state->participant_count);
+    mvprintw(4, 4, "Kuota: 5 - 7 peserta.");
+    mvprintw(5, 4, "Kosongkan nama & tekan Enter untuk selesai.");
+    mvprintw(6, 4, "Peserta terdaftar: %d", state->participant_count);
     attroff(COLOR_PAIR(COLOR_MENU));
 
     int i;
     for (i = 0; i < state->participant_count; i++) {
         attron(COLOR_PAIR(COLOR_SUCCESS));
-        mvprintw(7 + i, 4, "%d. %s", i + 1, state->participants[i].name.value);
+        mvprintw(8 + i, 4, "%d. %s", i + 1, state->participants[i].name.value);
         attroff(COLOR_PAIR(COLOR_SUCCESS));
     }
 
     refresh();
 
-    int row = 7 + state->participant_count + 1;
+    int row = 8 + state->participant_count + 1;
     char buffer[64];
     while (state->participant_count < MAX_PARTICIPANTS) {
         attron(COLOR_PAIR(COLOR_MENU));
@@ -65,19 +66,6 @@ void cli_surfaces_registration_execute(RegistrationAggregate *agg, CompetitionSt
             buffer[--len] = '\0';
 
         if (len == 0) {
-            if (state->participant_count >= MIN_PARTICIPANTS) break;
-            show_error(REG_TOO_FEW);
-            refresh();
-            continue;
-        }
-
-        char lower[64];
-        for (i = 0; i < (int)len; i++) lower[i] = buffer[i];
-        lower[len] = '\0';
-        for (i = 0; lower[i]; i++) {
-            if (lower[i] >= 'A' && lower[i] <= 'Z') lower[i] += 32;
-        }
-        if (strcmp(lower, "selesai") == 0) {
             if (state->participant_count >= MIN_PARTICIPANTS) break;
             show_error(REG_TOO_FEW);
             refresh();

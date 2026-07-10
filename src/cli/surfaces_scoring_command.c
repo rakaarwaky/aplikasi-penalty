@@ -27,11 +27,24 @@ static ScoringError read_zone(ZoneVO *out) {
 
 void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state) {
     if (agg == NULL || state == NULL) return;
+
+    /* Blokir jika peserta belum daftar */
     if (state->state == STATE_INIT) {
         tui_clear();
         attron(COLOR_PAIR(COLOR_ERROR));
         tui_print_centered(10, "[GAGAL] Daftar peserta dulu (Menu 1).");
         attroff(COLOR_PAIR(COLOR_ERROR));
+        refresh();
+        tui_getch();
+        return;
+    }
+
+    /* Blokir jika kompetisi sudah selesai */
+    if (state->state == STATE_COMPLETED) {
+        tui_clear();
+        attron(COLOR_PAIR(COLOR_MENU));
+        tui_print_centered(10, "[INFO] Semua peserta sudah selesai melakukan tendangan.");
+        attroff(COLOR_PAIR(COLOR_MENU));
         refresh();
         tui_getch();
         return;

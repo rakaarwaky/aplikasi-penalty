@@ -34,33 +34,57 @@ void cli_surfaces_recap_execute(RecapAggregate *agg, CompetitionState *state) {
     tui_print_centered(1, "REKAPITULASI LENGKAP");
     attroff(COLOR_PAIR(COLOR_TITLE) | A_BOLD);
 
-    tui_box(3, 1, 64, state->participant_count + 4);
+    int box_col = 1;
+    int box_width = 64;
+    int box_row = 3;
+    int box_height = state->participant_count + 6;
 
+    tui_box(box_row, box_col, box_width, box_height);
+
+    /* Header Text */
     attron(COLOR_PAIR(COLOR_HIGHLIGHT));
-    mvprintw(4, 2, "%-4s %-24s %-6s %s", "Rank", "Nama", "Skor", "Zona(0 1 2 3 4 5)");
+    mvprintw(box_row + 1, box_col + 2, "%-4s %-24s %-6s %s", "Rank", "Nama", "Skor", "Zona(0 1 2 3 4 5)");
     attroff(COLOR_PAIR(COLOR_HIGHLIGHT));
 
+    /* Header Separator Line */
+    attron(COLOR_PAIR(COLOR_BORDER));
+    mvaddch(box_row + 2, box_col, ACS_LTEE);
+    int c;
+    for (c = 1; c < box_width - 1; c++) mvaddch(box_row + 2, box_col + c, ACS_HLINE);
+    mvaddch(box_row + 2, box_col + box_width - 1, ACS_RTEE);
+    attroff(COLOR_PAIR(COLOR_BORDER));
+
+    /* Data Rows */
     int i;
     for (i = 0; i < state->participant_count; i++) {
         const RankingEntryVO *r = &ranking[i];
         const SearchResultVO *d = &details[r->participant_id];
-        int row = 5 + i;
+        int row = box_row + 3 + i;
 
         if (i % 2 == 0)
             attron(COLOR_PAIR(COLOR_MENU));
         else
             attron(COLOR_PAIR(COLOR_BORDER));
 
-        mvprintw(row, 2, "%-4d %-24s %-6d ", r->rank, d->name, d->total_score);
+        mvprintw(row, box_col + 2, "%-4d %-24s %-6d ", r->rank, d->name, d->total_score);
         int z;
         for (z = 0; z <= MAX_ZONE; z++) printw("%d ", d->zone_freq[z]);
 
         attroff(COLOR_PAIR(COLOR_MENU));
         attroff(COLOR_PAIR(COLOR_BORDER));
+
+        /* Row Separator Line (kecuali baris paling bawah) */
+        if (i < state->participant_count - 1) {
+            attron(COLOR_PAIR(COLOR_BORDER));
+            mvaddch(row + 1, box_col, ACS_LTEE);
+            for (c = 1; c < box_width - 1; c++) mvaddch(row + 1, box_col + c, ACS_HLINE);
+            mvaddch(row + 1, box_col + box_width - 1, ACS_RTEE);
+            attroff(COLOR_PAIR(COLOR_BORDER));
+        }
     }
 
     attron(COLOR_PAIR(COLOR_MENU));
-    mvprintw(5 + state->participant_count + 2, 2, "Tekan Enter untuk kembali...");
+    mvprintw(box_row + box_height - 1, box_col + 2, "Tekan Enter untuk kembali...");
     attroff(COLOR_PAIR(COLOR_MENU));
 
     refresh();

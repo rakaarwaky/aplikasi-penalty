@@ -36,13 +36,24 @@ static void draw_menu(int selected, CompetitionStateKind state) {
         char label[64];
         snprintf(label, sizeof label, "%s", menu_labels[i]);
 
-        /* Add status indicators */
-        if (i == 1 && state == STATE_INIT) strcat(label, "  [BLOKIR]");
-        else if (i == 1 && state != STATE_INIT) strcat(label, "  [SUDAH]");
-        else if (i == 2 && state == STATE_INIT) strcat(label, "  [BLOKIR]");
-        else if (i == 2 && state == STATE_COMPLETED) strcat(label, "  [SELESAI]");
-        else if (i == 3 && state != STATE_COMPLETED) strcat(label, "  [BLOKIR]");
-        else if (i == 5 && state != STATE_COMPLETED) strcat(label, "  [BLOKIR]");
+        /* Status indicators sesuai PRD State Machine */
+        if (i == 1) { /* Registration */
+            if (state == STATE_INIT) strcat(label, "  [AKTIF]");
+            else strcat(label, "  [SUDAH]");
+        } else if (i == 2) { /* Scoring */
+            if (state == STATE_INIT) strcat(label, "  [BLOKIR]");
+            else if (state == STATE_COMPLETED) strcat(label, "  [SELESAI]");
+            else strcat(label, "  [AKTIF]");
+        } else if (i == 3) { /* Ranking */
+            if (state != STATE_COMPLETED) strcat(label, "  [BLOKIR]");
+            else strcat(label, "  [AKTIF]");
+        } else if (i == 4) { /* Search */
+            if (state == STATE_INIT) strcat(label, "  [BLOKIR]");
+            else strcat(label, "  [AKTIF]");
+        } else if (i == 5) { /* Recap */
+            if (state != STATE_COMPLETED) strcat(label, "  [BLOKIR]");
+            else strcat(label, "  [AKTIF]");
+        }
 
         if (i == selected)
             tui_highlight_row(row, BOX_START_COL, BOX_WIDTH, label);
@@ -83,16 +94,19 @@ int cli_surfaces_menu_run(RegistrationAggregate *reg,
                 if (selected == 0) {
                     running = 0;
                 } else if (selected == 1) {
-                    if (state->state == STATE_INIT)
+                    /* Menu 1 aktif di INIT dan REGISTERED */
+                    if (state->state == STATE_INIT || state->state == STATE_REGISTERED)
                         cli_surfaces_registration_execute(reg, state);
                 } else if (selected == 2) {
-                    if (state->state != STATE_INIT)
+                    /* Menu 2 aktif di REGISTERED */
+                    if (state->state == STATE_REGISTERED)
                         cli_surfaces_scoring_execute(sc, state);
                 } else if (selected == 3) {
                     if (state->state == STATE_COMPLETED)
                         cli_surfaces_ranking_execute(rk, state);
                 } else if (selected == 4) {
-                    if (state->state != STATE_INIT)
+                    /* Menu 4 aktif di REGISTERED dan COMPLETED */
+                    if (state->state == STATE_REGISTERED || state->state == STATE_COMPLETED)
                         cli_surfaces_search_execute(sr, state);
                 } else if (selected == 5) {
                     if (state->state == STATE_COMPLETED)

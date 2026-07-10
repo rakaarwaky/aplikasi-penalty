@@ -76,7 +76,10 @@ void cli_surfaces_search_execute(SearchAggregate *agg, CompetitionState *state) 
         mvprintw(7, 4, "Total Skor : %d", r.total_score);
         mvprintw(8, 4, "Tendangan  : ");
         int k;
-        for (k = 0; k < TOTAL_KICKS; k++) printw("%d ", r.kicks[k]);
+        for (k = 0; k < TOTAL_KICKS; k++) {
+            if (r.kicks[k] == -1) printw("- ");
+            else printw("%d ", r.kicks[k]);
+        }
         printw("\n");
         mvprintw(9, 4, "Zona       : ");
         int z;
