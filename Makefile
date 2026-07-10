@@ -40,7 +40,7 @@ TEST_BIN   := run_tests
 PREFIX ?= /usr/local
 BINDIR  = $(PREFIX)/bin
 
-.PHONY: all clean run test lint format analyze metrics version valgrind install uninstall
+.PHONY: all clean run test lint format analyze metrics version valgrind install uninstall win
 
 all: $(TARGET)
 
@@ -123,3 +123,46 @@ install: $(TARGET)
 # Uninstall
 uninstall:
 	rm -f $(DESTDIR)$(BINDIR)/$(TARGET)
+
+# Windows cross-compile (MinGW)
+WIN_CC      := x86_64-w64-mingw32-gcc
+WIN_TARGET  := aplikasi_perhitungan_penalty.exe
+WIN_LDFLAGS := -lpdcurses -lmingw32
+
+win:
+	$(WIN_CC) $(CFLAGS) $(INCLUDES) \
+		$(SRC_DIR)/root_cli_main_entry.c \
+		$(SRC_DIR)/cli/surfaces_menu_command.c \
+		$(SRC_DIR)/cli/surfaces_registration_command.c \
+		$(SRC_DIR)/cli/surfaces_scoring_command.c \
+		$(SRC_DIR)/cli/surfaces_ranking_command.c \
+		$(SRC_DIR)/cli/surfaces_search_command.c \
+		$(SRC_DIR)/cli/surfaces_recap_command.c \
+		$(SRC_DIR)/tui/infrastructure_tui_adapter.c \
+		$(SRC_DIR)/registration/capabilities_registration_validator.c \
+		$(SRC_DIR)/registration/capabilities_registration_appender.c \
+		$(SRC_DIR)/registration/agent_registration_orchestrator.c \
+		$(SRC_DIR)/registration/root_registration_container.c \
+		$(SRC_DIR)/scoring/capabilities_scoring_zone_validator.c \
+		$(SRC_DIR)/scoring/capabilities_scoring_score_calculator.c \
+		$(SRC_DIR)/scoring/agent_scoring_orchestrator.c \
+		$(SRC_DIR)/scoring/root_scoring_container.c \
+		$(SRC_DIR)/ranking/capabilities_ranking_calculator.c \
+		$(SRC_DIR)/ranking/agent_ranking_orchestrator.c \
+		$(SRC_DIR)/ranking/root_ranking_container.c \
+		$(SRC_DIR)/search/capabilities_search_resolver.c \
+		$(SRC_DIR)/search/agent_search_orchestrator.c \
+		$(SRC_DIR)/search/root_search_container.c \
+		$(SRC_DIR)/recap/capabilities_recap_formatter.c \
+		$(SRC_DIR)/recap/agent_recap_orchestrator.c \
+		$(SRC_DIR)/recap/root_recap_container.c \
+		$(SRC_DIR)/storage/infrastructure_storage_adapter.c \
+		$(SRC_DIR)/storage/agent_storage_orchestrator.c \
+		$(SRC_DIR)/storage/root_storage_container.c \
+		$(SRC_DIR)/sanitizer/capabilities_sanitizer_validator.c \
+		$(SRC_DIR)/export/infrastructure_export_adapter.c \
+		$(SRC_DIR)/export/agent_export_orchestrator.c \
+		$(SRC_DIR)/export/root_export_container.c \
+		$(SRC_DIR)/shared/taxonomy_logger.c \
+		-o $(WIN_TARGET) $(WIN_LDFLAGS)
+	@echo "Windows exe: $(WIN_TARGET)"

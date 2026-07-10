@@ -101,6 +101,18 @@ make run
 
 > **Catatan:** Kode sudah mendukung native Windows dengan `#ifdef _WIN32` untuk PDCurses.
 
+### Windows (Cross-compile dari Linux)
+
+```bash
+# Install MinGW cross-compiler
+sudo dnf install -y mingw64-gcc mingw64-pdcurses
+
+# Build .exe dari Linux
+make win
+```
+
+Hasil: `aplikasi_perhitungan_penalty.exe`
+
 ---
 
 ## Cara Build & Run
@@ -263,7 +275,7 @@ src/
 ├── export/                  <- fitur ekspor ranking ke TXT
 ├── sanitizer/               <- fitur input sanitization
 ├── tui/                     <- infrastructure TUI adapter (ncurses)
-├── cli/                     <- surfaces: CLI commands (I/O user)
+├── cli/                     <- surfaces: TUI commands (I/O user via ncurses)
 └── root_cli_main_entry.c   <- titik masuk (wiring semua container)
 
 tests/
@@ -284,19 +296,20 @@ tests/
 
 ## Makefile Targets
 
-| Target             | Deskripsi                                    |
-| ------------------ | -------------------------------------------- |
-| `make`           | Build binary`aplikasi_perhitungan_penalty` |
-| `make run`       | Build lalu jalankan                          |
-| `make test`      | Jalankan 113 unit tests                      |
-| `make lint`      | Static analysis dengan cppcheck              |
-| `make format`    | Format code dengan clang-format              |
-| `make analyze`   | Static analysis dengan scan-build (Clang)    |
-| `make valgrind`  | Memory leak check dengan valgrind            |
-| `make metrics`   | Tampilkan code metrics                       |
-| `make install`   | Install ke`/usr/local/bin`                 |
-| `make uninstall` | Hapus dari`/usr/local/bin`                 |
-| `make clean`     | Hapus build artifacts                        |
+| Target | Deskripsi |
+|--------|-----------|
+| `make` | Build binary `aplikasi_perhitungan_penalty` |
+| `make run` | Build lalu jalankan |
+| `make test` | Jalankan 113 unit tests |
+| `make win` | Build `.exe` untuk Windows (MinGW + PDCurses) |
+| `make lint` | Static analysis dengan cppcheck |
+| `make format` | Format code dengan clang-format |
+| `make analyze` | Static analysis dengan scan-build (Clang) |
+| `make valgrind` | Memory leak check dengan valgrind |
+| `make metrics` | Tampilkan code metrics |
+| `make install` | Install ke `/usr/local/bin` |
+| `make uninstall` | Hapus dari `/usr/local/bin` |
+| `make clean` | Hapus build artifacts |
 
 ---
 
@@ -356,7 +369,7 @@ Kode mengikuti aturan AES (detail di `RULES_AES.md`):
 | Capabilities   | `capabilities_`   | Business logic murni (tanpa I/O)       |
 | Infrastructure | `infrastructure_` | I/O implementation (file, ncurses)     |
 | Agent          | `agent_`          | Orchestration pipeline                 |
-| Surfaces       | `surfaces_`       | CLI commands, user I/O                 |
+| Surfaces       | `surfaces_`       | TUI commands, user I/O (ncurses)      |
 | Root           | `root_`           | Wiring/perakitan (tanpa logic)         |
 
 ---
