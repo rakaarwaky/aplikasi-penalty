@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include <string.h>
 
-/* Registration → Scoring → Ranking → Search → Recap */
+/* Registration → Scoring → Ranking → Search → Recap → Storage */
 static void test_full_pipeline(void) {
     CompetitionState state = {0};
     state.state = STATE_REGISTERED;
@@ -24,13 +24,13 @@ static void test_full_pipeline(void) {
     assert(state.participant_count == 5);
 
     /* 2. Record kicks with different patterns */
-    int patterns[5][7] = {
-        {5, 5, 5, 5, 5, 5, 5},  /* Alice: all zone 5 = 35 */
-        {4, 4, 4, 4, 4, 4, 4},  /* Bob: all zone 4 = 28 */
-        {5, 4, 3, 2, 1, 0, 5},  /* Charlie: mixed = 20 */
-        {3, 3, 3, 3, 3, 3, 3},  /* Diana: all zone 3 = 21 */
-        {2, 2, 2, 2, 2, 2, 2}   /* Eve: all zone 2 = 14 */
-    };
+    int p0[] = {5, 5, 5, 5, 5, 5, 5};  /* Alice: 35 */
+    int p1[] = {4, 4, 4, 4, 4, 4, 4};  /* Bob: 28 */
+    int p2[] = {5, 4, 3, 2, 1, 0, 5};  /* Charlie: 20 */
+    int p3[] = {3, 3, 3, 3, 3, 3, 3};  /* Diana: 21 */
+    int p4[] = {2, 2, 2, 2, 2, 2, 2};  /* Eve: 14 */
+    int *patterns[] = {p0, p1, p2, p3, p4};
+
     for (int p = 0; p < 5; p++) {
         for (int k = 0; k < 7; k++) {
             ZoneVO z = {patterns[p][k]};
@@ -38,9 +38,10 @@ static void test_full_pipeline(void) {
         }
     }
 
-    /* 3. Calculate ranking */
+    /* 3. Calculate ranking via capabilities */
     RankingEntryVO rankings[MAX_PARTICIPANTS];
-    capabilities_ranking_compute(&state, rankings, MAX_PARTICIPANTS);
+    RankingError rke = capabilities_ranking_compute(&state, rankings, MAX_PARTICIPANTS);
+    assert(rke == RK_OK);
 
     /* Verify ranking order: Alice(35) > Bob(28) > Diana(21) > Charlie(20) > Eve(14) */
     assert(rankings[0].total_score == 35);
@@ -49,21 +50,22 @@ static void test_full_pipeline(void) {
     assert(rankings[3].total_score == 20);
     assert(rankings[4].total_score == 14);
 
-    /* 4. Search for participant */
+    /* 4. Search for participant via capabilities */
+    ParticipantNameVO bob_name = {{0}};
+    strcpy(bob_name.value, "Bob");
     SearchResultVO result;
-    ParticipantNameVO search_name = {{0}};
-    strcpy(search_name.value, "Bob");
-    capabilities_search_find(&state, &search_name, &result);
+    SearchError se = capabilities_search_find(&state, &bob_name, &result);
+    assert(se == SR_OK);
     assert(result.found == 1);
     assert(result.total_score == 28);
 
-    /* 5. Generate recap */
+    /* 5. Generate recap via capabilities */
     SearchResultVO details[MAX_PARTICIPANTS];
-    RankingAggregate rank_agg = root_ranking_build();
-    RecapAggregate recap_agg = root_recap_build(&rank_agg.protocol);
-    agent_recap_prepare(&recap_agg, &state, rankings, details, MAX_PARTICIPANTS);
+    RecapError re = capabilities_recap_prepare_details(&state, details, MAX_PARTICIPANTS);
+    assert(re == RC_OK);
+    assert(details[0].total_score == 35);  /* Alice */
 
-    /* 6. Save to file */
+    /* 6. Save to file via storage */
     StorageAggregate storage = root_storage_build();
     StorageError ste = agent_storage_save(&storage, "test_pipeline.dat", &state);
     assert(ste == ST_OK);
@@ -98,7 +100,8 @@ static void test_all_same_scores(void) {
     }
 
     RankingEntryVO rankings[MAX_PARTICIPANTS];
-    capabilities_ranking_compute(&state, rankings, MAX_PARTICIPANTS);
+    RankingError rke = capabilities_ranking_compute(&state, rankings, MAX_PARTICIPANTS);
+    assert(rke == RK_OK);
 
     /* All should have same score */
     for (int i = 0; i < state.participant_count; i++) {
@@ -131,10 +134,47 @@ static void test_minimum_participants(void) {
     printf("  [PASS] test_minimum_participants\n");
 }
 
+/* Storage round-trip with complex state */
+static void test_storage_roundtrip(void) {
+    CompetitionState state = {0};
+    state.state = STATE_COMPLETED;
+
+    for (int i = 0; i < MAX_PARTICIPANTS; i++) {
+        ParticipantNameVO n = {{0}};
+        snprintf(n.value, 10, "Player%d", i);
+        capabilities_registration_append(&state, &n);
+    }
+
+    for (int p = 0; p < state.participant_count; p++) {
+        for (int k = 0; k < TOTAL_KICKS; k++) {
+            ZoneVO z = {k % 6};
+            capabilities_scoring_record_kick(&state, p, z);
+        }
+    }
+
+    StorageAggregate storage = root_storage_build();
+    StorageError ste = agent_storage_save(&storage, "test_roundtrip.dat", &state);
+    assert(ste == ST_OK);
+
+    CompetitionState loaded = {0};
+    ste = agent_storage_load(&storage, "test_roundtrip.dat", &loaded);
+    assert(ste == ST_OK);
+    assert(loaded.participant_count == MAX_PARTICIPANTS);
+    assert(loaded.state == STATE_COMPLETED);
+
+    for (int i = 0; i < loaded.participant_count; i++) {
+        assert(loaded.participants[i].kick_count == TOTAL_KICKS);
+    }
+
+    remove("test_roundtrip.dat");
+    printf("  [PASS] test_storage_roundtrip\n");
+}
+
 void run_integration_tests(void) {
     printf("=== Integration Tests ===\n");
     test_full_pipeline();
     test_all_same_scores();
     test_minimum_participants();
+    test_storage_roundtrip();
     printf("All integration tests passed!\n");
 }

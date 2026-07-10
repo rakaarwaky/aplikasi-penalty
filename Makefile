@@ -81,6 +81,41 @@ analyze:
 	$(CC) $(CFLAGS) -fanalyzer $(INCLUDES) -fsyntax-only $(C_SOURCES) 2>&1 || true
 	@echo "Static analysis complete"
 
+# Code metrics (cloc jika tersedia)
+metrics:
+	@echo "=== Code Metrics ==="
+	@echo "Files:"
+	@find src/ -name "*.c" | wc -l
+	@echo "Headers:"
+	@find src/ -name "*.h" | wc -l
+	@echo "Lines of code:"
+	@find src/ -name "*.c" -exec cat {} + | wc -l
+	@echo "Lines of headers:"
+	@find src/ -name "*.h" -exec cat {} + | wc -l
+	@echo "Test files:"
+	@find tests/ -name "*.c" | wc -l
+	@echo "Test lines:"
+	@find tests/ -name "*.c" -exec cat {} + | wc -l
+	@if command -v cloc > /dev/null 2>&1; then \
+		echo ""; \
+		cloc src/ tests/ --quiet; \
+	fi
+
+# Version
+version:
+	@echo "Version: 1.0.0"
+	@echo "Build: $$(date +%Y%m%d)"
+	@echo "Tests: $$(grep -c 'PASS' tests/test_*.c 2>/dev/null || echo 0)"
+
+# Performance benchmark
+bench:
+	@echo "=== Performance Benchmark ==="
+	@time ./run_tests 2>&1 | tail -1
+
+# Full check (lint + format + analyze + test)
+check: lint format-check analyze test
+	@echo "=== All checks passed ==="
+
 # Linting
 lint:
 	cppcheck --enable=all --suppress=missingIncludeSystem \
