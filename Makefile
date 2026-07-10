@@ -35,6 +35,7 @@ TEST_LIB_SRC := $(filter-out $(SRC_DIR)/root_cli_main_entry.c \
                   $(SRC_DIR)/cli/surfaces_search_command.c \
                   $(SRC_DIR)/cli/surfaces_recap_command.c \
                   $(SRC_DIR)/tui/infrastructure_tui_adapter.c \
+                  $(SRC_DIR)/root_display_container.c \
                   $(SRC_DIR)/tui/root_display_container.c, $(C_SOURCES))
 TEST_BIN   := run_tests
 

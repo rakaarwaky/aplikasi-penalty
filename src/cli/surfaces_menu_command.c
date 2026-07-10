@@ -195,7 +195,6 @@ static void show_help_screen(DisplayPort *dp) {
 int cli_surfaces_menu_run(RegistrationAggregate *reg,
                           ScoringAggregate *sc, RankingAggregate *rk,
                           SearchAggregate *sr, RecapAggregate *rc,
-                          StorageAggregate *st,
                           CompetitionState *state,
                           DisplayPort *dp) {
     int selected = 1;
@@ -228,15 +227,11 @@ int cli_surfaces_menu_run(RegistrationAggregate *reg,
                     if (dp->confirm("Yakin ingin keluar?"))
                         running = 0;
                 } else if (selected == 1) {
-                    if (state->state == STATE_INIT || state->state == STATE_REGISTERED) {
+                    if (state->state == STATE_INIT || state->state == STATE_REGISTERED)
                         cli_surfaces_registration_execute(reg, state, dp);
-                        agent_storage_save(st, "lomba.penalty", state);
-                    }
                 } else if (selected == 2) {
-                    if (state->state == STATE_REGISTERED) {
+                    if (state->state == STATE_REGISTERED)
                         cli_surfaces_scoring_execute(sc, state, dp);
-                        agent_storage_save(st, "lomba.penalty", state);
-                    }
                 } else if (selected == 3) {
                     if (state->state == STATE_COMPLETED)
                         cli_surfaces_ranking_execute(rk, state, dp);
