@@ -2,25 +2,30 @@ PENALTY SHOOTOUT — DISTRIBUSI LINUX
 ===================================
 
 Isi folder ini:
-  - aplikasi_perhitungan_penalty        (binary aplikasi, sudah jadi)
-  - PenaltyShootout.desktop (launcher: 2x klik -> buka terminal -> jalan)
-  - README.txt              (file ini)
+  - AplikasiPenaltyShootout-x86_64.AppImage  (LANGSUNG JALAN - tidak perlu install)
+  - aplikasi_perhitungan_penalty              (binary alternatif)
+  - AplikasiPerhitunganPenalty.desktop        (launcher alternatif)
+  - README.txt                                (file ini)
 
-CARA PAKAI (user awam):
+CARA PAKAI (PALING MUDAH):
+  1. Download file "AplikasiPenaltyShootout-x86_64.AppImage"
+  2. Klik kanan → Properties → centang "Allow executing file as program"
+     ATAU jalankan: chmod +x AplikasiPenaltyShootout-x86_64.AppImage
+  3. Klik 2x file AppImage → permainan langsung jalan!
+  4. Tidak perlu install, tidak perlu terminal, tidak perlu dependensi.
+
+CARA PAKAI (ALTERNATIF - launcher):
   1. Extract folder ini ke mana saja.
-  2. Klik kanan "PenaltyShootout.desktop" -> "Allow Launching" 
-     atau langsung dobel-klik.
-  3. Terminal otomatis terbuka dan permainan jalan.
-  4. Setelah selesai, tekan Enter untuk menutup terminal.
+  2. Klik kanan "AplikasiPerhitunganPenalty.desktop" → "Allow Launching"
+  3. Klik 2x → terminal terbuka → permainan jalan.
 
 SYARAT:
-  - Sistem Linux (x86_64). Binary ini untuk arsitektur 64-bit.
-  - ncurses sudah terpasang di hampir semua distro Linux
-    (Ubuntu/Debian/Fedora bawaan) -> TIDAK perlu install apa-apa,
-    TIDAK perlu koneksi internet.
+  - Sistem Linux (x86_64). Untuk arsitektur 64-bit.
+  - TIDAK perlu install apa-apa, TIDAK perlu koneksi internet.
+  - Semua dependensi (ncurses) sudah dibungkus ke dalam AppImage.
 
-CATATAN UNTUK DISTRIBUTOR:
-  - Binary ini dibuild di Fedora (glibc modern). Untuk kompatibilitas
-    maksimal ke distro lama, rebuild di distro lama/stable.
-  - Bila ingin binary 100% tanpa dependensi (self-contained), jalankan
-    build_static.sh (butuh ncurses static: compile ncurses dari sumber).
+CATATAN:
+  - AppImage = satu file yang berisi semua yang dibutuhkan.
+  - Bisa dijalankan di Ubuntu, Fedora, Debian, Arch, dll.
+  - Tidak perlu root/sudo.
+  - Untuk kompatibilitas maksimal ke distro lama, rebuild di distro lama.

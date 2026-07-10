@@ -33,9 +33,9 @@ void tui_normal_row(int row, int col, int width, const char *text);
 /* Input */
 int tui_getch(void);
 
-/* Key constants */
-#define TUI_KEY_UP     259
-#define TUI_KEY_DOWN   258
+/* Key constants – gunakan definisi asli curses agar portabel */
+#define TUI_KEY_UP     KEY_UP
+#define TUI_KEY_DOWN   KEY_DOWN
 #define TUI_KEY_ENTER  10
 #define TUI_KEY_ESC    27
 

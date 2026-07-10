@@ -3,6 +3,17 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
+
+static size_t trim_spaces(char *str) {
+    if (str == NULL) return 0;
+    char *start = str;
+    while (*start == ' ') start++;
+    if (start != str) memmove(str, start, strlen(start) + 1);
+    size_t len = strlen(str);
+    while (len > 0 && str[len - 1] == ' ') str[--len] = '\0';
+    return len;
+}
 
 static void show_error(RegistrationError e) {
     const char *msg;
@@ -64,6 +75,9 @@ void cli_surfaces_registration_execute(RegistrationAggregate *agg, CompetitionSt
         size_t len = strlen(buffer);
         while (len > 0 && (buffer[len - 1] == '\n' || buffer[len - 1] == '\r'))
             buffer[--len] = '\0';
+
+        trim_spaces(buffer);
+        len = strlen(buffer);
 
         if (len == 0) {
             if (state->participant_count >= MIN_PARTICIPANTS) break;
