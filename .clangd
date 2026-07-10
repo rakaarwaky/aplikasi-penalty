@@ -1,0 +1,13 @@
+CompileFlags:
+  Add:
+    - -std=c99
+    - -Wall
+    - -Wextra
+    - -Isrc
+    - -Isrc/shared
+    - -Isrc/registration
+    - -Isrc/scoring
+    - -Isrc/ranking
+    - -Isrc/search
+    - -Isrc/recap
+    - -Isrc/cli
