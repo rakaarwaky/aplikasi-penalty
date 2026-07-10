@@ -10,6 +10,7 @@ extern void run_sanitizer_tests(void);
 extern void run_integration_tests(void);
 extern void run_export_tests(void);
 extern void run_logger_tests(void);
+extern void run_coverage_gap_tests(void);
 
 int main(void) {
     printf("========================================\n");
