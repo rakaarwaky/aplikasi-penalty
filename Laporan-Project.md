@@ -125,8 +125,6 @@ graph TD
 
 ## 4. Struktur (struct)
 
-**Struct** (structure) adalah tipe data yang membungkus beberapa variabel menjadi satu kesatuan. Di program ini, seluruh data dibungkus dalam *Value Object* (VO) di `src/shared/` supaya tipe tidak tertukar saat kompilasi. Daftar di bawah adalah **TIPE (cetakan)**, bukan variabel — variabel yang dibuat dari tipe-tipe ini dicantumkan di Section 6. Tipe aggregate (`RegistrationAggregate`, `ScoringAggregate`, dll.) didefinisikan di `contract_*_aggregate.h` / `module.*.h` dan menjadi tipe bagi variabel aggregate di Section 6. Berikut struct yang ada di source:
-
 | Struct | Keterangan |
 |---|---|
 | `CompetitionState` | Wadah status lomba utama; menampung array peserta, jumlah peserta, dan tahap lomba; di-pass via pointer dari `main()` (tanpa variabel global). |
@@ -145,8 +143,6 @@ graph TD
 ---
 
 ## 5. Konstanta
-
-Konstanta terpusat di `taxonomy_game_constant.h`:
 
 | Konstanta | Nilai | Keterangan |
 |---|---|---|
@@ -168,8 +164,6 @@ Konstanta terpusat di `taxonomy_game_constant.h`:
 
 ## 6. Variabel
 
-**Variabel** adalah wadah nyata di memori yang menyimpan nilai. Ia bisa bertipe dasar (mis. `int`) maupun bertipe **struct** — artinya sebuah variabel yang tipenya adalah struct akan membungkus variabel-variabel lain di dalamnya. Aplikasi sengaja TIDAK menggunakan variabel global untuk data lomba. Di bawah ini, setiap baris adalah **VARIABEL (instance)** yang dibuat di `main()`; kolom *Jenis* menunjukkan apakah variabel itu bertipe dasar atau bertipe struct. Seluruh state lomba disimpan di `main()` lalu di-pass via pointer ke tiap fitur. Variabel yang ada di `root_cli_main_entry.c`:
-
 | Variabel | Jenis | Keterangan |
 |---|---|---|
 | `CompetitionState state` | Struct (`CompetitionState`, Sect. 4) | Satu-satunya wadah data lomba; diinisialisasi `participant_count = 0` dan `state = STATE_INIT`, lalu di-pass ke seluruh fitur via pointer. |
@@ -177,10 +171,9 @@ Konstanta terpusat di `taxonomy_game_constant.h`:
 | `char line[64]` | Dasar (`char`) | Buffer baris untuk menampilkan juara di layar penutup. |
 | `const char *winner`, `*second`, `*third` | Dasar (pointer `char`) | Pointer nama juara 1–3 di layar penutup. |
 
-Catatan: tipe-tipe contract (`RegistrationAggregate`, `ScoringAggregate`, `RankingAggregate`, `SearchAggregate`, `RecapAggregate`, `SanitizeAggregate`, `StorageAggregate`, `ExportAggregate`, `DisplayPort`) **bukan variabel** — mereka adalah struct/contract yang didefinisikan di `contract_*_aggregate.h` / `module.*.h` (lihat Section 4 & ARCHITECTURE.md). Di `main()`, yang diinstansiasi menjadi variabel bertipe contract tersebut adalah `reg, sc, rk, sr, rc, sn, st, ex` (aggregate) dan `dp` (DisplayPort); surfaces memanggil domain **lewat** variabel-variabel contract itu sebagai pintu masuk (AES: aggregate = satu-satunya pintu masuk surfaces ke domain).
+---
 
-
-Fungsi domain & infrastruktur utama (semua ada di `src/`):
+## 7. Fungsi
 
 | Fungsi | Keterangan |
 |---|---|
