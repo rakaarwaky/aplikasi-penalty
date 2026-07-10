@@ -38,6 +38,8 @@ static ScoringError read_zone(ZoneVO *out) {
 static void draw_scoring_screen(ParticipantEntity *part, const char *msg, int msg_is_error) {
     tui_clear();
 
+    /* Breadcrumb */
+    tui_print_centered_colored(0, "Menu Utama > Input Tendangan", COLOR_DIM, 0);
     tui_print_centered_colored(1, "INPUT TENDANGAN DAN SKOR", COLOR_TITLE, 1);
     tui_box(BOX_ROW, BOX_COL, BOX_WIDTH, BOX_HEIGHT);
     tui_separator(BOX_ROW + 1, BOX_COL, BOX_WIDTH);
@@ -95,7 +97,7 @@ static void draw_scoring_screen(ParticipantEntity *part, const char *msg, int ms
     attroff(COLOR_PAIR(COLOR_DIM));
 
     attron(COLOR_PAIR(COLOR_INFO) | A_BOLD);
-    mvprintw(BOX_ROW + 11, BOX_COL + 2, "Masukkan zona (0-%d): ", MAX_ZONE);
+    mvprintw(BOX_ROW + 11, BOX_COL + 2, "Masukkan zona (0-%d, contoh: 5): ", MAX_ZONE);
     attroff(COLOR_PAIR(COLOR_INFO) | A_BOLD);
 
     if (msg != NULL && msg[0] != '\0') {

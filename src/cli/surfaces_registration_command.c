@@ -36,6 +36,8 @@ static void draw_registration_screen(CompetitionState *state) {
     int count = state->participant_count;
     int box_height = count + 13;
 
+    /* Breadcrumb */
+    tui_print_centered_colored(0, "Menu Utama > Pendaftaran Peserta", COLOR_DIM, 0);
     tui_print_centered_colored(1, "PENDAFTARAN PESERTA", COLOR_TITLE, 1);
     tui_box(BOX_ROW, BOX_COL, BOX_WIDTH, box_height);
     tui_separator(BOX_ROW + 1, BOX_COL, BOX_WIDTH);
@@ -84,7 +86,7 @@ void cli_surfaces_registration_execute(RegistrationAggregate *agg, CompetitionSt
         error_row = BOX_ROW + count + 13 - 2;
 
         attron(COLOR_PAIR(COLOR_INFO) | A_BOLD);
-        mvprintw(row, BOX_COL + 2, "Nama peserta #%d: ", count + 1);
+        mvprintw(row, BOX_COL + 2, "Nama peserta #%d (contoh: \"Budi Santoso\"): ", count + 1);
         attroff(COLOR_PAIR(COLOR_INFO) | A_BOLD);
         refresh();
 
@@ -143,7 +145,7 @@ void cli_surfaces_registration_execute(RegistrationAggregate *agg, CompetitionSt
     mvprintw(final_error_row, BOX_COL + 2, "Total peserta: %d", final_count);
     attroff(COLOR_PAIR(COLOR_SUCCESS) | A_BOLD);
 
-    tui_footer("Tekan ENTER untuk kembali ke menu utama");
+    tui_footer("[ENTER] Lanjut  [q] Kembali");
     refresh();
     tui_getch();
 }

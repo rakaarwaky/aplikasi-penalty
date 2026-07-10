@@ -111,7 +111,7 @@ static void draw_menu(int selected, CompetitionStateKind state) {
     tui_print_colored(BOX_START_ROW + MENU_ITEMS + 3, BOX_START_COL + 2, state_text, state_color);
 
     /* Petunjuk navigasi */
-    tui_footer("Navigasi: [v/^]  Pilih: [ENTER]  Keluar: [0/ESC]");
+    tui_footer("[v/^] Pilih  [ENTER] OK  [q/0/ESC] Keluar");
 
     refresh();
 }
@@ -144,7 +144,8 @@ int cli_surfaces_menu_run(RegistrationAggregate *reg,
                 break;
             case TUI_KEY_ENTER:
                 if (selected == 0) {
-                    running = 0;
+                    if (tui_confirm("Yakin ingin keluar?"))
+                        running = 0;
                 } else if (selected == 1) {
                     if (state->state == STATE_INIT || state->state == STATE_REGISTERED)
                         cli_surfaces_registration_execute(reg, state);
@@ -166,7 +167,12 @@ int cli_surfaces_menu_run(RegistrationAggregate *reg,
                 running = 0;
                 break;
             case '0':
-                running = 0;
+                if (tui_confirm("Yakin ingin keluar?"))
+                    running = 0;
+                break;
+            case 'q':
+                if (tui_confirm("Yakin ingin keluar?"))
+                    running = 0;
                 break;
         }
     }
