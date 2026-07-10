@@ -1,4 +1,4 @@
-/* SANITIZER — Infrastructure Implementation */
+/* SANITIZER — Capabilities (Validation Logic) */
 #include "module.sanitizer.h"
 #include <ctype.h>
 #include <string.h>
