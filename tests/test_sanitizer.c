@@ -39,7 +39,7 @@ static void test_validate_int_invalid(void) {
 }
 
 static void test_validate_int_out_of_range(void) {
-    assert(sanitizer_validate_int("15", 0, 10) == SANITIZE_ERROR_TOO_LONG);
+    assert(sanitizer_validate_int("15", 0, 10) == SANITIZE_ERROR_OUT_OF_RANGE);
     printf("  [PASS] test_validate_int_out_of_range\n");
 }
 
