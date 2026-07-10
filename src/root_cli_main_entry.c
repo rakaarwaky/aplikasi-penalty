@@ -41,6 +41,7 @@ int main(void) {
     RecapAggregate        rc  = root_recap_build(rk.protocol);
     SanitizeAggregate     sn  = root_sanitize_build();
     StorageAggregate      st  = root_storage_build();
+    ExportAggregate       ex  = root_export_build();
 
     /* Hidupkan layar ncurses, rakit DisplayPort, lalu langsung ke menu utama. */
     tui_init();
@@ -53,7 +54,7 @@ int main(void) {
         agent_storage_load(&st, DEFAULT_STORAGE_FILENAME, &state);
     }
 
-    cli_surfaces_menu_run(&reg, &sc, &rk, &sr, &rc, &st, &state, &dp, &sn);
+    cli_surfaces_menu_run(&reg, &sc, &rk, &sr, &rc, &st, &ex, &state, &dp, &sn);
 
     /* D2: Ringkasan juara sebelum keluar — tampilkan di ncurses, tunggu Enter. */
     if (state.state == STATE_COMPLETED && state.participant_count > 0) {

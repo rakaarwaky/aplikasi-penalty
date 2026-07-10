@@ -16,6 +16,7 @@
 #include "search/module.search.h"
 #include "recap/module.recap.h"
 #include "storage/module.storage.h"
+#include "export/module.export.h"
 
 DisplayPort root_display_build(void);
 
@@ -23,7 +24,8 @@ DisplayPort root_display_build(void);
 int cli_surfaces_menu_run(RegistrationAggregate *reg,
                           ScoringAggregate *sc, RankingAggregate *rk,
                           SearchAggregate *sr, RecapAggregate *rc,
-                          StorageAggregate *st, CompetitionState *state,
+                          StorageAggregate *st, ExportAggregate *ex,
+                          CompetitionState *state,
                           DisplayPort *dp, SanitizeAggregate *sn);
 
 void cli_surfaces_registration_execute(RegistrationAggregate *agg,
@@ -33,10 +35,13 @@ void cli_surfaces_scoring_execute(ScoringAggregate *agg,
                                   CompetitionState *state, DisplayPort *dp,
                                   SanitizeAggregate *sn);
 void cli_surfaces_ranking_execute(RankingAggregate *agg,
+                                  ExportAggregate *ex,
                                   CompetitionState *state, DisplayPort *dp);
 void cli_surfaces_search_execute(SearchAggregate *agg,
+                                 ExportAggregate *ex,
                                  CompetitionState *state, DisplayPort *dp);
 void cli_surfaces_recap_execute(RecapAggregate *agg,
+                                ExportAggregate *ex,
                                 CompetitionState *state, DisplayPort *dp);
 void cli_surfaces_storage_execute(StorageAggregate *agg,
                                   CompetitionState *state, DisplayPort *dp);
