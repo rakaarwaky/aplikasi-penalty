@@ -81,6 +81,37 @@ int addstr(const char *s) { (void)s; return 0; }
 int attron(attr_t a) { (void)a; return 0; }
 int attroff(attr_t a) { (void)a; return 0; }
 
+/*
+ * Stub versi window (w*) — ncurses.h memetakan makro attron/getch/refresh/
+ * addstr/dll ke wattron(stdscr,...)/wgetch(stdscr)/... saat file ini di-
+ * compile bersama adapter. Karena test TIDAK link -lncursesw, semua simbol
+ * w* harus disediakan di sini agar linker puas.
+ */
+int wattron(WINDOW *w, attr_t a) { (void)w; (void)a; return 0; }
+int wattroff(WINDOW *w, attr_t a) { (void)w; (void)a; return 0; }
+int wgetch(WINDOW *w) {
+    (void)w;
+    if (g_keys_len > 0) {
+        int k = g_keys[0];
+        memmove(g_keys, g_keys + 1, (size_t)(--g_keys_len) * sizeof(int));
+        return k;
+    }
+    return 0;
+}
+int wrefresh(WINDOW *w) { (void)w; return 0; }
+int wclear(WINDOW *w) { (void)w; return 0; }
+int waddstr(WINDOW *w, const char *s) { (void)w; (void)s; return 0; }
+int waddnstr(WINDOW *w, const char *s, int n) { (void)w; (void)s; (void)n; return 0; }
+int waddch(WINDOW *w, chtype c) { (void)w; (void)c; return 0; }
+int wmove(WINDOW *w, int y, int x) { (void)w; (void)y; (void)x; return 0; }
+int wprintw(WINDOW *w, const char *fmt, ...) { (void)w; (void)fmt; return 0; }
+int wgetnstr(WINDOW *w, char *buf, int n) {
+    (void)w;
+    if (n <= 0 || buf == NULL) return 0;
+    pop_str(buf, n);
+    return 0;
+}
+
 /* ── Input ── */
 int getch(void) {
     if (g_keys_len > 0) {
@@ -120,3 +151,19 @@ int mvgetnstr(int y, int x, char *buf, int n) {
 }
 
 int confirm(const char *prompt) { (void)prompt; return 1; }
+
+/* ── Stub fungsi ncurses yang berawalan 'w' (di-rename oleh makro ncurses.h) ── */
+int wmove(WINDOW *win, int y, int x) { (void)win;(void)y;(void)x; return 0; }
+int waddch(WINDOW *win, chtype ch) { (void)win;(void)ch; return 0; }
+int wattr_on(WINDOW *win, attr_t attr, void *opts) { (void)win;(void)attr;(void)opts; return 0; }
+int wattr_off(WINDOW *win, attr_t attr, void *opts) { (void)win;(void)attr;(void)opts; return 0; }
+int wgetnstr(WINDOW *win, char *str, int n) { (void)win; return getnstr(str, n); }
+int wbkgd(WINDOW *win, chtype ch) { (void)win;(void)ch; return 0; }
+int wclear(WINDOW *win) { (void)win; return 0; }
+int wgetch(WINDOW *win) { (void)win; return getch(); }
+int wrefresh(WINDOW *win) { (void)win; return 0; }
+int waddnstr(WINDOW *win, const char *str, int n) { (void)win;(void)str;(void)n; return 0; }
+int wattron(WINDOW *win, int attrs) { (void)win;(void)attrs; return 0; }
+int wattroff(WINDOW *win, int attrs) { (void)win;(void)attrs; return 0; }
+int mvwprintw(WINDOW *win, int y, int x, const char *fmt, ...) { (void)win;(void)y;(void)x;(void)fmt; return 0; }
+int waddstr(WINDOW *win, const char *str) { (void)win;(void)str; return 0; }
