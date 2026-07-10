@@ -123,22 +123,48 @@ graph TD
 
 ---
 
-## 4. Struktur (struct)
+## 4. Struktur (struct & enum)
 
 | Struct | Keterangan |
 |---|---|
-| `CompetitionState` | Wadah status lomba utama; menampung array peserta, jumlah peserta, dan tahap lomba; di-pass via pointer dari `main()` (tanpa variabel global). |
-| `CompetitionStateKind` | Enum tahap lomba: `STATE_INIT` (belum ada peserta), `STATE_REGISTERED` (boleh tendang & cari), `STATE_COMPLETED` (boleh ranking & recap). |
-| `ParticipantEntity` | Satu peserta lengkap: id, nama, 7 hasil tendangan (`kicks`), total skor, frekuensi zona, dan jumlah tendangan dilakukan. |
-| `ParticipantIdVO` | Pembungkus nomor urut peserta (indeks dalam array data). |
-| `ParticipantNameVO` | Pembungkus nama peserta (`char[MAX_NAME_LENGTH+1]`) agar batas panjang terjaga. |
+| `CompetitionState` | Wadah status lomba utama; menampung array peserta, jumlah peserta, dan tahap lomba. |
+| `CompetitionStateKind` | Enum tahap lomba: `STATE_INIT`, `STATE_REGISTERED`, `STATE_COMPLETED`. |
+| `ParticipantEntity` | Satu peserta lengkap: id, nama, 7 hasil tendangan (`kicks`), total skor, frekuensi zona, jumlah tendangan. |
+| `ParticipantIdVO` | Pembungkus nomor urut peserta (indeks array data). |
+| `ParticipantNameVO` | Pembungkus nama peserta (`char[MAX_NAME_LENGTH+1]`). |
 | `KickVO` | Satu tendangan: `zone` (0–5) dan `points` (sama dengan zone). |
-| `ZoneVO` | Pembungkus nilai zona (0..5, 0 = miss) agar tidak tertukar dengan id/poin. |
+| `ZoneVO` | Pembungkus nilai zona (0..5, 0 = miss). |
 | `TotalScoreVO` | Pembungkus total skor peserta (0..35 = 7 × 5). |
-| `ZoneFreqVO` | Frekuensi tiap zona (0..5), dipakai pemecah seri peringkat. |
-| `KickCountVO` | Pembungkus jumlah tendangan yang sudah dilakukan (0..TOTAL_KICKS). |
-| `RankingEntryVO` | Satu baris hasil peringkat (ranking & recap): id, total skor, frekuensi zona, dan posisi rank. |
-| `SearchResultVO` | Balikan pencarian peserta: status ketemu, id, nama, skor, riwayat tendangan, dan frekuensi zona. |
+| `ZoneFreqVO` | Frekuensi tiap zona (0..5), pemecah seri peringkat. |
+| `KickCountVO` | Pembungkus jumlah tendangan dilakukan (0..TOTAL_KICKS). |
+| `RankingEntryVO` | Satu baris hasil peringkat: `participant_id`, `total_score`, `zone_freq[MAX_ZONE+1]`, `rank`. |
+| `SearchResultVO` | Balikan pencarian: status, id, nama, skor, riwayat tendangan, frekuensi zona. |
+| `RegistrationAggregate` | Contract aggregate pendaftaran (`contract_registration_aggregate.h`). |
+| `ScoringAggregate` | Contract aggregate scoring (`contract_scoring_aggregate.h`). |
+| `RankingAggregate` | Contract aggregate ranking (`contract_ranking_aggregate.h`). |
+| `SearchAggregate` | Contract aggregate pencarian (`contract_search_aggregate`/surfaces). |
+| `RecapAggregate` | Contract aggregate rekap (`contract_recap_aggregate.h`). |
+| `SanitizeAggregate` | Contract aggregate validasi input (`contract_sanitize_aggregate.h`). |
+| `StorageAggregate` | Contract aggregate penyimpanan (`module.storage.h`). |
+| `ExportAggregate` | Contract aggregate ekspor (`module.export.h`). |
+| `DisplayPort` | Antarmuka render struct function-pointer (`contract_display_port.h`). |
+| `RegistrationProtocol` | Contract port pendaftaran (`contract_registration_protocol.h`). |
+| `ScoringProtocol` | Contract port scoring (`contract_scoring_protocol.h`). |
+| `RankingProtocol` | Contract port ranking (`contract_ranking_protocol.h`). |
+| `SearchProtocol` | Contract port pencarian (`contract_search_protocol.h`). |
+| `SanitizeProtocol` | Contract port validasi (`contract_sanitize_protocol.h`). |
+| `ExportProtocol` | Contract port ekspor (`contract_export_protocol.h`). |
+
+| Enum | Nilai |
+|---|---|
+| `RegistrationError` | `REG_OK=0`, `REG_NAME_EMPTY`, `REG_NAME_TOO_LONG`, `REG_NAME_INVALID_CHAR`, `REG_NAME_DUPLICATE`, `REG_FULL`, `REG_TOO_FEW` |
+| `ScoringError` | `SC_OK=0`, `SC_INVALID_ZONE`, `SC_NOT_REGISTERED`, `SC_ALREADY_DONE`, `SC_PARTICIPANT_NOT_FOUND` |
+| `RankingError` | `RK_OK=0`, `RK_NOT_READY`, `RK_NO_PARTICIPANT` |
+| `SearchError` | `SR_OK=0`, `SR_NOT_FOUND`, `SR_EMPTY_QUERY` |
+| `RecapError` | `RC_OK=0`, `RC_NOT_READY` |
+| `ExportError` | `EX_OK=0`, `EX_OPEN_FAIL`, `EX_WRITE_FAIL`, `EX_READ_FAIL`, `EX_EMPTY`, `EX_CORRUPT`, `EX_CLOSE_FAIL` |
+| `SanitizeError` | `SZ_OK=0`, `SZ_EMPTY`, `SZ_TOO_LONG`, `SZ_INVALID_CHAR`, `SZ_INVALID_INT`, `SZ_OUT_OF_RANGE`, `SZ_UNKNOWN` |
+| `LogLevel` | `LOG_DEBUG`, `LOG_INFO`, `LOG_WARN`, `LOG_ERROR` |
 
 ---
 
