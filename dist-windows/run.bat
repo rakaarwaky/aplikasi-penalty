@@ -1,7 +1,5 @@
 @echo off
-rem Buka di Command Prompt, jalankan app, lalu biarkan jendela tetap terbuka.
+rem Klik 2x untuk menjalankan. App akan menahan jendela sampai Anda
+rem menekan Enter (tidak langsung tertutup).
 cd /d "%~dp0"
 aplikasi_perhitungan_penalty.exe
-echo.
-echo Tekan sembarang tombol untuk keluar...
-pause >nul

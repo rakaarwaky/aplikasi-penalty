@@ -16,5 +16,11 @@ int main(void) {
     cli_surfaces_menu_run(&reg, &sc, &rk, &sr, &rc, &state);
     tui_end();
 
+    /* Tahan jendela agar user bisa baca hasil sebelum tertutup
+       (penting di Windows: .exe langsung menutup jendela saat exit). */
+    printf("\nTekan Enter untuk keluar...");
+    fflush(stdout);
+    getchar();
+
     return 0;
 }

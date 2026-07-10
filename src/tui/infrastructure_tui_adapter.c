@@ -30,7 +30,7 @@ void tui_end(void) {
 }
 
 void tui_clear(void) {
-    erase();
+    clear();
 }
 
 void tui_print(int row, int col, const char *text) {
