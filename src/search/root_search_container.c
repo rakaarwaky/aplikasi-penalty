@@ -1,15 +1,15 @@
 /**
  * @file root_search_container.c
- * @brief Root container: rakit SearchAggregate (wiring protocol ke capabilities).
+ * @brief Siapkan struct pencarian dan sambungkan ke fungsi cari.
  */
 
 #include "search/module.search.h"
 
 /**
- * Bangun SearchAggregate: sambungkan protocol ke capability konkret.
- * Protocol `static` agar pointer-nya stabil untuk aggregate.
+ * Bangun struct pencarian: isi dengan alamat fungsi cari peserta
+ * agar siap dipakai seluruh program.
  *
- * @return SearchAggregate — berisi pointer protocol yang terisi.
+ * @return SearchAggregate yang sudah terisi.
  */
 SearchAggregate root_search_build(void) {
     static SearchProtocol protocol;

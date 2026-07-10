@@ -1,31 +1,26 @@
 /**
  * @file capabilities_recap_formatter.c
- * @brief Capability: susun detail per peserta untuk rekapitulasi (murni, tanpa I/O).
+ * @brief Kumpulkan data tiap peserta untuk ditampilkan di rekapitulasi.
  */
 
 #include "recap/module.recap.h"
 
 /**
- * Isikan array detail dengan data seluruh peserta (indeks = participant_id).
+ * Salin data seluruh peserta ke array hasil rekap.
  *
- * File ini HANYA menyusun detail; urutan/ranking TIDAK dihitung di sini
- * — recap meminjam RankingProtocol dari fitur ranking (lihat agent).
- * Data yang disalin: nama, total_score, kicks, zone_freq.
- *
- * @param state    Pointer ke state kompetisi (read-only).
- * @param details  Array SearchResultVO tujuan (minimal participant_count).
- * @param capacity Kapasitas array details.
- * @return         RecapError: RC_NOT_READY (NULL/state belum COMPLETED/kuota),
- *                 RC_OK.
+ * @param state    Data lomba (hanya dibaca).
+ * @param details Tempat menulis data tiap peserta.
+ * @param capacity Cukupnya ruang pada array details.
+ * @return         RC_OK bila berhasil, atau error bila belum siap/ruang kurang.
  */
 RecapError capabilities_recap_prepare_details(const CompetitionState *state,
                                               SearchResultVO *details, int capacity) {
-    /* Guard: pointer & kapasitas. */
+    /* Data atau ruang tidak sah. */
     if (state == NULL || details == NULL) return RC_NOT_READY;
     if (state->state != STATE_COMPLETED) return RC_NOT_READY;
     if (capacity < state->participant_count) return RC_NOT_READY;
 
-    /* Salin data tiap peserta ke entri detail. */
+    /* Salin data tiap peserta ke hasil. */
     for (int i = 0; i < state->participant_count; i++) {
         const ParticipantEntity *p = &state->participants[i];
         details[i].found = 1;

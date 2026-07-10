@@ -1,18 +1,15 @@
 /**
  * @file root_registration_container.c
- * @brief Root container: rakit RegistrationAggregate (wiring protocol ke capabilities).
+ * @brief Siapkan struct pendaftaran dan sambungkan ke fungsi cek & simpan.
  */
 
 #include "registration/module.registration.h"
 
 /**
- * Bangun RegistrationAggregate dengan menyambungkan function-pointer
- * protocol ke implementasi capabilities konkret.
+ * Bangun struct pendaftaran: isi dengan alamat fungsi cek nama
+ * dan fungsi simpan peserta agar siap dipakai seluruh program.
  *
- * Protocol disimpan di `static` agar alamatnya stabil (tidak dibebas
- * setelah fungsi kembali — aggregate hanya menyimpan pointer).
- *
- * @return RegistrationAggregate — berisi pointer protocol yang terisi.
+ * @return RegistrationAggregate yang sudah terisi.
  */
 RegistrationAggregate root_registration_build(void) {
     static RegistrationProtocol protocol;

@@ -1,43 +1,38 @@
 /**
  * @file capabilities_scoring_score_calculator.c
- * @brief Capability: catat satu tendangan & akumulasi skor (murni, tanpa I/O).
+ * @brief Catat satu tendangan peserta dan akumulasikan skornya.
  */
 
 #include "scoring/module.scoring.h"
 
 /**
- * Catat tendangan ke-`kick_count` milik peserta `id`.
+ * Rekam tendangan ke-`kick_count` milik peserta, lalu perbarui skor.
  *
- * Efek samping (mutasi state):
- *   - kicks[kick_count]   = zona
- *   - total_score         += zona
- *   - zone_freq[zona]     += 1
- *   - kick_count          += 1
- *   - Bila SELURUH peserta sudah TOTAL_KICKS tendangan → state ke STATE_COMPLETED.
+ * Yang diubah: simpan zona ke riwayat, tambah skor, hitung frekuensi
+ * zona, dan tandai bila seluruh peserta sudah menyelesaikan tendangan.
  *
- * @param state  Pointer ke state kompetisi (dimodifikasi).
- * @param id     ID peserta (indeks array).
- * @param zone   ZoneVO zona tendangan.
- * @return       ScoringError: SC_PARTICIPANT_NOT_FOUND (id salah),
- *               SC_ALREADY_DONE (kuota tendangan peserta penuh), SC_OK.
+ * @param state  Data lomba yang akan diubah.
+ * @param id     Nomor peserta (indeks dalam data).
+ * @param zone   Zona tendangan yang dicatat.
+ * @return       SC_OK bila berhasil, atau error bila id/peserta tak sah.
  */
 ScoringError capabilities_scoring_record_kick(CompetitionState *state, int id, ZoneVO zone) {
-    /* Guard: id harus valid & dalam rentang peserta terdaftar. */
+    /* Nomor peserta harus valid. */
     if (state == NULL || id < 0 || id >= state->participant_count)
         return SC_PARTICIPANT_NOT_FOUND;
     ParticipantEntity *p = &state->participants[id];
 
-    /* Guard: peserta sudah menyelesaikan semua tendangannya. */
+    /* Peserta sudah melakukan semua tendangannya. */
     if (p->kick_count >= TOTAL_KICKS) return SC_ALREADY_DONE;
 
-    /* Rekam tendangan ke slot berikutnya. */
+    /* Simpan hasil tendangan ke slot berikutnya. */
     int k = p->kick_count;
     p->kicks[k] = zone.value;
-    p->total_score += zone.value;
-    p->zone_freq[zone.value]++;
+    p->total_score += zone.value;       /* skor = jumlah semua zona */
+    p->zone_freq[zone.value]++;        /* hitung frekuensi zona ini */
     p->kick_count++;
 
-    /* Cek transisi state machine: REGISTERED -> COMPLETED bila semua selesai. */
+    /* Bila semua peserta sudah selesai, tandai lomba selesai. */
     if (state->state == STATE_REGISTERED) {
         int all = 1;
         for (int i = 0; i < state->participant_count; i++)

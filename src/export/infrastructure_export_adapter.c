@@ -1,6 +1,6 @@
 /**
  * @file infrastructure_export_adapter.c
- * @brief Infrastructure: implementasi ExportProtocol — tulis ranking ke file TXT (AES404: port impl).
+ * @brief Tulis hasil peringkat ke file teks berformat tabel.
  */
 
 /* EXPORT — Infrastructure Adapter (TXT file writer) */
@@ -8,14 +8,7 @@
 #include <stdio.h>
 #include <string.h>
 
-/* ──────────────────────────────────────────────
- * Tulis hasil ranking ke file teks (.txt) berformat
- * tabel: header + baris per peserta (rank, nama, skor)
- * + footer jumlah peserta.
- *
- * Nama diambil dari state->participants[pid].name
- * (bukan dari entries) agar selalu konsisten dgn state.
- * ────────────────────────────────────────────── */
+/* Tulis peringkat ke file .txt: judul, tabel rank/nama/skor, jumlah peserta. */
 static ExportError export_ranking_txt(const char *filename,
                                       const CompetitionState *state,
                                       const RankingEntryVO *entries,
@@ -24,15 +17,15 @@ static ExportError export_ranking_txt(const char *filename,
         return EXP_ERROR_FILE_NOT_FOUND;
     }
     if (count <= 0) {
-        return EXP_ERROR_EMPTY_DATA;
+        return EXP_ERROR_EMPTY_DATA; /* tidak ada data untuk diekspor */
     }
 
     FILE *file = fopen(filename, "w");
     if (file == NULL) {
-        return EXP_ERROR_PERMISSION;
+        return EXP_ERROR_PERMISSION; /* tidak bisa buka file */
     }
 
-    /* Header */
+    /* Judul. */
     fprintf(file, "========================================\n");
     fprintf(file, "  RANKING — C-AES Penalty Shootout\n");
     fprintf(file, "========================================\n\n");
@@ -40,7 +33,7 @@ static ExportError export_ranking_txt(const char *filename,
     fprintf(file, "%-6s %-20s %s\n", "Rank", "Name", "Score");
     fprintf(file, "------ -------------------- -----\n");
 
-    /* Baris per peserta. */
+    /* Satu baris per peserta. */
     for (int i = 0; i < count; i++) {
         int pid = entries[i].participant_id;
         const char *name = "Unknown";
@@ -53,7 +46,7 @@ static ExportError export_ranking_txt(const char *filename,
                 entries[i].total_score);
     }
 
-    /* Footer */
+    /* Jumlah peserta. */
     fprintf(file, "\n========================================\n");
     fprintf(file, "  Total participants: %d\n", count);
     fprintf(file, "========================================\n");
@@ -63,8 +56,7 @@ static ExportError export_ranking_txt(const char *filename,
 }
 
 /**
- * Bangun ExportProtocol dengan menyambungkan function-pointer
- * ke penulis file TXT di atas. Dipanggil oleh root container.
+ * Siapkan struct ekspor: sambungkan fungsi tulis file teks.
  */
 ExportProtocol export_adapter_create(void) {
     ExportProtocol p;

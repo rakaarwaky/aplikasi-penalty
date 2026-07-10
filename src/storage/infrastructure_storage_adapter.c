@@ -1,6 +1,6 @@
 /**
  * @file infrastructure_storage_adapter.c
- * @brief Infrastructure: implementasi StorageProtocol — I/O file biner state (AES404: port impl).
+ * @brief Baca/tulis data lomba dari/ke file biner.
  */
 
 /* STORAGE — Infrastructure Adapter (file I/O) */
@@ -8,12 +8,7 @@
 #include <stdio.h>
 #include <string.h>
 
-/* ──────────────────────────────────────────────
- * Implementasi konkret save: tulis seluruh struct
- * CompetitionState ke file biner (wb). Penulisan
- * 1 elemen berukuran sizeof(state) — cepat tapi
- * raw (tidak portabel antar arsitektur).
- * ────────────────────────────────────────────── */
+/* Tulis seluruh struct data lomba ke file biner. */
 static StorageError storage_save_impl(const char *filename, const CompetitionState *state) {
     if (filename == NULL || state == NULL) {
         return ST_ERROR_FILE_NOT_FOUND;
@@ -21,24 +16,20 @@ static StorageError storage_save_impl(const char *filename, const CompetitionSta
 
     FILE *file = fopen(filename, "wb");
     if (file == NULL) {
-        return ST_ERROR_PERMISSION;
+        return ST_ERROR_PERMISSION; /* tidak bisa buka file */
     }
 
     size_t written = fwrite(state, sizeof(CompetitionState), 1, file);
     fclose(file);
 
     if (written != 1) {
-        return ST_ERROR_CORRUPT;
+        return ST_ERROR_CORRUPT; /* penulisan tidak penuh */
     }
 
     return ST_OK;
 }
 
-/* ──────────────────────────────────────────────
- * Implementasi konkret load: baca file biner ke
- * struct state. Cek read_count == 1 untuk memastikan
- * file tidak rusak/terpotong.
- * ────────────────────────────────────────────── */
+/* Baca file biner ke struct data lomba. */
 static StorageError storage_load_impl(const char *filename, CompetitionState *state) {
     if (filename == NULL || state == NULL) {
         return ST_ERROR_FILE_NOT_FOUND;
@@ -53,15 +44,14 @@ static StorageError storage_load_impl(const char *filename, CompetitionState *st
     fclose(file);
 
     if (read_count != 1) {
-        return ST_ERROR_CORRUPT;
+        return ST_ERROR_CORRUPT; /* file rusak/terpotong */
     }
 
     return ST_OK;
 }
 
 /**
- * Bangun StorageProtocol dengan menyambungkan function-pointer
- * ke implementasi file I/O di atas. Dipanggil oleh root container.
+ * Siapkan struct penyimpan: sambungkan fungsi tulis & baca file.
  */
 StorageProtocol storage_adapter_create(void) {
     StorageProtocol protocol;

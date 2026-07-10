@@ -37,7 +37,10 @@ TEST_LIB_SRC := $(filter-out $(SRC_DIR)/root_cli_main_entry.c \
                   $(SRC_DIR)/tui/infrastructure_tui_adapter.c, $(C_SOURCES))
 TEST_BIN   := run_tests
 
-.PHONY: all clean run test lint format analyze metrics version valgrind
+PREFIX ?= /usr/local
+BINDIR  = $(PREFIX)/bin
+
+.PHONY: all clean run test lint format analyze metrics version valgrind install uninstall
 
 all: $(TARGET)
 
@@ -111,3 +114,12 @@ metrics:
 version:
 	@echo "Version: 1.0.0"
 	@echo "Build: $$(date +%Y%m%d)"
+
+# Install
+install: $(TARGET)
+	install -d $(DESTDIR)$(BINDIR)
+	install -m 755 $(TARGET) $(DESTDIR)$(BINDIR)/$(TARGET)
+
+# Uninstall
+uninstall:
+	rm -f $(DESTDIR)$(BINDIR)/$(TARGET)

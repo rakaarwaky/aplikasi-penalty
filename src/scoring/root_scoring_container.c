@@ -1,15 +1,15 @@
 /**
  * @file root_scoring_container.c
- * @brief Root container: rakit ScoringAggregate (wiring protocol ke capabilities).
+ * @brief Siapkan struct scoring dan sambungkan ke fungsi cek & catat.
  */
 
 #include "scoring/module.scoring.h"
 
 /**
- * Bangun ScoringAggregate: sambungkan protocol ke capabilities konkret.
- * Protocol `static` agar pointer-nya stabil untuk aggregate.
+ * Bangun struct scoring: isi dengan alamat fungsi cek zona dan
+ * fungsi catat tendangan agar siap dipakai seluruh program.
  *
- * @return ScoringAggregate — berisi pointer protocol yang terisi.
+ * @return ScoringAggregate yang sudah terisi.
  */
 ScoringAggregate root_scoring_build(void) {
     static ScoringProtocol protocol;

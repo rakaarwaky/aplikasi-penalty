@@ -1,14 +1,14 @@
-/* EXPORT — Module Declaration */
+/* EXPORT — Deklarasi Modul */
 #ifndef MODULE_EXPORT_H
 #define MODULE_EXPORT_H
 
 #include "shared/taxonomy_export_error.h"
 #include "shared/contract_export_protocol.h"
 
-/* INFRASTRUCTURE — file I/O implementation (implements ExportProtocol) */
+/* INFRASTRUCTURE — implementasi file I/O (mengimplementasikan ExportProtocol) */
 ExportProtocol export_adapter_create(void);
 
-/* AGENT — orchestration through protocol */
+/* AGENT — orkestrasi melalui protocol */
 typedef struct {
     const ExportProtocol *protocol;
 } ExportAggregate;

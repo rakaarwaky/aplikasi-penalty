@@ -1,17 +1,16 @@
 /**
  * @file root_export_container.c
- * @brief Root container: rakit ExportAggregate (wiring protocol ke infrastructure).
+ * @brief Siapkan struct ekspor dan sambungkan ke fungsi tulis file.
  */
 
 /* EXPORT — Root Container (wiring) */
 #include "export/module.export.h"
 
 /**
- * Bangun ExportAggregate.
- * Protocol di-buat via export_adapter_create() (infrastructure),
- * disimpan di `static` agar alamatnya stabil untuk aggregate.
+ * Bangun struct ekspor: isi dengan fungsi tulis file teks
+ * agar siap dipakai seluruh program.
  *
- * @return ExportAggregate — berisi pointer protocol yang terisi.
+ * @return ExportAggregate yang sudah terisi.
  */
 ExportAggregate root_export_build(void) {
     ExportAggregate agg;

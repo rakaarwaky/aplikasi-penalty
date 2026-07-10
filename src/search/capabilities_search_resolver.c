@@ -1,6 +1,6 @@
 /**
  * @file capabilities_search_resolver.c
- * @brief Capability: cari peserta berdasar nama (murni, tanpa I/O).
+ * @brief Cari peserta berdasar namanya.
  */
 
 #include "search/module.search.h"
@@ -8,13 +8,7 @@
 #include <string.h>
 #include <ctype.h>
 
-/* ──────────────────────────────────────────────
- * Helper lokal (static): perbandingan string
- * case-insensitive. Sama persis dengan yg di
- * registration validator — duplikasi disengaja
- * (masing-masing capability mandiri, tanpa shar
- * util lintas file untuk jaga batas layer).
- * ────────────────────────────────────────────── */
+/* Bandingkan dua string tanpa peduli huruf besar/kecil. */
 static int ci_equal(const char *a, const char *b) {
     while (*a && *b) {
         if (tolower((unsigned char)*a) != tolower((unsigned char)*b)) return 0;
@@ -24,26 +18,25 @@ static int ci_equal(const char *a, const char *b) {
 }
 
 /**
- * Cari peserta berdasar nama (case-insensitive, kecocokan persis).
+ * Cari peserta dari namanya (cocok persis, tak peduli kapital).
  *
- * Bila ditemukan, isikan SearchResultVO: found=1, participant_id,
- * salin nama/total_score/kicks/zone_freq. Bila tidak, found=0.
+ * Bila ketemu, isi SearchResultVO dengan data peserta tersebut.
  *
- * @param state  Pointer ke state kompetisi (read-only).
- * @param name   Pointer ke VO nama yang dicari.
- * @param out    Pointer ke SearchResultVO tujuan hasil.
- * @return       SearchError: SR_NOT_FOUND (NULL/kosong/tidak ada),
- *               SR_EMPTY_QUERY (query kosong), SR_OK.
+ * @param state  Data lomba (hanya dibaca).
+ * @param name   Nama yang dicari.
+ * @param out    Tempat menulis hasil pencarian.
+ * @return       SR_OK bila ketemu, SR_NOT_FOUND bila tak ada,
+ *               SR_EMPTY_QUERY bila nama kosong.
  */
 SearchError capabilities_search_find(const CompetitionState *state,
                                      const ParticipantNameVO *name,
                                      SearchResultVO *out) {
-    /* Guard: pointer wajib. */
+    /* Data atau nama tidak sah. */
     if (state == NULL || name == NULL || out == NULL) return SR_NOT_FOUND;
-    /* Guard: query kosong. */
+    /* Nama pencarian kosong. */
     if (name->value[0] == '\0') return SR_EMPTY_QUERY;
 
-    /* Linear scan peserta terdaftar. */
+    /* Cari satu-per-satu peserta yang namanya cocok. */
     for (int i = 0; i < state->participant_count; i++) {
         if (ci_equal(state->participants[i].name.value, name->value)) {
             out->found = 1;

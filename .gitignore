@@ -1,4 +1,26 @@
+# Build artifacts
+build/
+*.o
+
+# Binary
+aplikasi_perhitungan_penalty
+run_tests
+
+# Test artifacts
+*.dat
+
+# Valgrind output
+valgrind.out.*
+massif.out.*
+
 # Clang analysis output
 *.plist
+
 # IDE
 .clangd
+.cache/
+
+# Editor
+*~
+*.swp
+*.swo

@@ -1,6 +1,6 @@
 /**
  * @file capabilities_registration_validator.c
- * @brief Capability: validasi nama peserta sebelum registrasi (murni, tanpa I/O).
+ * @brief Cek validitas nama peserta sebelum didaftarkan.
  */
 
 #include "registration/module.registration.h"
@@ -8,11 +8,7 @@
 #include <string.h>
 #include <ctype.h>
 
-/* ──────────────────────────────────────────────
- * Helper lokal (static): perbandingan string
- * case-insensitive. Mengembalikan 1 jika sama.
- * Dipakai untuk deteksi duplikat nama peserta.
- * ────────────────────────────────────────────── */
+/* Bandingkan dua string tanpa peduli huruf besar/kecil. */
 static int ci_equal(const char *a, const char *b) {
     while (*a && *b) {
         if (tolower((unsigned char)*a) != tolower((unsigned char)*b)) return 0;
@@ -22,32 +18,28 @@ static int ci_equal(const char *a, const char *b) {
 }
 
 /**
- * Validasi nama peserta menurut aturan registrasi.
+ * Periksa apakah nama peserta sah untuk didaftarkan.
  *
- * Urutan pengecekan (short-circuit):
- *   1. NULL / string kosong            → REG_NAME_EMPTY
- *   2. Lebih dari MAX_NAME_LENGTH     → REG_NAME_TOO_LONG
- *   3. Karakter selain huruf/spasi    → REG_NAME_INVALID_CHAR
- *   4. Tidak ada satupun huruf        → REG_NAME_EMPTY
- *   5. Sudah terdaftar (case-insens)  → REG_NAME_DUPLICATE
+ * Urutan cek: kosong -> terlalu panjang -> ada karakter tak sah ->
+ * tidak ada huruf sama sekali -> nama sudah dipakai peserta lain.
  *
- * @param state  Pointer ke state kompetisi (const — hanya dibaca untuk cek duplikat).
- * @param name   Pointer ke VO nama yang akan divalidasi.
- * @return       RegistrationError — REG_OK jika seluruh aturan terpenuhi.
+ * @param state  Data lomba (hanya dibaca, untuk cek duplikat nama).
+ * @param name   Nama yang akan diperiksa.
+ * @return       REG_OK bila sah, atau kode error yang menjelaskan penyebabnya.
  */
 RegistrationError capabilities_registration_validate_name(const CompetitionState *state,
                                                           const ParticipantNameVO *name) {
-    /* 1. Nama NULL atau string kosong. */
+    /* Nama belum diisi sama sekali. */
     if (name == NULL || name->value[0] == '\0') return REG_NAME_EMPTY;
 
-    /* 2. Panjang melebihi batas maksimum nama (tanpa strlen untuk hindari UB). */
+    /* Melebihi batas panjang maksimum nama (safe: tanpa strlen). */
     size_t len = 0;
     while (len <= (size_t)MAX_NAME_LENGTH && name->value[len] != '\0') {
         len++;
     }
     if (len > (size_t)MAX_NAME_LENGTH) return REG_NAME_TOO_LONG;
 
-    /* 3 & 4. Scan karakter: hanya huruf/spasi sah; butuh >=1 huruf. */
+    /* Tiap huruf harus alfabet atau spasi; butuh minimal satu huruf. */
     int has_letter = 0;
     for (size_t i = 0; i < len; i++) {
         char c = name->value[i];
@@ -56,7 +48,7 @@ RegistrationError capabilities_registration_validate_name(const CompetitionState
     }
     if (!has_letter) return REG_NAME_EMPTY;
 
-    /* 5. Duplikat: bandingkan terhadap seluruh peserta terdaftar. */
+    /* Cek apakah nama sudah dipakai peserta yang terdaftar. */
     if (state != NULL) {
         for (int i = 0; i < state->participant_count; i++) {
             if (ci_equal(state->participants[i].name.value, name->value))

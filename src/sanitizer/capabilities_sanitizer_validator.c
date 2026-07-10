@@ -1,11 +1,6 @@
 /**
  * @file capabilities_sanitizer_validator.c
- * @brief Sanitizer: validasi input string & integer (murni, tanpa I/O terminal).
- *
- * File ini berada di folder sanitizer/ dengan awalan
- * capabilities_  — ia berisi logika validasi
- * murni; pemanggilan langsung (sanitizer_validate_*) juga disediakan
- * sebagai convenience wrapper di bawah.
+ * @brief Periksa keabsahan input teks & angka dari pengguna.
  */
 
 /* SANITIZER — Capabilities (Validation Logic) */
@@ -14,10 +9,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-/* ──────────────────────────────────────────────
- * Validasi string: NULL, panjang > max, atau
- * karakter non-printable = tidak sah.
- * ────────────────────────────────────────────── */
+/* Cek string: tidak kosong, tidak terlalu panjang, hanya karakter tercetak. */
 static SanitizeError validate_string_impl(const char *input, size_t max_length) {
     if (input == NULL) {
         return SANITIZE_ERROR_NULL_INPUT;
@@ -34,11 +26,7 @@ static SanitizeError validate_string_impl(const char *input, size_t max_length) 
     return SANITIZE_OK;
 }
 
-/* ──────────────────────────────────────────────
- * Validasi integer dari string: pakai strtol,
- * cek sisa (endptr) harus '\0' (input murni
- * angka), lalu cek rentang [min_val, max_val].
- * ────────────────────────────────────────────── */
+/* Cek angka: string harus angka murni dan dalam rentang [min,max]. */
 static SanitizeError validate_int_impl(const char *input, int min_val, int max_val) {
     if (input == NULL) {
         return SANITIZE_ERROR_NULL_INPUT;
@@ -46,16 +34,16 @@ static SanitizeError validate_int_impl(const char *input, int min_val, int max_v
     char *endptr;
     long val = strtol(input, &endptr, 10);
     if (*endptr != '\0' || endptr == input) {
-        return SANITIZE_ERROR_INVALID_CHARS;
+        return SANITIZE_ERROR_INVALID_CHARS; /* bukan angka */
     }
     if (val < min_val || val > max_val) {
-        return SANITIZE_ERROR_TOO_LONG;
+        return SANITIZE_ERROR_TOO_LONG; /* di luar rentang */
     }
     return SANITIZE_OK;
 }
 
 /**
- * Bangun SanitizeProtocol: sambungkan function-pointer ke impl di atas.
+ * Siapkan struct sanitasi: sambungkan fungsi cek string & angka.
  */
 SanitizeProtocol sanitizer_create(void) {
     SanitizeProtocol p;
@@ -64,14 +52,12 @@ SanitizeProtocol sanitizer_create(void) {
     return p;
 }
 
-/* ──────────────────────────────────────────────
- * Convenience wrapper: pemanggilan langsung tanpa
- * harus merakit protocol. Didelegasikan ke impl.
- * ────────────────────────────────────────────── */
+/* Cek string secara langsung (tanpa merakit struct). */
 SanitizeError sanitizer_validate_string(const char *input, size_t max_length) {
     return validate_string_impl(input, max_length);
 }
 
+/* Cek angka secara langsung (tanpa merakit struct). */
 SanitizeError sanitizer_validate_int(const char *input, int min_val, int max_val) {
     return validate_int_impl(input, min_val, max_val);
 }
