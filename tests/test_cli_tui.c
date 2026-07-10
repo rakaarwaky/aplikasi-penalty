@@ -46,9 +46,10 @@ static void play_to_completed(DisplayPort *dp, CompetitionState *state,
     assert(state->state == STATE_REGISTERED);
 
     /* Scoring: 5 peserta x 7 kick. Tiap kick: 1 zona + 1 readkey;
-       tiap peserta: +1 readkey akhir. Total 35 zona + 40 key. */
+       tiap peserta: +1 readkey akhir + 1 final all-done.
+       Total 35 zona + 41 key (35 kick + 5 selesai + 1 final). */
     for (i = 0; i < 35; i++) fake_tui_push_str("5");
-    for (i = 0; i < 40; i++) fake_tui_push_key(TUI_KEY_ENTER);
+    for (i = 0; i < 41; i++) fake_tui_push_key(TUI_KEY_ENTER);
     cli_surfaces_scoring_execute(sc, state, dp, sn);
     assert(state->state == STATE_COMPLETED);
     assert(state->participants[0].total_score.value == 35);
