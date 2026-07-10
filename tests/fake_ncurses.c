@@ -105,12 +105,6 @@ int waddnstr(WINDOW *w, const char *s, int n) { (void)w; (void)s; (void)n; retur
 int waddch(WINDOW *w, chtype c) { (void)w; (void)c; return 0; }
 int wmove(WINDOW *w, int y, int x) { (void)w; (void)y; (void)x; return 0; }
 int wprintw(WINDOW *w, const char *fmt, ...) { (void)w; (void)fmt; return 0; }
-int wgetnstr(WINDOW *w, char *buf, int n) {
-    (void)w;
-    if (n <= 0 || buf == NULL) return 0;
-    pop_str(buf, n);
-    return 0;
-}
 
 /* ── Input ── */
 int getch(void) {
