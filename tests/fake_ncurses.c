@@ -81,6 +81,20 @@ int addstr(const char *s) { (void)s; return 0; }
 int attron(attr_t a) { (void)a; return 0; }
 int attroff(attr_t a) { (void)a; return 0; }
 
+/* ── w* stubs (ncursesw macro targets) ── */
+/* attron(a) -> wattr_on(stdscr,...), attroff(a) -> wattr_off(stdscr,...) */
+int wattr_on(WINDOW *w, attr_t a, void *opts) { (void)w;(void)a;(void)opts; return 0; }
+int wattr_off(WINDOW *w, attr_t a, void *opts) { (void)w;(void)a;(void)opts; return 0; }
+int wmove(WINDOW *w, int y, int x) { (void)w;(void)y;(void)x; return 0; }
+int waddch(WINDOW *w, chtype ch) { (void)w;(void)ch; return 0; }
+int waddnstr(WINDOW *w, const char *s, int n) { (void)w;(void)s;(void)n; return 0; }
+int wprintw(WINDOW *w, const char *fmt, ...) { (void)w;(void)fmt; return 0; }
+int wrefresh(WINDOW *w) { (void)w; return 0; }
+int wclear(WINDOW *w) { (void)w; return 0; }
+int wbkgd(WINDOW *w, chtype ch) { (void)w;(void)ch; return 0; }
+int wgetch(WINDOW *w) { (void)w; return getch(); }
+int wgetnstr(WINDOW *w, char *buf, int n) { (void)w; return getnstr(buf, n); }
+
 /* ── Input ── */
 int getch(void) {
     if (g_keys_len > 0) {
