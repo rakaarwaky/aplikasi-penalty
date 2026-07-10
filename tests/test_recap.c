@@ -1,6 +1,7 @@
 #include "recap/module.recap.h"
 #include "registration/module.registration.h"
 #include "scoring/module.scoring.h"
+#include "ranking/module.ranking.h"
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
@@ -151,7 +152,7 @@ static void test_recap_agent(void) {
         }
     }
 
-    RecapAggregate agg = root_recap_build();
+    RecapAggregate agg = root_recap_build(root_ranking_build().protocol);
     RankingEntryVO ranking[MAX_PARTICIPANTS];
     SearchResultVO details[MAX_PARTICIPANTS];
     RecapError e = agent_recap_prepare(&agg, &state, ranking, details, MAX_PARTICIPANTS);
@@ -173,7 +174,7 @@ static void test_recap_agent_null_aggregate(void) {
 }
 
 static void test_recap_agent_null_state(void) {
-    RecapAggregate agg = root_recap_build();
+    RecapAggregate agg = root_recap_build(root_ranking_build().protocol);
     RankingEntryVO ranking[1];
     SearchResultVO details[1];
     assert(agent_recap_prepare(&agg, NULL, ranking, details, 1) == RC_NOT_READY);
@@ -183,7 +184,7 @@ static void test_recap_agent_null_state(void) {
 static void test_recap_agent_null_ranking(void) {
     CompetitionState state = {0};
     state.state = STATE_COMPLETED;
-    RecapAggregate agg = root_recap_build();
+    RecapAggregate agg = root_recap_build(root_ranking_build().protocol);
     SearchResultVO details[1];
     assert(agent_recap_prepare(&agg, &state, NULL, details, 1) == RC_NOT_READY);
     printf("  [PASS] test_recap_agent_null_ranking\n");
@@ -192,7 +193,7 @@ static void test_recap_agent_null_ranking(void) {
 static void test_recap_agent_null_details(void) {
     CompetitionState state = {0};
     state.state = STATE_COMPLETED;
-    RecapAggregate agg = root_recap_build();
+    RecapAggregate agg = root_recap_build(root_ranking_build().protocol);
     RankingEntryVO ranking[1];
     assert(agent_recap_prepare(&agg, &state, ranking, NULL, 1) == RC_NOT_READY);
     printf("  [PASS] test_recap_agent_null_details\n");
