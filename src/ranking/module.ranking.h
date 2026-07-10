@@ -1,6 +1,6 @@
 /* AES_BYPASS: module declaration (barrel) — 1 header per feature folder.
-   Menyatukan deklarasi publik ranking: contract, capabilities, infrastructure,
-   agent, root. */
+   Domain ranking: contract, capabilities, agent, root.
+   Tanpa I/O: presentasi ada di cli/surfaces_ranking_command.c. */
 #ifndef MODULE_RANKING_H
 #define MODULE_RANKING_H
 
@@ -16,38 +16,24 @@ typedef struct {
 } RankingProtocol;
 
 /* ============================================================
-   CONTRACT — PORT
-   ============================================================ */
-typedef struct {
-    void (*display_header)(void);
-    void (*display_entry)(const CompetitionState *state, const RankingEntryVO *e);
-    void (*display_not_ready)(void);
-    void (*display_wait)(void);
-} RankingPort;
-
-/* ============================================================
    CONTRACT — AGGREGATE
    ============================================================ */
 typedef struct {
     RankingProtocol *protocol;
-    RankingPort *port;
 } RankingAggregate;
 
 /* ============================================================
-   CAPABILITIES
+   CAPABILITIES — pure logic
    ============================================================ */
 RankingError capabilities_ranking_compute(const CompetitionState *state,
                                           RankingEntryVO *out, int capacity);
 
 /* ============================================================
-   INFRASTRUCTURE — port factory
+   AGENT — koordinasi; tanpa I/O
    ============================================================ */
-RankingPort *create_ranking_port(void);
-
-/* ============================================================
-   AGENT — orchestrator
-   ============================================================ */
-RankingError agent_ranking_run(RankingAggregate *agg, CompetitionState *state);
+RankingError agent_ranking_compute(RankingAggregate *agg,
+                                   const CompetitionState *state,
+                                   RankingEntryVO *out, int capacity);
 
 /* ============================================================
    ROOT — container builder (wiring only)

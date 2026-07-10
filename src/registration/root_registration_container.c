@@ -7,6 +7,5 @@ RegistrationAggregate root_registration_build(void) {
 
     RegistrationAggregate a;
     a.protocol = &protocol;
-    a.port = create_registration_port();
     return a;
 }

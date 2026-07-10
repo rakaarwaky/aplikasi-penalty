@@ -7,6 +7,5 @@ ScoringAggregate root_scoring_build(void) {
 
     ScoringAggregate a;
     a.protocol = &protocol;
-    a.port = create_scoring_port();
     return a;
 }

@@ -1,13 +1,13 @@
 /* AES_BYPASS: module declaration (barrel) — 1 header per feature folder.
-   Menyatukan deklarasi publik scoring: contract, capabilities, infrastructure,
-   agent, root. */
+   Domain scoring: contract, capabilities, agent, root.
+   Tanpa I/O: presentasi & input ada di cli/surfaces_scoring_command.c. */
 #ifndef MODULE_SCORING_H
 #define MODULE_SCORING_H
 
 #include "shared/module.shared.h"
 
 /* ============================================================
-   CONTRACT — PROTOCOL (AES402: pakai ZoneVO, bukan int mentah)
+   CONTRACT — PROTOCOL (AES402 pakai ZoneVO)
    ============================================================ */
 typedef ScoringError (*validate_zone_fn)(ZoneVO zone);
 typedef ScoringError (*record_kick_fn)(CompetitionState *state, int id, ZoneVO zone);
@@ -17,41 +17,24 @@ typedef struct {
 } ScoringProtocol;
 
 /* ============================================================
-   CONTRACT — PORT
-   ============================================================ */
-typedef struct {
-    void (*display_header)(void);
-    void (*display_prompt)(const ParticipantEntity *p, int kick_no);
-    ScoringError (*read_zone)(ZoneVO *out);
-    void (*display_result)(int zone, int points);
-    void (*display_error)(ScoringError e);
-    void (*display_wait)(void);
-    void (*clear_buffer)(void);
-} ScoringPort;
-
-/* ============================================================
    CONTRACT — AGGREGATE
    ============================================================ */
 typedef struct {
     ScoringProtocol *protocol;
-    ScoringPort *port;
 } ScoringAggregate;
 
 /* ============================================================
-   CAPABILITIES
+   CAPABILITIES — pure logic
    ============================================================ */
 ScoringError capabilities_scoring_validate_zone(ZoneVO zone);
 ScoringError capabilities_scoring_record_kick(CompetitionState *state, int id, ZoneVO zone);
 
 /* ============================================================
-   INFRASTRUCTURE — port factory
+   AGENT — koordinasi (validate lalu record); tanpa I/O
    ============================================================ */
-ScoringPort *create_scoring_port(void);
-
-/* ============================================================
-   AGENT — orchestrator
-   ============================================================ */
-ScoringError agent_scoring_run(ScoringAggregate *agg, CompetitionState *state);
+ScoringError agent_scoring_record(ScoringAggregate *agg,
+                                  CompetitionState *state,
+                                  int id, ZoneVO zone);
 
 /* ============================================================
    ROOT — container builder (wiring only)

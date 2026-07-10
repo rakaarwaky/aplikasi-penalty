@@ -1,14 +1,13 @@
 /* AES_BYPASS: module declaration (barrel) — 1 header per feature folder.
-   Menyatukan deklarasi publik registration: contract (protocol, port, aggregate),
-   capabilities, infrastructure, agent, root. */
+   Domain registration: contract (protocol, aggregate), capabilities, agent, root.
+   Tanpa I/O: presentasi & input user ada di cli/surfaces_registration_command.c. */
 #ifndef MODULE_REGISTRATION_H
 #define MODULE_REGISTRATION_H
 
 #include "shared/module.shared.h"
 
 /* ============================================================
-   CONTRACT — PROTOCOL (inbound, business operations)
-   AES402: pakai ParticipantNameVO, bukan char* mentah.
+   CONTRACT — PROTOCOL (inbound, business ops; AES402 pakai VO)
    ============================================================ */
 typedef RegistrationError (*validate_name_fn)(const CompetitionState *state,
                                               const ParticipantNameVO *name);
@@ -20,28 +19,14 @@ typedef struct {
 } RegistrationProtocol;
 
 /* ============================================================
-   CONTRACT — PORT (outbound I/O, AES406: I/O hanya via port)
-   ============================================================ */
-typedef struct {
-    void (*display_header)(void);
-    void (*display_prompt)(int number);
-    RegistrationError (*read_name)(char *buffer, int size);
-    void (*display_success)(const char *name);
-    void (*display_error)(RegistrationError e);
-    void (*display_wait)(void);
-    void (*clear_buffer)(void);
-} RegistrationPort;
-
-/* ============================================================
-   CONTRACT — AGGREGATE (pengikat protocol + port)
+   CONTRACT — AGGREGATE (facade; tanpa port karena tanpa I/O sistem)
    ============================================================ */
 typedef struct {
     RegistrationProtocol *protocol;
-    RegistrationPort *port;
 } RegistrationAggregate;
 
 /* ============================================================
-   CAPABILITIES — function declarations
+   CAPABILITIES — pure logic (AES403, tanpa I/O)
    ============================================================ */
 RegistrationError capabilities_registration_validate_name(const CompetitionState *state,
                                                           const ParticipantNameVO *name);
@@ -49,17 +34,14 @@ RegistrationError capabilities_registration_append(CompetitionState *state,
                                                    const ParticipantNameVO *name);
 
 /* ============================================================
-   INFRASTRUCTURE — port factory
+   AGENT — koordinasi (validate lalu append); tanpa I/O
    ============================================================ */
-RegistrationPort *create_registration_port(void);
+RegistrationError agent_registration_add(RegistrationAggregate *agg,
+                                         CompetitionState *state,
+                                         const ParticipantNameVO *name);
 
 /* ============================================================
-   AGENT — orchestrator
-   ============================================================ */
-RegistrationError agent_registration_run(RegistrationAggregate *agg, CompetitionState *state);
-
-/* ============================================================
-   ROOT — container builder (wiring only, no logic)
+   ROOT — container builder (wiring only)
    ============================================================ */
 RegistrationAggregate root_registration_build(void);
 
