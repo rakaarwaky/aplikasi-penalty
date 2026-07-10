@@ -120,4 +120,62 @@ typedef enum {
     RC_OK = 0, RC_NOT_READY
 } RecapError;
 
+/* ============================================================
+   CONTRACTS — interface function-pointer per fitur.
+   Diletakkan di shared agar fitur lain cukup memakai KONTRAK ini
+   (bukan implementasi). Implementasi ada di capabilities tiap fitur;
+   perakitan (wiring) ada di root_*_container tiap fitur.
+   Contoh peminjaman: recap memakai RankingProtocol untuk urutan
+   ranking tanpa menyalin logika ranking.
+   ============================================================ */
+
+/* --- registration --- */
+typedef RegistrationError (*validate_name_fn)(const CompetitionState *state,
+                                              const ParticipantNameVO *name);
+typedef RegistrationError (*append_participant_fn)(CompetitionState *state,
+                                                   const ParticipantNameVO *name);
+typedef struct {
+    validate_name_fn validate_name;
+    append_participant_fn append_participant;
+} RegistrationProtocol;
+typedef struct { RegistrationProtocol *protocol; } RegistrationAggregate;
+
+/* --- scoring --- */
+typedef ScoringError (*validate_zone_fn)(ZoneVO zone);
+typedef ScoringError (*record_kick_fn)(CompetitionState *state, int id, ZoneVO zone);
+typedef struct {
+    validate_zone_fn validate_zone;
+    record_kick_fn record_kick;
+} ScoringProtocol;
+typedef struct { ScoringProtocol *protocol; } ScoringAggregate;
+
+/* --- ranking --- */
+typedef RankingError (*compute_ranking_fn)(const CompetitionState *state,
+                                           RankingEntryVO *out, int capacity);
+typedef struct {
+    compute_ranking_fn compute_ranking;
+} RankingProtocol;
+typedef struct { RankingProtocol *protocol; } RankingAggregate;
+
+/* --- search --- */
+typedef SearchError (*find_participant_fn)(const CompetitionState *state,
+                                           const ParticipantNameVO *name,
+                                           SearchResultVO *out);
+typedef struct {
+    find_participant_fn find_participant;
+} SearchProtocol;
+typedef struct { SearchProtocol *protocol; } SearchAggregate;
+
+/* --- recap --- */
+/* Recap hanya menyusun detail per peserta; urutan dipinjam dari RankingProtocol. */
+typedef RecapError (*prepare_details_fn)(const CompetitionState *state,
+                                         SearchResultVO *details, int capacity);
+typedef struct {
+    prepare_details_fn prepare_details;
+} RecapProtocol;
+typedef struct {
+    RecapProtocol *protocol;    /* milik recap */
+    RankingProtocol *ranking;   /* dipinjam dari fitur ranking via kontrak */
+} RecapAggregate;
+
 #endif /* SHARED_MODULE_SHARED_H */
