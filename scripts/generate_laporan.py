@@ -51,7 +51,9 @@ para('Berdasarkan kerangka epistemologis filsafat masalah, suatu kondisi hanya d
      'sehingga masalah diturunkan langsung dari requirement tersebut, bukan dari asumsi.')
 
 h2('1.1 Tujuan (ditetapkan Project_Task.pdf)')
-para('Tujuan diambil verbatim dari dokumen tugas, bukan dirumuskan sendiri:')
+para('Subjek dalam konteks ini adalah penyusun program yang diwajibkan memenuhi '
+     'spesifikasi dokumen tugas. Tujuan diambil verbatim dari dokumen tugas, bukan '
+     'dirumuskan sendiri:')
 bullet('Membangun program bahasa C untuk mengelola hasil lomba tendangan penalti.')
 bullet('Jumlah peserta 5-7 orang; setiap peserta 7 tendangan; zona bernilai 0 sampai 5.')
 bullet('Mengubah zona menjadi skor; total skor = jumlah seluruh skor tendangan.')
@@ -67,11 +69,17 @@ para('Keadaan saat ini: belum tersedia program yang memenuhi seluruh ketentuan d
      'Kesenjangan (gap) antara kedua keadaan inilah yang menjadikan tugas ini sebagai masalah.')
 
 h2('1.3 Hambatan (Diturunkan dari Requirement PDF)')
+para('Berikut hambatan yang diturunkan dari requirement Project_Task.pdf, terbagi menjadi '
+     'batasan (constraint) dan kebutuhan fungsional yang wajib diimplementasi:')
+
+para('Batasan (constraint) — pembatas yang melahirkan obstacle bila dilanggar:')
 bullet('Masalah 1 - Pembatasan input zona 0-5 (Ketentuan 2 & 4). Tanpa pembatasan, '
        'pengguna dapat memasukkan nilai di luar rentang yang merusak perhitungan, '
        'sehingga melanggar spesifikasi zona.')
 bullet('Masalah 2 - Batas jumlah peserta 5-7 (aturan lomba). Data peserta harus '
        'dialokasikan menampung maksimal 7 tanpa meluap, namun tetap menerima minimal 5.')
+
+para('Kebutuhan fungsional — kewajiban spesifikasi yang harus dipenuhi agar tujuan tercapai:')
 bullet('Masalah 3 - Konversi zona ke skor dan akumulasi (Ketentuan 3 & 4). Setiap zona '
        'harus dipetakan ke poin, lalu dijumlahkan menjadi total skor tiap peserta.')
 bullet('Masalah 4 - Penentuan juara dan aturan seri bertingkat (Ketentuan 5 & 6). '
@@ -212,6 +220,40 @@ code('static int compare_entries(const void *a, const void *b) {\n'
      '    return 0;                                  /* seri sempurna */\n'
      '}')
 para('Kompilasi & pengujian: make (build) dan make test (semua test lolos).')
+
+# ---- Header identitas: HANYA halaman pertama ----
+# Tidak dibentuk sendiri; diambil dari identitas penyusun (template tugas).
+from docx.oxml.ns import qn
+
+sec = doc.sections[0]
+sectPr = sec._sectPr
+
+# Aktifkan "Different First Page"
+titlePg = sectPr.find(qn('w:titlePg'))
+if titlePg is None:
+    titlePg = sectPr.makeelement(qn('w:titlePg'), {})
+    sectPr.append(titlePg)
+titlePg.set(qn('w:val'), 'true')
+
+# Isi first-page header dengan identitas
+first_hdr = sec.first_page_header
+first_hdr.is_linked_to_previous = False
+# Hapus isi lama (jika ada)
+for p in list(first_hdr.paragraphs):
+    p._p.getparent().remove(p._p)
+
+identity = [
+    'Nama        : Raka Arwaky',
+    'Nim         : 22342030',
+    'Mata Kuliah : Pengantar Coding',
+    'Sesi        : 863',
+]
+for line in identity:
+    hp = first_hdr.add_paragraph()
+    hp.add_run(line)
+
+# Pastikan tidak ada default header (biar halaman 2+ kosong)
+sec.header.is_linked_to_previous = True
 
 doc.save('Laporan-Project.docx')
 print('SAVED Laporan-Project.docx')

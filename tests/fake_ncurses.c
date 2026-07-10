@@ -60,7 +60,9 @@ static int    g_strs_cap = 0;
 void fake_tui_push_key(int k) {
     if (g_keys_len >= g_keys_cap) {
         g_keys_cap = g_keys_cap ? g_keys_cap * 2 : 16;
-        g_keys = realloc(g_keys, (size_t)g_keys_cap * sizeof(int));
+        int *tmp = realloc(g_keys, (size_t)g_keys_cap * sizeof(int));
+        if (tmp == NULL) return;
+        g_keys = tmp;
     }
     g_keys[g_keys_len++] = k;
 }
@@ -68,7 +70,9 @@ void fake_tui_push_key(int k) {
 void fake_tui_push_str(const char *s) {
     if (g_strs_len >= g_strs_cap) {
         g_strs_cap = g_strs_cap ? g_strs_cap * 2 : 16;
-        g_strs = realloc(g_strs, (size_t)g_strs_cap * 64);
+        char *tmp = realloc(g_strs, (size_t)g_strs_cap * 64);
+        if (tmp == NULL) return;
+        g_strs = tmp;
     }
     strncpy(g_strs + (size_t)g_strs_len * 64, s, 63);
     g_strs[(size_t)g_strs_len * 64 + 63] = '\0';
