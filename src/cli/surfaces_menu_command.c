@@ -1,5 +1,5 @@
 #include "cli/module.cli.h"
-#include "infrastructure_tui_adapter.h"
+#include "tui/infrastructure_tui_adapter.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -57,14 +57,6 @@ static void draw_menu(int selected, CompetitionStateKind state) {
     attroff(COLOR_PAIR(COLOR_MENU));
 
     refresh();
-}
-
-void cli_surfaces_menu_header(void) {
-    /* Header is drawn inside draw_menu */
-}
-
-void cli_surfaces_menu_display(CompetitionStateKind state) {
-    /* Handled by draw_menu in the loop */
 }
 
 int cli_surfaces_menu_run(RegistrationAggregate *reg,
