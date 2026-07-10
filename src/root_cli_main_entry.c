@@ -5,6 +5,8 @@
 
 #include "cli/module.cli.h"
 #include "sanitizer/module.sanitizer.h"
+#include "storage/module.storage.h"
+#include "shared/taxonomy_game_constant.h"
 #include "tui/infrastructure_tui_adapter.h"
 
 #include <locale.h>
@@ -48,7 +50,7 @@ int main(void) {
 
     /* Muat data tersimpan bila ada (silent: kalau file belum ada, biarkan kosong). */
     {
-        agent_storage_load(&st, STORAGE_DEFAULT_FILE, &state);
+        agent_storage_load(&st, DEFAULT_STORAGE_FILENAME, &state);
     }
 
     cli_surfaces_menu_run(&reg, &sc, &rk, &sr, &rc, &st, &state, &dp, &sn);

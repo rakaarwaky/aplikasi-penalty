@@ -38,9 +38,8 @@ void cli_surfaces_search_execute(SearchAggregate *agg,
                                  CompetitionState *state, DisplayPort *dp);
 void cli_surfaces_recap_execute(RecapAggregate *agg,
                                 CompetitionState *state, DisplayPort *dp);
-
 void cli_surfaces_storage_execute(StorageAggregate *agg,
-                                 CompetitionState *state, DisplayPort *dp);
+                                  CompetitionState *state, DisplayPort *dp);
 
 /* ── Dumb Surfaces (page) ── */
 void menu_page_draw(DisplayPort *dp, int selected, CompetitionStateKind state,

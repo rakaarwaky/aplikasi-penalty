@@ -18,8 +18,9 @@ static const char *menu_labels[MENU_ITEMS] = {
     "Tampilkan Ranking",
     "Cari Peserta",
     "Rekapitulasi Lengkap",
-    "Penyimpanan Data"
+    "Simpan / Muat Data"
 };
+
 
 static void resolve_status(int item, CompetitionStateKind state,
                            const char **out_status, int *out_color) {

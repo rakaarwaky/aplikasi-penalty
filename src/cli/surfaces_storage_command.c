@@ -1,14 +1,17 @@
 /**
  * @file surfaces_storage_command.c
- * @brief Smart surface: layar penyimpanan (Simpan / Muat / Hapus File / Reset).
+ * @brief Smart surface: navigasi & aksi penyimpanan data lomba.
  */
 
+/* CLI — Smart Surface (Command) */
 #include "cli/module.cli.h"
 #include "storage/module.storage.h"
+#include "shared/taxonomy_display_constant.h"
+#include "shared/taxonomy_game_constant.h"
 
 #include <stdio.h>
 
-/* Cek apakah file data tersimpan ada di disk. */
+/* Cek ada/tidaknya file tersimpan (tanpa membukanya lewat storage API). */
 static int file_exists(const char *filename) {
     FILE *f = fopen(filename, "rb");
     if (f == NULL) return 0;
@@ -16,31 +19,22 @@ static int file_exists(const char *filename) {
     return 1;
 }
 
-/* Konversi kode error penyimpanan jadi teks pesan. */
-static const char *storage_err_text(StorageError e) {
-    switch (e) {
-        case ST_OK:                return "Berhasil.";
-        case ST_ERROR_FILE_NOT_FOUND: return "File tidak ditemukan.";
-        case ST_ERROR_PERMISSION:  return "Gagal (izin/akses).";
-        case ST_ERROR_CORRUPT:     return "File rusak/tidak valid.";
-        case ST_ERROR_FULL:        return "Penyimpanan penuh.";
-        default:                   return "Galat tidak dikenal.";
-    }
+/* Tampilkan pesan hasil aksi lalu tunggu ENTER. */
+static void show_result(DisplayPort *dp, int selected, int show_file,
+                        const char *msg, int color) {
+    storage_page_draw(dp, selected, show_file, msg, color);
+    dp->readkey();
 }
-/**
- * Jalankan layar penyimpanan. Kembali bila user menekan ESC / [0].
- */
+
 void cli_surfaces_storage_execute(StorageAggregate *agg,
                                   CompetitionState *state,
                                   DisplayPort *dp) {
     int selected = 1;
-    char msg[80] = "";
-    int msg_is_error = 0;
     int running = 1;
 
     while (running) {
-        int exists = file_exists(STORAGE_DEFAULT_FILE);
-        storage_page_draw(dp, selected, exists, msg, msg_is_error);
+        int show_file = file_exists(DEFAULT_STORAGE_FILENAME);
+        storage_page_draw(dp, selected, show_file, "", COLOR_DIM);
 
         int key = dp->readkey();
         switch (key) {
@@ -52,52 +46,60 @@ void cli_surfaces_storage_execute(StorageAggregate *agg,
                 selected++;
                 if (selected > 4) selected = 1;
                 break;
-            case TUI_KEY_ESC:
-            case '0':
-                running = 0;
-                break;
             case TUI_KEY_ENTER:
-                msg[0] = '\0';
-                msg_is_error = 0;
                 if (selected == 1) {
                     /* Simpan */
-                    StorageError e = agent_storage_save(agg, STORAGE_DEFAULT_FILE, state);
-                    if (e == ST_OK) {
-                        snprintf(msg, sizeof msg, "[OK] Tersimpan ke %s", STORAGE_DEFAULT_FILE);
-                    } else {
-                        msg_is_error = 1;
-                        snprintf(msg, sizeof msg, "[GAGAL] %s", storage_err_text(e));
-                    }
+                    StorageError r = agent_storage_save(agg, DEFAULT_STORAGE_FILENAME, state);
+                    if (r == ST_OK)
+                        show_result(dp, selected, 1, "[OK] Data lomba tersimpan.", COLOR_SUCCESS);
+                    else
+                        show_result(dp, selected, show_file,
+                                    "[GAGAL] Tidak bisa menyimpan data lomba.", COLOR_ERROR);
                 } else if (selected == 2) {
                     /* Muat */
-                    StorageError e = agent_storage_load(agg, STORAGE_DEFAULT_FILE, state);
-                    if (e == ST_OK) {
-                        snprintf(msg, sizeof msg, "[OK] Dimuat dari %s", STORAGE_DEFAULT_FILE);
-                    } else {
-                        msg_is_error = 1;
-                        snprintf(msg, sizeof msg, "[GAGAL] %s", storage_err_text(e));
+                    if (!show_file) {
+                        show_result(dp, selected, 0,
+                                    "[INFO] Belum ada file tersimpan.", COLOR_WARNING);
+                        break;
                     }
+                    if (!dp->confirm("Muat akan MENGGANTI data lomba saat ini. Lanjut?"))
+                        break;
+                    StorageError r = agent_storage_load(agg, DEFAULT_STORAGE_FILENAME, state);
+                    if (r == ST_OK)
+                        show_result(dp, selected, 1, "[OK] Data lomba dimuat.", COLOR_SUCCESS);
+                    else
+                        show_result(dp, selected, show_file,
+                                    "[GAGAL] File rusak atau bukan data lomba.", COLOR_ERROR);
                 } else if (selected == 3) {
-                    /* Hapus file tersimpan */
-                    if (!exists) {
-                        msg_is_error = 1;
-                        snprintf(msg, sizeof msg, "[GAGAL] File tidak ada.");
-                    } else if (dp->confirm("Hapus file data tersimpan?")) {
-                        StorageError e = agent_storage_delete(agg, STORAGE_DEFAULT_FILE);
-                        if (e == ST_OK) {
-                            snprintf(msg, sizeof msg, "[OK] File dihapus.");
-                        } else {
-                            msg_is_error = 1;
-                            snprintf(msg, sizeof msg, "[GAGAL] %s", storage_err_text(e));
-                        }
+                    /* Hapus file */
+                    if (!show_file) {
+                        show_result(dp, selected, 0,
+                                    "[INFO] Tidak ada file yang bisa dihapus.", COLOR_WARNING);
+                        break;
                     }
+                    if (!dp->confirm("Hapus file data tersimpan? Tidak bisa dibatalkan."))
+                        break;
+                    StorageError r = agent_storage_delete(agg, DEFAULT_STORAGE_FILENAME);
+                    if (r == ST_OK)
+                        show_result(dp, selected, 0, "[OK] File tersimpan dihapus.", COLOR_SUCCESS);
+                    else
+                        show_result(dp, selected, show_file,
+                                    "[GAGAL] Tidak bisa menghapus file.", COLOR_ERROR);
                 } else if (selected == 4) {
-                    /* Reset lomba (bersihkan memory) */
-                    if (dp->confirm("Reset lomba? Semua peserta & skor hilang.")) {
-                        *state = (CompetitionState){0};
-                        snprintf(msg, sizeof msg, "[OK] Lomba direset.");
-                    }
+                    /* Reset lomba (bersihkan memori) */
+                    if (!dp->confirm("Reset akan menghapus SEMUA peserta & skor dari memori. Lanjut?"))
+                        break;
+                    CompetitionState reset = {0};
+                    *state = reset;
+                    show_result(dp, selected, show_file,
+                                "[OK] Lomba di-reset. Mulai dari pendaftaran.", COLOR_SUCCESS);
                 }
+                break;
+            case '0':
+            case 'q':
+            case 'Q':
+            case TUI_KEY_ESC:
+                running = 0;
                 break;
             default:
                 break;
