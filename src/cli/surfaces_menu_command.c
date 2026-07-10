@@ -218,7 +218,8 @@ static void show_locked_message(DisplayPort *dp, const char *msg) {
 static void dispatch_feature(int selected, RegistrationAggregate *reg,
                              ScoringAggregate *sc, RankingAggregate *rk,
                              SearchAggregate *sr, RecapAggregate *rc,
-                             StorageAggregate *st, CompetitionState *state,
+                             StorageAggregate *st, ExportAggregate *ex,
+                             CompetitionState *state,
                              DisplayPort *dp, SanitizeAggregate *sn) {
     if (selected == 1) {
         if (state->state == STATE_INIT || state->state == STATE_REGISTERED)
@@ -234,17 +235,17 @@ static void dispatch_feature(int selected, RegistrationAggregate *reg,
             show_locked_message(dp, "[INFO] Semua tendangan sudah selesai.");
     } else if (selected == 3) {
         if (state->state == STATE_COMPLETED)
-            cli_surfaces_ranking_execute(rk, state, dp);
+            cli_surfaces_ranking_execute(rk, ex, state, dp);
         else
             show_locked_message(dp, "[INFO] Ranking terkunci. Selesaikan tendangan semua peserta dulu.");
     } else if (selected == 4) {
         if (state->state == STATE_REGISTERED || state->state == STATE_COMPLETED)
-            cli_surfaces_search_execute(sr, state, dp);
+            cli_surfaces_search_execute(sr, ex, state, dp);
         else
             show_locked_message(dp, "[INFO] Belum ada peserta. Daftar dulu (Menu 1).");
     } else if (selected == 5) {
         if (state->state == STATE_COMPLETED)
-            cli_surfaces_recap_execute(rc, state, dp);
+            cli_surfaces_recap_execute(rc, ex, state, dp);
         else
             show_locked_message(dp, "[INFO] Rekap terkunci. Selesaikan tendangan semua peserta dulu.");
     } else if (selected == 6) {
