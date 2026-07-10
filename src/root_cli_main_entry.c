@@ -39,14 +39,12 @@ int main(void) {
     RecapAggregate        rc  = root_recap_build(rk.protocol);
     SanitizeAggregate     sn  = root_sanitize_build();
 
-    /* Hidupkan layar ncurses lalu tampilkan splash screen. */
+    /* Hidupkan layar ncurses, rakit DisplayPort, lalu langsung ke menu utama. */
     tui_init();
 
     /* Rakit DisplayPort — surfaces hanya pegang pointer ke ini. */
     DisplayPort dp = root_display_build();
 
-    tui_splash(50);
-    flushinp();  /* buang sisa Enter agar tidak bocor ke menu utama */
     cli_surfaces_menu_run(&reg, &sc, &rk, &sr, &rc, &state, &dp, &sn);
 
     /* D2: Ringkasan juara sebelum keluar — tampilkan di ncurses, tunggu Enter. */

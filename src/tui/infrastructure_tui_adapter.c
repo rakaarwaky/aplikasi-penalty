@@ -271,52 +271,6 @@ int tui_confirm(const char *prompt) {
 }
 
 /* Tampilkan splash screen selama delay_ms milidetik (animasi sederhana). */
-void tui_splash(int delay_ms) {
-    tui_clear();
-
-    int center_row = LINES / 2;
-
-    /* ASCII art title */
-    const char *art[] = {
-        " _____ ____  _   _ _____ _____ ____  __  __ ___ _   _    _    _     ",
-        "|  ___|  _ \\| \\ | |_   _| ____|  _ \\|  \\/  |_ _| \\ | |  / \\  | |    ",
-        "| |_  | |_) |  \\| | | | |  _| | |_) | |\\/| || ||  \\| | / _ \\ | |    ",
-        "|  _| |  __/| |\\  | | | | |___|  _ <| |  | || || |\\  |/ ___ \\| |___ ",
-        "|_|   |_|   |_| \\_| |_| |_____|_| \\_\\_|  |_|___|_| \\_/_/   \\_\\_____|",
-        NULL
-    };
-
-    /* Animasi: tampilkan baris per baris */
-    int i;
-    for (i = 0; art[i] != NULL; i++) {
-        tui_print_centered_colored(center_row - 3 + i, art[i], COLOR_TITLE, 1);
-        refresh();
-        napms(delay_ms);
-    }
-
-    /* Subtitle */
-    tui_print_centered_colored(center_row + 2, "APLIKASI PERHITUNGAN PENALTI", COLOR_GOLD, 1);
-    refresh();
-    napms(delay_ms);
-
-    /* Progress bar loading */
-    tui_print_centered(center_row + 4, "Memuat aplikasi...");
-    int bar_width = 30;
-    int bar_col = (COLS - bar_width) / 2;
-    int step;
-    for (step = 0; step <= 100; step += 5) {
-        tui_progress_bar(center_row + 5, bar_col, bar_width, step, COLOR_SUCCESS);
-        refresh();
-        napms(delay_ms / 3);
-    }
-
-    /* Tampilkan versi */
-    tui_print_centered_colored(center_row + 8, "Versi 1.0.0", COLOR_DIM, 0);
-    refresh();
-
-    /* Splash otomatis lanjut ke menu (tanpa menunggu Enter). */
-}
-
 /* ── Input String (dipanggil surfaces untuk baca teks dari pengguna) ── */
 
 /**

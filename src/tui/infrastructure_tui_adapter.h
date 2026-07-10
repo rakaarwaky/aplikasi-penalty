@@ -24,9 +24,6 @@
 void tui_init(void);
 void tui_end(void);
 
-/* Splash screen dengan animasi sederhana. Dipanggil dari root entry. */
-void tui_splash(int delay_ms);
-
 /* Factory: buat DisplayPort yang sudah terisi semua function pointer. */
 DisplayPort tui_display_port_create(void);
 

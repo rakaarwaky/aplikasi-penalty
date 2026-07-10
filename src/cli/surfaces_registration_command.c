@@ -42,10 +42,10 @@ static void draw_registration_screen(DisplayPort *dp, CompetitionState *state) {
     /* Breadcrumb — warna redup agar tidak mendominasi */
     dp->print_centered_colored(0, "Menu Utama > Pendaftaran Peserta", COLOR_DIM, 0);
 
-    /* Header konsisten dengan Unicode solid */
-    dp->print_centered_colored(1, "══════════════════════════════════", COLOR_DIM, 0);
+    /* Header konsisten dengan UTF-8 escape sequences */
+    dp->print_centered_colored(1, UTF_DOUBLE_H_32, COLOR_DIM, 0);
     dp->print_centered_colored(2, "       PENDAFTARAN PESERTA        ", COLOR_TITLE, 1);
-    dp->print_centered_colored(3, "══════════════════════════════════", COLOR_DIM, 0);
+    dp->print_centered_colored(3, UTF_DOUBLE_H_32, COLOR_DIM, 0);
 
     dp->box(BOX_ROW, BOX_COL, BOX_WIDTH, box_height);
 
@@ -70,7 +70,7 @@ static void draw_registration_screen(DisplayPort *dp, CompetitionState *state) {
     int i;
     for (i = 0; i < count; i++) {
         snprintf(buf, sizeof buf, "%2d. %s", i + 1, state->participants[i].name.value);
-        dp->draw_colored(BOX_ROW + 8 + i, BOX_COL + 4, COLOR_SUCCESS, 0, buf);
+        dp->draw_colored(BOX_ROW + 8 + i, BOX_COL + 4, COLOR_GOLD, 0, buf);
     }
 
     dp->separator(BOX_ROW + 9 + count, BOX_COL, BOX_WIDTH);
