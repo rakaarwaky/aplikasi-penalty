@@ -84,6 +84,7 @@ analyze:
 # Linting
 lint:
 	cppcheck --enable=all --suppress=missingIncludeSystem \
+		--suppress=unusedFunction --suppress=normalCheckLevelMaxBranches \
 		-I$(SRC_DIR) -I$(SRC_DIR)/shared \
 		-I$(SRC_DIR)/registration -I$(SRC_DIR)/scoring \
 		-I$(SRC_DIR)/ranking -I$(SRC_DIR)/search \

@@ -3,12 +3,14 @@
 ## Current State (8/10)
 
 **What we have:**
+
 - C99 standard
 - Consistent naming conventions (AES rules)
 - Modular architecture
 - Clear separation of concerns
 
 **What we're missing:**
+
 - Automated linting
 - Code formatting standards
 - Static analysis
@@ -18,6 +20,7 @@
 ## Target State (10/10)
 
 **Enterprise Code Quality Requirements:**
+
 - Automated linting (no warnings)
 - Consistent formatting (clang-format)
 - Static analysis (cppcheck)
@@ -32,6 +35,7 @@
 **Tool: cppcheck**
 
 **Setup:**
+
 ```bash
 # Install cppcheck
 sudo dnf install cppcheck
@@ -41,6 +45,7 @@ cppcheck --enable=all --suppress=missingIncludeSystem src/ tests/
 ```
 
 **Integration:**
+
 ```makefile
 # Add to Makefile
 lint:
@@ -49,6 +54,7 @@ lint:
 ```
 
 **Success Criteria:**
+
 - Zero warnings
 - Zero errors
 - All checks enabled
@@ -58,6 +64,7 @@ lint:
 **Tool: clang-format**
 
 **Setup:**
+
 ```bash
 # Install clang-format
 sudo dnf install clang
@@ -67,6 +74,7 @@ clang-format -style=llvm -dump-config > .clang-format
 ```
 
 **Configuration (.clang-format):**
+
 ```yaml
 BasedOnStyle: LLVM
 IndentWidth: 4
@@ -77,6 +85,7 @@ AllowShortLoopsOnASingleLine: false
 ```
 
 **Integration:**
+
 ```makefile
 # Add to Makefile
 format:
@@ -93,6 +102,7 @@ check-format:
 **Tool: clang-tidy**
 
 **Setup:**
+
 ```bash
 # Install clang-tidy
 sudo dnf install clang-tools-extra
@@ -102,6 +112,7 @@ clang-tidy src/**/*.c -p build/
 ```
 
 **Integration:**
+
 ```makefile
 # Add to Makefile
 analyze:
@@ -142,11 +153,13 @@ jobs:
 ### 5. Add Documentation Standards (Medium Priority)
 
 **Standards:**
+
 - All functions must have Doxygen comments
 - All files must have header comments
 - All modules must have README.md
 
 **Example:**
+
 ```c
 /**
  * @brief Validate participant name
@@ -168,6 +181,7 @@ RegistrationError capabilities_registration_validate_name(
 ### 6. Add Code Review Process (Low Priority)
 
 **Process:**
+
 - All changes require pull request
 - All PRs require review
 - All reviews must check:
