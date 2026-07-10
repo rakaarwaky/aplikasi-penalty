@@ -16,7 +16,7 @@ INCLUDES := -I$(SRC_DIR) -I$(SRC_DIR)/shared \
             -I$(SRC_DIR)/tui -I$(SRC_DIR)/storage \
             -I$(SRC_DIR)/sanitizer -I$(SRC_DIR)/export
 
-LDFLAGS  := -lncurses
+LDFLAGS  := -lncursesw
 
 # Test
 TEST_DIR   := tests

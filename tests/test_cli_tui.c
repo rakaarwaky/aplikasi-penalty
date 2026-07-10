@@ -60,7 +60,7 @@ static void test_full_game_via_surfaces(void) {
     ScoringAggregate sc = root_scoring_build();
     RankingAggregate rk = root_ranking_build();
     SearchAggregate sr = root_search_build();
-    RecapAggregate rc = root_recap_build();
+    RecapAggregate rc = root_recap_build(root_ranking_build().protocol);
     SanitizeAggregate sn = root_sanitize_build();
     DisplayPort dp = root_display_build();
 
@@ -93,7 +93,7 @@ static void test_menu_dispatch_and_exit(void) {
     ScoringAggregate sc = root_scoring_build();
     RankingAggregate rk = root_ranking_build();
     SearchAggregate sr = root_search_build();
-    RecapAggregate rc = root_recap_build();
+    RecapAggregate rc = root_recap_build(root_ranking_build().protocol);
     SanitizeAggregate sn = root_sanitize_build();
     DisplayPort dp = root_display_build();
 
@@ -127,7 +127,7 @@ static void test_surfaces_guard_paths(void) {
     CompetitionState state = {0};  /* STATE_INIT */
     ScoringAggregate sc = root_scoring_build();
     SearchAggregate sr = root_search_build();
-    RecapAggregate rc = root_recap_build();
+    RecapAggregate rc = root_recap_build(root_ranking_build().protocol);
     SanitizeAggregate sn = root_sanitize_build();
     DisplayPort dp = root_display_build();
 
