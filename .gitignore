@@ -2,3 +2,9 @@
 build/
 *.o
 penalty_shootout
+
+# Clang analysis output
+*.plist
+
+# IDE
+.clangd
