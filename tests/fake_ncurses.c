@@ -81,31 +81,6 @@ int addstr(const char *s) { (void)s; return 0; }
 int attron(attr_t a) { (void)a; return 0; }
 int attroff(attr_t a) { (void)a; return 0; }
 
-/*
- * Stub versi window (w*) — ncurses.h memetakan makro attron/getch/refresh/
- * addstr/dll ke wattron(stdscr,...)/wgetch(stdscr)/... saat file ini di-
- * compile bersama adapter. Karena test TIDAK link -lncursesw, semua simbol
- * w* harus disediakan di sini agar linker puas.
- */
-int wattron(WINDOW *w, attr_t a) { (void)w; (void)a; return 0; }
-int wattroff(WINDOW *w, attr_t a) { (void)w; (void)a; return 0; }
-int wgetch(WINDOW *w) {
-    (void)w;
-    if (g_keys_len > 0) {
-        int k = g_keys[0];
-        memmove(g_keys, g_keys + 1, (size_t)(--g_keys_len) * sizeof(int));
-        return k;
-    }
-    return 0;
-}
-int wrefresh(WINDOW *w) { (void)w; return 0; }
-int wclear(WINDOW *w) { (void)w; return 0; }
-int waddstr(WINDOW *w, const char *s) { (void)w; (void)s; return 0; }
-int waddnstr(WINDOW *w, const char *s, int n) { (void)w; (void)s; (void)n; return 0; }
-int waddch(WINDOW *w, chtype c) { (void)w; (void)c; return 0; }
-int wmove(WINDOW *w, int y, int x) { (void)w; (void)y; (void)x; return 0; }
-int wprintw(WINDOW *w, const char *fmt, ...) { (void)w; (void)fmt; return 0; }
-
 /* ── Input ── */
 int getch(void) {
     if (g_keys_len > 0) {
