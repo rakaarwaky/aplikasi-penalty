@@ -1,11 +1,19 @@
 #include "cli/module.cli.h"
+#include "infrastructure_tui_adapter.h"
 
 #include <stdio.h>
+#include <string.h>
 #include <ctype.h>
 
 static ScoringError read_zone(ZoneVO *out) {
     char buf[32];
-    if (fgets(buf, sizeof buf, stdin) == NULL) return SC_INVALID_ZONE;
+    echo();
+    curs_set(1);
+    memset(buf, 0, sizeof buf);
+    getnstr(buf, 10);
+    curs_set(0);
+    noecho();
+
     int i = 0;
     while (buf[i] != '\0' && buf[i] != '\n') {
         if (!isdigit((unsigned char)buf[i]) && buf[i] != '-') return SC_INVALID_ZONE;
@@ -20,37 +28,97 @@ static ScoringError read_zone(ZoneVO *out) {
 void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state) {
     if (agg == NULL || state == NULL) return;
     if (state->state == STATE_INIT) {
-        printf("  [GAGAL] Daftar peserta dulu (Menu 1).\n");
+        tui_clear();
+        attron(COLOR_PAIR(COLOR_ERROR));
+        tui_print_centered(10, "[GAGAL] Daftar peserta dulu (Menu 1).");
+        attroff(COLOR_PAIR(COLOR_ERROR));
+        refresh();
+        tui_getch();
         return;
     }
 
-    printf("\n=== INPUT TENDANGAN DAN SKOR ===\n");
-    printf("Setiap peserta %d tendangan (zona %d-%d).\n\n", TOTAL_KICKS, MIN_ZONE, MAX_ZONE);
-
-    for (int p = 0; p < state->participant_count; p++) {
+    int p;
+    for (p = 0; p < state->participant_count; p++) {
         ParticipantEntity *part = &state->participants[p];
         while (part->kick_count < TOTAL_KICKS) {
-            printf("  %s - tendangan %d/%d, zona (%d-%d): ",
-                   part->name.value, part->kick_count + 1, TOTAL_KICKS, MIN_ZONE, MAX_ZONE);
-            fflush(stdout);
+            tui_clear();
+
+            attron(COLOR_PAIR(COLOR_TITLE) | A_BOLD);
+            tui_print_centered(1, "INPUT TENDANGAN DAN SKOR");
+            attroff(COLOR_PAIR(COLOR_TITLE) | A_BOLD);
+
+            tui_box(3, 2, 56, 12);
+
+            attron(COLOR_PAIR(COLOR_MENU));
+            mvprintw(4, 4, "Peserta: %s", part->name.value);
+            mvprintw(5, 4, "Tendangan %d/%d  |  Skor sementara: %d",
+                     part->kick_count + 1, TOTAL_KICKS, part->total_score);
+            attroff(COLOR_PAIR(COLOR_MENU));
+
+            /* Show previous kicks */
+            int k;
+            int row = 7;
+            attron(COLOR_PAIR(COLOR_MENU));
+            mvprintw(row, 4, "Riwayat: ");
+            for (k = 0; k < part->kick_count; k++) {
+                printw("Z%d ", part->kicks[k]);
+            }
+            attroff(COLOR_PAIR(COLOR_MENU));
+
+            /* Input zone */
+            attron(COLOR_PAIR(COLOR_MENU));
+            mvprintw(9, 4, "Masukkan zona (0-%d): ", MAX_ZONE);
+            attroff(COLOR_PAIR(COLOR_MENU));
+            refresh();
 
             ZoneVO z;
-            if (read_zone(&z) != SC_OK) {
-                if (feof(stdin)) return;   /* input habis */
-                printf("  [GAGAL] Zona harus %d-%d.\n", MIN_ZONE, MAX_ZONE);
+            if (read_zone(&z) != SC_OK || z.value < MIN_ZONE || z.value > MAX_ZONE) {
+                attron(COLOR_PAIR(COLOR_ERROR));
+                mvprintw(11, 4, "[GAGAL] Zona harus %d-%d.        ", MIN_ZONE, MAX_ZONE);
+                attroff(COLOR_PAIR(COLOR_ERROR));
+                refresh();
+                tui_getch();
                 continue;
             }
 
             ScoringError e = agent_scoring_record(agg, state, p, z);
-            if (e == SC_OK) printf("  Zona %d -> %d poin\n", z.value, z.value);
-            else if (e == SC_INVALID_ZONE) printf("  [GAGAL] Zona harus %d-%d.\n", MIN_ZONE, MAX_ZONE);
-            else printf("  [GAGAL] Kesalahan pencatatan.\n");
+            if (e == SC_OK) {
+                attron(COLOR_PAIR(COLOR_SUCCESS));
+                mvprintw(11, 4, "Zona %d -> %d poin               ", z.value, z.value);
+                attroff(COLOR_PAIR(COLOR_SUCCESS));
+            } else if (e == SC_INVALID_ZONE) {
+                attron(COLOR_PAIR(COLOR_ERROR));
+                mvprintw(11, 4, "[GAGAL] Zona harus %d-%d.        ", MIN_ZONE, MAX_ZONE);
+                attroff(COLOR_PAIR(COLOR_ERROR));
+            } else {
+                attron(COLOR_PAIR(COLOR_ERROR));
+                mvprintw(11, 4, "[GAGAL] Kesalahan pencatatan.    ");
+                attroff(COLOR_PAIR(COLOR_ERROR));
+            }
+            refresh();
+            tui_getch();
         }
-        printf("  Selesai %s. Total: %d\n", part->name.value, part->total_score);
+
+        /* Show completion for this participant */
+        tui_clear();
+        attron(COLOR_PAIR(COLOR_SUCCESS) | A_BOLD);
+        mvprintw(5, 4, "[SELESAI] %s — Total: %d poin",
+                 part->name.value, part->total_score);
+        attroff(COLOR_PAIR(COLOR_SUCCESS) | A_BOLD);
+        refresh();
+        tui_getch();
     }
 
-    if (state->state == STATE_COMPLETED)
-        printf("\nSemua tendangan selesai. Status: COMPLETED.\n");
-    printf("Tekan Enter untuk melanjutkan...");
-    getchar();
+    /* All done */
+    tui_clear();
+    if (state->state == STATE_COMPLETED) {
+        attron(COLOR_PAIR(COLOR_SUCCESS) | A_BOLD);
+        tui_print_centered(5, "Semua tendangan selesai!");
+        attroff(COLOR_PAIR(COLOR_SUCCESS) | A_BOLD);
+    }
+    attron(COLOR_PAIR(COLOR_MENU));
+    tui_print_centered(7, "Tekan Enter untuk kembali...");
+    attroff(COLOR_PAIR(COLOR_MENU));
+    refresh();
+    tui_getch();
 }

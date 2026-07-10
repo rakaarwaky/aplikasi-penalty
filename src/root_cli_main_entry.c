@@ -1,5 +1,5 @@
 #include "cli/module.cli.h"
-#include "cli/infrastructure_tui_adapter.h"
+#include "infrastructure_tui_adapter.h"
 
 int main(void) {
     CompetitionState state;

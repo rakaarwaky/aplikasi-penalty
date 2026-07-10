@@ -3,7 +3,6 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "shared/taxonomy_string_utility.h"
 
 static void show_error(RegistrationError e) {
     const char *msg;
@@ -17,8 +16,9 @@ static void show_error(RegistrationError e) {
         default:                    msg = "Kesalahan pendaftaran.";
     }
     attron(COLOR_PAIR(COLOR_ERROR));
-    mvprintw(20, 4, "[GAGAL] %s", msg);
+    mvprintw(20, 4, "[GAGAL] %s          ", msg);
     attroff(COLOR_PAIR(COLOR_ERROR));
+    refresh();
 }
 
 void cli_surfaces_registration_execute(RegistrationAggregate *agg, CompetitionState *state) {
@@ -37,7 +37,6 @@ void cli_surfaces_registration_execute(RegistrationAggregate *agg, CompetitionSt
     mvprintw(5, 4, "Peserta terdaftar: %d", state->participant_count);
     attroff(COLOR_PAIR(COLOR_MENU));
 
-    /* Show registered participants */
     int i;
     for (i = 0; i < state->participant_count; i++) {
         attron(COLOR_PAIR(COLOR_SUCCESS));
@@ -45,7 +44,6 @@ void cli_surfaces_registration_execute(RegistrationAggregate *agg, CompetitionSt
         attroff(COLOR_PAIR(COLOR_SUCCESS));
     }
 
-    /* Input area */
     int row = 7 + state->participant_count + 1;
     char buffer[64];
     while (state->participant_count < MAX_PARTICIPANTS) {
@@ -71,7 +69,6 @@ void cli_surfaces_registration_execute(RegistrationAggregate *agg, CompetitionSt
             continue;
         }
 
-        /* Check for "selesai" */
         char lower[64];
         for (i = 0; i < (int)len; i++) lower[i] = buffer[i];
         lower[len] = '\0';

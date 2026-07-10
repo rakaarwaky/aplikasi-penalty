@@ -1,6 +1,8 @@
 #ifndef INFRASTRUCTURE_TUI_ADAPTER_H
 #define INFRASTRUCTURE_TUI_ADAPTER_H
 
+#include <ncurses.h>
+
 /* ncurses initialization and teardown */
 void tui_init(void);
 void tui_end(void);

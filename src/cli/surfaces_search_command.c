@@ -1,4 +1,5 @@
 #include "cli/module.cli.h"
+#include "infrastructure_tui_adapter.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -6,20 +7,48 @@
 void cli_surfaces_search_execute(SearchAggregate *agg, CompetitionState *state) {
     if (agg == NULL || state == NULL) return;
     if (state->state == STATE_INIT) {
-        printf("  [GAGAL] Daftar peserta dulu.\n");
+        tui_clear();
+        attron(COLOR_PAIR(COLOR_ERROR));
+        tui_print_centered(10, "[GAGAL] Daftar peserta dulu.");
+        attroff(COLOR_PAIR(COLOR_ERROR));
+        refresh();
+        tui_getch();
         return;
     }
 
-    printf("\n=== CARI PESERTA ===\n");
-    printf("Masukkan nama peserta: ");
-    fflush(stdout);
+    tui_clear();
 
-    char buffer[MAX_NAME_LENGTH + 2];
-    if (fgets(buffer, sizeof buffer, stdin) == NULL) return;
+    attron(COLOR_PAIR(COLOR_TITLE) | A_BOLD);
+    tui_print_centered(1, "CARI PESERTA");
+    attroff(COLOR_PAIR(COLOR_TITLE) | A_BOLD);
+
+    tui_box(3, 2, 56, 14);
+
+    attron(COLOR_PAIR(COLOR_MENU));
+    mvprintw(4, 4, "Masukkan nama peserta:");
+    attroff(COLOR_PAIR(COLOR_MENU));
+    refresh();
+
+    char buffer[64];
+    echo();
+    curs_set(1);
+    memset(buffer, 0, sizeof buffer);
+    mvgetnstr(5, 4, buffer, 30);
+    curs_set(0);
+    noecho();
+
     size_t len = strlen(buffer);
     while (len > 0 && (buffer[len - 1] == '\n' || buffer[len - 1] == '\r'))
         buffer[--len] = '\0';
-    if (len == 0) { printf("  [GAGAL] Nama pencarian kosong.\n"); return; }
+
+    if (len == 0) {
+        attron(COLOR_PAIR(COLOR_ERROR));
+        mvprintw(7, 4, "[GAGAL] Nama pencarian kosong.");
+        attroff(COLOR_PAIR(COLOR_ERROR));
+        refresh();
+        tui_getch();
+        return;
+    }
 
     ParticipantNameVO name;
     strncpy(name.value, buffer, MAX_NAME_LENGTH);
@@ -27,19 +56,32 @@ void cli_surfaces_search_execute(SearchAggregate *agg, CompetitionState *state) 
 
     SearchResultVO r;
     SearchError e = agent_search_find(agg, state, &name, &r);
+
     if (e == SR_OK) {
-        printf("\n  === Detail Peserta ===\n");
-        printf("  Nama       : %s\n", r.name);
-        printf("  Total Skor : %d\n", r.total_score);
-        printf("  Tendangan  : ");
-        for (int k = 0; k < TOTAL_KICKS; k++) printf("%d ", r.kicks[k]);
-        printf("\n  Zona       : ");
-        for (int z = 0; z <= MAX_ZONE; z++) printf("Z%d:%d ", z, r.zone_freq[z]);
-        printf("\n");
+        attron(COLOR_PAIR(COLOR_SUCCESS) | A_BOLD);
+        mvprintw(7, 4, "[DITEMUKAN]");
+        attroff(COLOR_PAIR(COLOR_SUCCESS) | A_BOLD);
+
+        attron(COLOR_PAIR(COLOR_MENU));
+        mvprintw(9, 4, "Nama       : %s", r.name);
+        mvprintw(10, 4, "Total Skor : %d", r.total_score);
+        mvprintw(11, 4, "Tendangan  : ");
+        int k;
+        for (k = 0; k < TOTAL_KICKS; k++) printw("%d ", r.kicks[k]);
+        printw("\n");
+        mvprintw(12, 4, "Zona       : ");
+        int z;
+        for (z = 0; z <= MAX_ZONE; z++) printw("Z%d:%d ", z, r.zone_freq[z]);
+        attroff(COLOR_PAIR(COLOR_MENU));
     } else {
-        printf("  Peserta '%s' tidak ditemukan.\n", buffer);
+        attron(COLOR_PAIR(COLOR_ERROR));
+        mvprintw(7, 4, "Peserta '%s' tidak ditemukan.", buffer);
+        attroff(COLOR_PAIR(COLOR_ERROR));
     }
 
-    printf("\nTekan Enter untuk melanjutkan...");
-    getchar();
+    attron(COLOR_PAIR(COLOR_MENU));
+    mvprintw(15, 4, "Tekan Enter untuk kembali...");
+    attroff(COLOR_PAIR(COLOR_MENU));
+    refresh();
+    tui_getch();
 }
