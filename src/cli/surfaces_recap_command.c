@@ -16,23 +16,19 @@ void cli_surfaces_recap_execute(RecapAggregate *agg, CompetitionState *state) {
     if (agg == NULL || state == NULL) return;
     if (state->state != STATE_COMPLETED) {
         tui_clear();
-        attron(COLOR_PAIR(COLOR_ERROR));
-        tui_print_centered(10, "[GAGAL] Tendangan belum selesai.");
-        attroff(COLOR_PAIR(COLOR_ERROR));
+        tui_print_centered_colored(10, "[GAGAL] Tendangan belum selesai.", COLOR_ERROR, 1);
         refresh();
         tui_getch();
         return;
     }
 
-    /* Siapkan data peringkat & detail. */
+    /* Siapkan data peringkat & detail */
     RankingEntryVO ranking[MAX_PARTICIPANTS];
     SearchResultVO details[MAX_PARTICIPANTS];
     RecapError e = agent_recap_prepare(agg, state, ranking, details, MAX_PARTICIPANTS);
     if (e != RC_OK) {
         tui_clear();
-        attron(COLOR_PAIR(COLOR_ERROR));
-        tui_print_centered(10, "[GAGAL] Rekap belum siap.");
-        attroff(COLOR_PAIR(COLOR_ERROR));
+        tui_print_centered_colored(10, "[GAGAL] Rekap belum siap.", COLOR_ERROR, 1);
         refresh();
         tui_getch();
         return;
@@ -40,65 +36,71 @@ void cli_surfaces_recap_execute(RecapAggregate *agg, CompetitionState *state) {
 
     tui_clear();
 
-    /* Judul. */
-    attron(COLOR_PAIR(COLOR_TITLE) | A_BOLD);
-    tui_print_centered(1, "REKAPITULASI LENGKAP");
-    attroff(COLOR_PAIR(COLOR_TITLE) | A_BOLD);
+    /* Judul dengan dekorasi */
+    tui_print_centered_colored(0, "============================================", COLOR_GOLD, 1);
+    tui_print_centered_colored(1, "REKAPITULASI LENGKAP", COLOR_TITLE, 1);
+    tui_print_centered_colored(2, "============================================", COLOR_GOLD, 1);
 
-    /* Dimensi & bingkai luar. */
+    /* Dimensi & bingkai */
     int box_col = 1;
-    int box_width = 64;
-    int box_row = 3;
-    int box_height = state->participant_count + 6;
+    int box_width = 66;
+    int box_row = 4;
+    int box_height = state->participant_count + 8;
 
     tui_box(box_row, box_col, box_width, box_height);
 
-    /* Header kolom. */
-    attron(COLOR_PAIR(COLOR_HIGHLIGHT));
-    mvprintw(box_row + 1, box_col + 2, "%-4s %-24s %-6s %s", "No", "Nama", "Skor", "Zona(0 1 2 3 4 5)");
-    attroff(COLOR_PAIR(COLOR_HIGHLIGHT));
+    /* Header kolom dengan background */
+    tui_separator(box_row + 1, box_col, box_width);
+    attron(COLOR_PAIR(COLOR_HEADER) | A_BOLD);
+    mvprintw(box_row + 2, box_col + 2, " %-4s %-22s %-6s %s", "No", "Nama", "Skor", "Zona(0 1 2 3 4 5)");
+    attroff(COLOR_PAIR(COLOR_HEADER) | A_BOLD);
+    tui_separator(box_row + 3, box_col, box_width);
 
-    /* Garis pemisah header. */
-    attron(COLOR_PAIR(COLOR_BORDER));
-    mvaddch(box_row + 2, box_col, ACS_LTEE);
-    int c;
-    for (c = 1; c < box_width - 1; c++) mvaddch(box_row + 2, box_col + c, ACS_HLINE);
-    mvaddch(box_row + 2, box_col + box_width - 1, ACS_RTEE);
-    attroff(COLOR_PAIR(COLOR_BORDER));
-
-    /* Satu baris per peserta. */
+    /* Satu baris per peserta */
     int i;
     for (i = 0; i < state->participant_count; i++) {
         const RankingEntryVO *r = &ranking[i];
         const SearchResultVO *d = &details[r->participant_id];
-        int row = box_row + 3 + i;
+        int row = box_row + 4 + i;
 
-        if (i % 2 == 0)
-            attron(COLOR_PAIR(COLOR_MENU));
-        else
-            attron(COLOR_PAIR(COLOR_BORDER));
+        /* Pilih warna berdasarkan peringkat */
+        int row_color = COLOR_MENU;
+        if (r->rank == 1) row_color = COLOR_GOLD;
+        else if (r->rank == 2) row_color = COLOR_SILVER;
+        else if (r->rank == 3) row_color = COLOR_BRONZE;
+        else if (i % 2 == 1) row_color = COLOR_DIM;
 
-        mvprintw(row, box_col + 2, "%-4d %-24s %-6d ", r->rank, d->name, d->total_score);
+        attron(COLOR_PAIR(row_color) | (r->rank <= 3 ? A_BOLD : 0));
+        mvprintw(row, box_col + 2, " %-4d %-22s %-6d ", r->rank, d->name, d->total_score);
         int z;
         for (z = 0; z <= MAX_ZONE; z++) printw("%d ", d->zone_freq[z]);
+        attroff(COLOR_PAIR(row_color) | (r->rank <= 3 ? A_BOLD : 0));
 
-        attroff(COLOR_PAIR(COLOR_MENU));
-        attroff(COLOR_PAIR(COLOR_BORDER));
-
-        /* Garis pemisah antar baris (kecuali baris terbawah). */
+        /* Garis pemisah antar baris */
         if (i < state->participant_count - 1) {
-            attron(COLOR_PAIR(COLOR_BORDER));
-            mvaddch(row + 1, box_col, ACS_LTEE);
-            for (c = 1; c < box_width - 1; c++) mvaddch(row + 1, box_col + c, ACS_HLINE);
-            mvaddch(row + 1, box_col + box_width - 1, ACS_RTEE);
-            attroff(COLOR_PAIR(COLOR_BORDER));
+            tui_separator(row + 1, box_col, box_width);
         }
     }
 
-    /* Penutup. */
+    /* Separator footer */
+    tui_separator(box_row + 4 + state->participant_count, box_col, box_width);
+
+    /* Ringkasan */
     attron(COLOR_PAIR(COLOR_MENU));
-    mvprintw(box_row + box_height - 1, box_col + 2, "Tekan Enter untuk kembali...");
+    mvprintw(box_row + 5 + state->participant_count, box_col + 2,
+             "Total peserta: %d", state->participant_count);
     attroff(COLOR_PAIR(COLOR_MENU));
+
+    /* Tampilkan juara */
+    if (state->participant_count > 0) {
+        const char *winner = state->participants[ranking[0].participant_id].name.value;
+        attron(COLOR_PAIR(COLOR_GOLD) | A_BOLD);
+        mvprintw(box_row + 6 + state->participant_count, box_col + 2,
+                 "JUARA: %s dengan %d poin!", winner, ranking[0].total_score);
+        attroff(COLOR_PAIR(COLOR_GOLD) | A_BOLD);
+    }
+
+    tui_footer("Tekan ENTER untuk kembali ke menu utama");
 
     refresh();
     tui_getch();

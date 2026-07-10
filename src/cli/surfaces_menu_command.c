@@ -9,70 +9,109 @@
 #include <stdio.h>
 #include <string.h>
 
-#define MENU_ITEMS 6     /* jumlah pilihan (0=keluar + 5 fitur) */
-#define BOX_WIDTH  50     /* lebar kotak menu */
-#define BOX_START_ROW 2   /* baris awal kotak */
-#define BOX_START_COL 2   /* kolom awal kotak */
+#define MENU_ITEMS 6
+#define BOX_WIDTH  52
+#define BOX_START_ROW 3
+#define BOX_START_COL 2
 
-/* Teks tiap pilihan menu. */
 static const char *menu_labels[MENU_ITEMS] = {
-    "0. Keluar",
-    "1. Pendaftaran Peserta",
-    "2. Input Tendangan dan Skor",
-    "3. Tampilkan Ranking",
-    "4. Cari Peserta",
-    "5. Rekapitulasi Lengkap"
+    "  Keluar",
+    "  Pendaftaran Peserta",
+    "  Input Tendangan dan Skor",
+    "  Tampilkan Ranking",
+    "  Cari Peserta",
+    "  Rekapitulasi Lengkap"
 };
 
-/* Gambar ulang layar menu; tambahkan label status [AKTIF]/[BLOKIR]/[SUDAH]
-   pada tiap menu sesuai kondisi lomba saat ini. */
+static const char *menu_icons[MENU_ITEMS] = {
+    "[X]",
+    "[>]",
+    "[*]",
+    "[#]",
+    "[?]",
+    "[=]"
+};
+
+/* Gambar ulang layar menu; tambahkan label status sesuai kondisi lomba. */
 static void draw_menu(int selected, CompetitionStateKind state) {
     tui_clear();
 
-    /* Judul. */
+    /* Dekorasi header */
+    tui_print_centered_colored(0, "+----------------------------------------------------------+", COLOR_BORDER, 0);
+    tui_print_centered_colored(1, "|", COLOR_BORDER, 0);
+
     attron(COLOR_PAIR(COLOR_TITLE) | A_BOLD);
-    tui_print_centered(1, "APLIKASI LOMBA TENDANGAN PENALTI");
+    tui_print_centered(1, "  LOMBA TENDANGAN PENALTI  ");
     attroff(COLOR_PAIR(COLOR_TITLE) | A_BOLD);
+
+    /* Tutup garis header */
+    int title_len = 32;
+    int pad = (COLS - title_len) / 2;
+    tui_print_colored(1, pad + title_len, "|", COLOR_BORDER);
+
+    tui_print_centered_colored(2, "+----------------------------------------------------------+", COLOR_BORDER, 0);
 
     /* Bingkai kotak. */
     tui_box(BOX_START_ROW, BOX_START_COL, BOX_WIDTH, MENU_ITEMS + 4);
 
-    /* Tiap pilihan + label statusnya. */
+    /* Garis pemisah setelah judul box */
+    tui_separator(BOX_START_ROW + 1, BOX_START_COL, BOX_WIDTH);
+
+    /* Tiap pilihan + label statusnya */
     int i;
     for (i = 0; i < MENU_ITEMS; i++) {
         int row = BOX_START_ROW + 2 + i;
-        char label[64];
-        snprintf(label, sizeof label, "%s", menu_labels[i]);
+        char label[80];
+        snprintf(label, sizeof label, "%s %s", menu_icons[i], menu_labels[i]);
 
-        if (i == 1) { /* Pendaftaran */
-            if (state == STATE_INIT) strcat(label, "  [AKTIF]");
-            else strcat(label, "  [SUDAH]");
-        } else if (i == 2) { /* Input tendangan */
-            if (state == STATE_INIT) strcat(label, "  [BLOKIR]");
-            else if (state == STATE_COMPLETED) strcat(label, "  [SELESAI]");
-            else strcat(label, "  [AKTIF]");
-        } else if (i == 3) { /* Ranking */
-            if (state != STATE_COMPLETED) strcat(label, "  [BLOKIR]");
-            else strcat(label, "  [AKTIF]");
-        } else if (i == 4) { /* Cari */
-            if (state == STATE_INIT) strcat(label, "  [BLOKIR]");
-            else strcat(label, "  [AKTIF]");
-        } else if (i == 5) { /* Rekap */
-            if (state != STATE_COMPLETED) strcat(label, "  [BLOKIR]");
-            else strcat(label, "  [AKTIF]");
+        /* Status tags */
+        const char *status = "";
+
+        if (i == 0) {
+            /* Keluar - tidak ada status */
+        } else if (i == 1) {
+            if (state == STATE_INIT) status = "[AKTIF]";
+            else status = "[SUDAH]";
+        } else if (i == 2) {
+            if (state == STATE_INIT) status = "[KUNCI]";
+            else if (state == STATE_COMPLETED) status = "[SELESAI]";
+            else status = "[AKTIF]";
+        } else if (i == 3) {
+            if (state != STATE_COMPLETED) status = "[KUNCI]";
+            else status = "[AKTIF]";
+        } else if (i == 4) {
+            if (state == STATE_INIT) status = "[KUNCI]";
+            else status = "[AKTIF]";
+        } else if (i == 5) {
+            if (state != STATE_COMPLETED) status = "[KUNCI]";
+            else status = "[AKTIF]";
         }
 
-        if (i == selected)
-            tui_highlight_row(row, BOX_START_COL, BOX_WIDTH, label);
-        else
-            tui_normal_row(row, BOX_START_COL, BOX_WIDTH, label);
+        char full_label[128];
+        snprintf(full_label, sizeof full_label, "%-28s %s", label, status);
+
+        if (i == selected) {
+            tui_highlight_row(row, BOX_START_COL, BOX_WIDTH, full_label);
+        } else {
+            tui_normal_row(row, BOX_START_COL, BOX_WIDTH, full_label);
+        }
     }
 
-    /* Petunjuk navigasi. */
-    attron(COLOR_PAIR(COLOR_MENU));
-    mvprintw(BOX_START_ROW + MENU_ITEMS + 3, BOX_START_COL + 2,
-             "Navigasi: v/^  Pilih: Enter  Keluar: 0");
-    attroff(COLOR_PAIR(COLOR_MENU));
+    /* Separator sebelum footer */
+    tui_separator(BOX_START_ROW + MENU_ITEMS + 2, BOX_START_COL, BOX_WIDTH);
+
+    /* Info status lomba */
+    const char *state_text = "";
+    int state_color = COLOR_DIM;
+    switch (state) {
+        case STATE_INIT:      state_text = "Fase: Pendaftaran"; state_color = COLOR_INFO; break;
+        case STATE_REGISTERED: state_text = "Fase: Input Tendangan"; state_color = COLOR_WARNING; break;
+        case STATE_COMPLETED: state_text = "Fase: Selesai"; state_color = COLOR_SUCCESS; break;
+    }
+    tui_print_colored(BOX_START_ROW + MENU_ITEMS + 3, BOX_START_COL + 2, state_text, state_color);
+
+    /* Petunjuk navigasi */
+    tui_footer("Navigasi: [v/^]  Pilih: [ENTER]  Keluar: [0/ESC]");
 
     refresh();
 }
@@ -85,8 +124,11 @@ int cli_surfaces_menu_run(RegistrationAggregate *reg,
                           ScoringAggregate *sc, RankingAggregate *rk,
                           SearchAggregate *sr, RecapAggregate *rc,
                           CompetitionState *state) {
-    int selected = 1;   /* pilihan awal: menu 1 */
+    int selected = 1;
     int running = 1;
+
+    /* Tampilkan splash screen sekali saat pertama kali. */
+    tui_splash(3);
 
     while (running) {
         draw_menu(selected, state->state);
@@ -95,28 +137,25 @@ int cli_surfaces_menu_run(RegistrationAggregate *reg,
         switch (key) {
             case TUI_KEY_UP:
                 selected--;
-                if (selected < 0) selected = MENU_ITEMS - 1; /* putar ke bawah */
+                if (selected < 0) selected = MENU_ITEMS - 1;
                 break;
             case TUI_KEY_DOWN:
                 selected++;
-                if (selected >= MENU_ITEMS) selected = 0;       /* putar ke atas */
+                if (selected >= MENU_ITEMS) selected = 0;
                 break;
             case TUI_KEY_ENTER:
                 if (selected == 0) {
-                    running = 0; /* Keluar */
+                    running = 0;
                 } else if (selected == 1) {
-                    /* Pendaftaran: buka bila belum/masuk tahap pendaftaran. */
                     if (state->state == STATE_INIT || state->state == STATE_REGISTERED)
                         cli_surfaces_registration_execute(reg, state);
                 } else if (selected == 2) {
-                    /* Input tendangan: buka bila pendaftaran selesai. */
                     if (state->state == STATE_REGISTERED)
                         cli_surfaces_scoring_execute(sc, state);
                 } else if (selected == 3) {
                     if (state->state == STATE_COMPLETED)
                         cli_surfaces_ranking_execute(rk, state);
                 } else if (selected == 4) {
-                    /* Cari: buka bila sudah ada peserta terdaftar. */
                     if (state->state == STATE_REGISTERED || state->state == STATE_COMPLETED)
                         cli_surfaces_search_execute(sr, state);
                 } else if (selected == 5) {
@@ -125,6 +164,9 @@ int cli_surfaces_menu_run(RegistrationAggregate *reg,
                 }
                 break;
             case TUI_KEY_ESC:
+                running = 0;
+                break;
+            case '0':
                 running = 0;
                 break;
         }

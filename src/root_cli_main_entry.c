@@ -33,8 +33,9 @@ int main(void) {
     SearchAggregate sr = root_search_build();
     RecapAggregate rc = root_recap_build(rk.protocol);
 
-    /* Hidupkan layar ncurses lalu tampilkan menu utama. */
+    /* Hidupkan layar ncurses lalu tampilkan splash screen. */
     tui_init();
+    tui_splash(50);
     cli_surfaces_menu_run(&reg, &sc, &rk, &sr, &rc, &state);
     tui_end();
 
