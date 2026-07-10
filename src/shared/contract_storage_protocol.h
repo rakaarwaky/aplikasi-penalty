@@ -15,10 +15,14 @@ typedef StorageError (*save_fn)(const char *filename, const CompetitionState *st
 /* Tipe fungsi: baca data lomba dari file. */
 typedef StorageError (*load_fn)(const char *filename, CompetitionState *state);
 
+/* Tipe fungsi: hapus file data tersimpan di disk. */
+typedef StorageError (*delete_fn)(const char *filename);
+
 /** Kumpulan fungsi penyimpanan — diisi oleh root container. */
 typedef struct {
-    save_fn save;  /**< Simpan ke file. */
-    load_fn load;  /**< Muat dari file. */
+    save_fn save;     /**< Simpan ke file. */
+    load_fn load;     /**< Muat dari file. */
+    delete_fn delete_file; /**< Hapus file tersimpan. */
 } StorageProtocol;
 
 #endif /* SHARED_CONTRACT_STORAGE_PROTOCOL_H */

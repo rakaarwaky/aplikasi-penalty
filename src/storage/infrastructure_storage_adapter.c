@@ -52,10 +52,23 @@ static StorageError storage_load_impl(const char *filename, CompetitionState *st
 
 /**
  * Siapkan struct penyimpan: sambungkan fungsi tulis & baca file.
- */
-StorageProtocol storage_adapter_create(void) {
-    StorageProtocol protocol;
-    protocol.save = storage_save_impl;
-    protocol.load = storage_load_impl;
-    return protocol;
-}
+ static StorageError storage_delete_impl(const char *filename) {
+     if (filename == NULL) return ST_ERROR_FILE_NOT_FOUND;
+
+     /* Cek ada/tidak dulu biar pesan lebih jelas (bukan error "" permission). */
+     FILE *check = fopen(filename, "rb");
+     if (check == NULL) return ST_ERROR_FILE_NOT_FOUND;
+     fclose(check);
+
+     if (remove(filename) != 0) return ST_ERROR_PERMISSION; /* gagal hapus */
+     return ST_OK;
+ }
+
+ /** Siapkan struct penyimpan: sambungkan fungsi tulis, baca & hapus file. */
+ StorageProtocol storage_adapter_create(void) {
+     StorageProtocol protocol;
+     protocol.save = storage_save_impl;
+     protocol.load = storage_load_impl;
+     protocol.delete_file = storage_delete_impl;
+     return protocol;
+ }
