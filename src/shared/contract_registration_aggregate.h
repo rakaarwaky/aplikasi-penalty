@@ -1,13 +1,16 @@
+/**
+ * @file contract_registration_aggregate.h
+ * @brief Wadah protocol pendaftaran yang dipakai seluruh program.
+ */
+
 #ifndef SHARED_CONTRACT_REGISTRATION_AGGREGATE_H
 #define SHARED_CONTRACT_REGISTRATION_AGGREGATE_H
 
-/* Aggregate untuk fitur pendaftaran peserta. */
-
 #include "shared/contract_registration_protocol.h"
 
-/** Aggregate pendaftaran — menggabungkan protocol pendaftaran. */
+/** Penghubung ke fungsi pendaftaran (disimpan alamatnya saja). */
 typedef struct {
-    RegistrationProtocol *protocol; /**< Pointer ke protocol pendaftaran. */
+    RegistrationProtocol *protocol; /**< Pointer ke fungsi-fungsi pendaftaran. */
 } RegistrationAggregate;
 
 #endif /* SHARED_CONTRACT_REGISTRATION_AGGREGATE_H */

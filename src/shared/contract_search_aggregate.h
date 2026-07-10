@@ -1,13 +1,16 @@
+/**
+ * @file contract_search_aggregate.h
+ * @brief Wadah protocol search yang dipakai seluruh program.
+ */
+
 #ifndef SHARED_CONTRACT_SEARCH_AGGREGATE_H
 #define SHARED_CONTRACT_SEARCH_AGGREGATE_H
 
-/* Aggregate untuk fitur pencarian peserta. */
-
 #include "shared/contract_search_protocol.h"
 
-/** Aggregate search — menggabungkan protocol pencarian peserta. */
+/** Penghubung ke fungsi pencarian (disimpan alamatnya saja). */
 typedef struct {
-    SearchProtocol *protocol; /**< Pointer ke protocol search. */
+    SearchProtocol *protocol; /**< Pointer ke fungsi-fungsi cari. */
 } SearchAggregate;
 
 #endif /* SHARED_CONTRACT_SEARCH_AGGREGATE_H */

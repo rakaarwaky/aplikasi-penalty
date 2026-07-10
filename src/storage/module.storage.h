@@ -1,4 +1,8 @@
-/* Deklarasi modul penyimpanan — save/load state kompetisi. */
+/**
+ * @file module.storage.h
+ * @brief Kumpulan fungsi simpan/muat data lomba ke file (cari lewat satu file ini).
+ */
+
 #ifndef MODULE_STORAGE_H
 #define MODULE_STORAGE_H
 
@@ -6,10 +10,10 @@
 #include "shared/taxonomy_storage_error.h"
 #include "shared/taxonomy_competition_state_vo.h"
 
-/* INFRASTRUCTURE — implementasi file I/O (mengimplementasikan StorageProtocol) */
+/* Fungsi baca/tulis file (diisi alamatnya saat rakit). */
 StorageProtocol storage_adapter_create(void);
 
-/* AGENT — orkestrasi melalui protocol */
+/* Penghubung ke fungsi penyimpanan. */
 typedef struct {
     const StorageProtocol *protocol;
 } StorageAggregate;
@@ -22,7 +26,7 @@ StorageError agent_storage_load(const StorageAggregate *agg,
                                 const char *filename,
                                 CompetitionState *state);
 
-/* ROOT — container builder (wiring only) */
+/* Siapkan struct penyimpanan. */
 StorageAggregate root_storage_build(void);
 
 #endif /* MODULE_STORAGE_H */

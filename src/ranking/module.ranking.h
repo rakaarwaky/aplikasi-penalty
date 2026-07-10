@@ -1,19 +1,23 @@
-/* Deklarasi modul ranking — capabilities, agent, root. */
+/**
+ * @file module.ranking.h
+ * @brief Kumpulan fungsi fitur peringkat (cari lewat satu file ini).
+ */
+
 #ifndef MODULE_RANKING_H
 #define MODULE_RANKING_H
 
 #include "shared/contract_ranking_aggregate.h"
 
-/* CAPABILITIES — implementasi RankingProtocol (murni, tanpa I/O) */
+/* Hitung peringkat peserta (diisi alamatnya saat rakit). */
 RankingError capabilities_ranking_compute(const CompetitionState *state,
                                           RankingEntryVO *out, int capacity);
 
-/* AGENT — koordinasi; tanpa I/O */
+/* Hitung peringkat. */
 RankingError agent_ranking_compute(RankingAggregate *agg,
                                    const CompetitionState *state,
                                    RankingEntryVO *out, int capacity);
 
-/* ROOT — container builder (wiring only) */
+/* Siapkan struct ranking. */
 RankingAggregate root_ranking_build(void);
 
 #endif /* MODULE_RANKING_H */

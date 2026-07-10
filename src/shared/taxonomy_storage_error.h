@@ -1,15 +1,18 @@
+/**
+ * @file taxonomy_storage_error.h
+ * @brief Kode error baca/tulis file penyimpanan data.
+ */
+
 #ifndef SHARED_TAXONOMY_STORAGE_ERROR_H
 #define SHARED_TAXONOMY_STORAGE_ERROR_H
 
-/* Error enum untuk operasi save/load state kompetisi ke file. */
-
-/** Error enum untuk operasi storage. */
+/** Hasil operasi simpan/muat file lomba. */
 typedef enum {
-    ST_OK = 0,                /**< Operasi storage berhasil. */
-    ST_ERROR_FILE_NOT_FOUND,  /**< File tidak ditemukan (untuk load). */
-    ST_ERROR_PERMISSION,      /**< Tidak memiliki izin akses file. */
-    ST_ERROR_CORRUPT,         /**< File rusak atau format tidak sesuai. */
-    ST_ERROR_FULL             /**< Penyimpanan penuh (tidak bisa menulis). */
+    ST_OK = 0,                /**< Berhasil. */
+    ST_ERROR_FILE_NOT_FOUND,  /**< File tak ada / nama kosong. */
+    ST_ERROR_PERMISSION,      /**< Tidak boleh akses file. */
+    ST_ERROR_CORRUPT,         /**< File rusak / tak utuh saat baca/tulis. */
+    ST_ERROR_FULL             /**< Tempat simpanan penuh. */
 } StorageError;
 
 #endif /* SHARED_TAXONOMY_STORAGE_ERROR_H */

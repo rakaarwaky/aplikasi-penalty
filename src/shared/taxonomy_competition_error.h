@@ -1,56 +1,49 @@
+/**
+ * @file taxonomy_competition_error.h
+ * @brief Kode error tiap fitur (dipakai agar pesan gagal bisa ditampilkan).
+ */
+
 #ifndef SHARED_TAXONOMY_COMPETITION_ERROR_H
 #define SHARED_TAXONOMY_COMPETITION_ERROR_H
 
-/* Error enum per fitur: registration, scoring, ranking, search, recap. */
-
-/* ──────────────────────────────────────────────
- * RegistrationError — error pendaftaran peserta
- * ────────────────────────────────────────────── */
+/* Error pendaftaran peserta. */
 typedef enum {
-    REG_OK = 0,                /**< Operasi berhasil. */
-    REG_NAME_EMPTY,            /**< Nama kosong (0 karakter). */
-    REG_NAME_TOO_LONG,         /**< Nama melebihi MAX_NAME_LENGTH. */
-    REG_NAME_INVALID_CHAR,     /**< Nama mengandung karakter tidak valid. */
-    REG_NAME_DUPLICATE,        /**< Nama sudah terdaftar. */
-    REG_FULL,                  /**< Jumlah peserta sudah MAX_PARTICIPANTS. */
-    REG_TOO_FEW                /**< Jumlah peserta kurang dari MIN_PARTICIPANTS (untuk finalisasi). */
+    REG_OK = 0,                /**< Berhasil. */
+    REG_NAME_EMPTY,            /**< Nama kosong. */
+    REG_NAME_TOO_LONG,         /**< Nama kepanjangan. */
+    REG_NAME_INVALID_CHAR,     /**< Ada karakter tak sah (bukan huruf/spasi). */
+    REG_NAME_DUPLICATE,        /**< Nama sudah dipakai. */
+    REG_FULL,                  /**< Kuota peserta penuh. */
+    REG_TOO_FEW                /**< Belum cukup peserta untuk selesai. */
 } RegistrationError;
 
-/* ──────────────────────────────────────────────
- * ScoringError — error pencatatan tendangan
- * ────────────────────────────────────────────── */
+/* Error pencatatan tendangan. */
 typedef enum {
-    SC_OK = 0,                 /**< Operasi berhasil. */
-    SC_INVALID_ZONE,           /**< Zona di luar rentang [MIN_ZONE, MAX_ZONE]. */
-    SC_NOT_REGISTERED,         /**< Peserta belum terdaftar. */
-    SC_ALREADY_DONE,           /**< Peserta sudah selesai TOTAL_KICKS tendangan. */
-    SC_PARTICIPANT_NOT_FOUND   /**< Peserta dengan ID tersebut tidak ditemukan. */
+    SC_OK = 0,                 /**< Berhasil. */
+    SC_INVALID_ZONE,           /**< Zona di luar 0..5. */
+    SC_NOT_REGISTERED,         /**< Data belum siap (belum terdaftar). */
+    SC_ALREADY_DONE,           /**< Peserta sudah 7 tendangan. */
+    SC_PARTICIPANT_NOT_FOUND   /**< Nomor peserta tak ada. */
 } ScoringError;
 
-/* ──────────────────────────────────────────────
- * RankingError — error perhitungan ranking
- * ────────────────────────────────────────────── */
+/* Error perhitungan peringkat. */
 typedef enum {
-    RK_OK = 0,                 /**< Operasi berhasil. */
-    RK_NOT_READY,              /**< State belum STATE_COMPLETED. */
-    RK_NO_PARTICIPANT          /**< Tidak ada peserta terdaftar. */
+    RK_OK = 0,                 /**< Berhasil. */
+    RK_NOT_READY,              /**< Lomba belum selesai (belum STATE_COMPLETED). */
+    RK_NO_PARTICIPANT          /**< Tidak ada peserta / ruang kurang. */
 } RankingError;
 
-/* ──────────────────────────────────────────────
- * SearchError — error pencarian peserta
- * ────────────────────────────────────────────── */
+/* Error pencarian peserta. */
 typedef enum {
-    SR_OK = 0,                 /**< Operasi berhasil. */
-    SR_NOT_FOUND,              /**< Peserta tidak ditemukan. */
-    SR_EMPTY_QUERY             /**< Query pencarian kosong. */
+    SR_OK = 0,                 /**< Berhasil. */
+    SR_NOT_FOUND,              /**< Peserta tak ditemukan. */
+    SR_EMPTY_QUERY             /**< Nama dicari kosong. */
 } SearchError;
 
-/* ──────────────────────────────────────────────
- * RecapError — error rekapitulasi
- * ────────────────────────────────────────────── */
+/* Error rekapitulasi. */
 typedef enum {
-    RC_OK = 0,                 /**< Operasi berhasil. */
-    RC_NOT_READY               /**< State belum STATE_COMPLETED. */
+    RC_OK = 0,                 /**< Berhasil. */
+    RC_NOT_READY               /**< Lomba belum selesai. */
 } RecapError;
 
 #endif /* SHARED_TAXONOMY_COMPETITION_ERROR_H */

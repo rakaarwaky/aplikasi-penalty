@@ -1,57 +1,44 @@
+/**
+ * @file taxonomy_game_constant.h
+ * @brief Batas & kode tetap permainan penalty (1 sumber ubah untuk seluruh aturan).
+ */
+
 #ifndef SHARED_TAXONOMY_GAME_CONSTANT_H
 #define SHARED_TAXONOMY_GAME_CONSTANT_H
 
-/* Konstanta domain untuk seluruh batas permainan penalty shootout. */
+/* ── Batas jumlah peserta ── */
 
-/* ──────────────────────────────────────────────
- * Batas Peserta
- * ────────────────────────────────────────────── */
-/** Jumlah minimum peserta yang harus terdaftar sebelum lomba boleh dimulai. */
+/** Minimal 5 peserta supaya ada peringkat yang bermakna. */
 #define MIN_PARTICIPANTS 5
 
-/** Jumlah maksimum peserta yang didukung oleh kompetisi. */
+/** Maksimal 7 peserta — batas array data lomba. */
 #define MAX_PARTICIPANTS 7
 
-/* ──────────────────────────────────────────────
- * Batas Tendangan
- * ────────────────────────────────────────────── */
-/** Jumlah total tendangan yang diberikan oleh setiap peserta. */
+/* ── Batas tendangan ── */
+
+/** Tiap peserta menendang persis 7 kali. Dipakai untuk ukuran array kicks[]. */
 #define TOTAL_KICKS 7
 
-/* ──────────────────────────────────────────────
- * Zona Tendangan
- * ────────────────────────────────────────────── */
-/** Zona minimum yang sah (0 = miss). */
+/* ── Zona tendangan (0 = miss, 1..5 = sasaran) ── */
+
+/** Zona terrendah: tembakan meleset sama sekali. */
 #define MIN_ZONE 0
 
-/** Zona maksimum yang sah (5 = sudut tertinggi). */
+/** Zona tertinggi: pojok atas, nilai poin maksimum. */
 #define MAX_ZONE 5
 
-/* ──────────────────────────────────────────────
- * Batas Nama
- * ────────────────────────────────────────────── */
-/** Panjang maksimum karakter nama peserta (tanpa null-terminator). */
+/* ── Batas nama ── */
+
+/** Panjang nama terpanjang yang diterima (belum termasu null). Dipakai ukuran buffer nama. */
 #define MAX_NAME_LENGTH 30
 
-/* ──────────────────────────────────────────────
- * Kode Menu CLI
- * ────────────────────────────────────────────── */
-/** Keluar dari aplikasi. */
-#define MENU_EXIT 0
+/* ── Kode pilihan menu utama (cocok dengan nomor di layar menu) ── */
 
-/** Masuk ke menu pendaftaran peserta. */
-#define MENU_REGISTRATION 1
-
-/** Masuk ke menu pencatatan tendangan (scoring). */
-#define MENU_SCORING 2
-
-/** Masuk ke menu ranking. */
-#define MENU_RANKING 3
-
-/** Masuk ke menu pencarian peserta. */
-#define MENU_SEARCH 4
-
-/** Masuk ke menu rekapitulasi hasil. */
-#define MENU_RECAP 5
+#define MENU_EXIT 0        /**< Pilihan 0: keluar dari program. */
+#define MENU_REGISTRATION 1 /**< Pilihan 1: layar pendaftaran peserta. */
+#define MENU_SCORING 2     /**< Pilihan 2: layar input tendangan & skor. */
+#define MENU_RANKING 3     /**< Pilihan 3: layar tampilkan peringkat. */
+#define MENU_SEARCH 4       /**< Pilihan 4: layar cari peserta. */
+#define MENU_RECAP 5        /**< Pilihan 5: layar rekapitulasi lengkap. */
 
 #endif /* SHARED_TAXONOMY_GAME_CONSTANT_H */

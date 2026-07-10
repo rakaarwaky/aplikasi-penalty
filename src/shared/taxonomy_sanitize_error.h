@@ -1,14 +1,17 @@
+/**
+ * @file taxonomy_sanitize_error.h
+ * @brief Kode error pemeriksaan input teks/angka dari pengguna.
+ */
+
 #ifndef TAXONOMY_SANITIZE_ERROR_H
 #define TAXONOMY_SANITIZE_ERROR_H
 
-/* Error enum untuk validasi/sanitasi input pengguna. */
-
-/** Error enum untuk sanitasi input. */
+/** Hasil validasi input pengguna. */
 typedef enum {
-    SANITIZE_OK,                   /**< Input valid. */
-    SANITIZE_ERROR_NULL_INPUT,     /**< Input adalah NULL. */
-    SANITIZE_ERROR_TOO_LONG,       /**< Input melebihi panjang maksimum. */
-    SANITIZE_ERROR_INVALID_CHARS   /**< Input mengandung karakter tidak valid. */
+    SANITIZE_OK,                   /**< Input sah. */
+    SANITIZE_ERROR_NULL_INPUT,     /**< Input kosong/null. */
+    SANITIZE_ERROR_TOO_LONG,       /**< Melebihi panjang/rentang. */
+    SANITIZE_ERROR_INVALID_CHARS   /**< Ada karakter tak sah. */
 } SanitizeError;
 
 #endif /* TAXONOMY_SANITIZE_ERROR_H */

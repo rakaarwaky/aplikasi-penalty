@@ -1,24 +1,25 @@
-/* Deklarasi modul CLI — menyatukan seluruh surface command.
-   Surface HANYA delegasi ke agent (AES406): tanpa logika/I/O langsung. */
+/**
+ * @file module.cli.h
+ * @brief Kumpulan fungsi layar menu & tiap fitur (cari lewat satu file ini).
+ */
+
 #ifndef MODULE_CLI_H
 #define MODULE_CLI_H
 
-/* Deklarasi modul tiap fitur: capabilities, agent, root.
-   Termasuk shared contract (aggregate) sehingga tipe aggregate & fungsi
-   agent terlihat oleh seluruh surface. */
+/* Fungsi tiap fitur (supaya layar tahu prototipenya). */
 #include "registration/module.registration.h"
 #include "scoring/module.scoring.h"
 #include "ranking/module.ranking.h"
 #include "search/module.search.h"
 #include "recap/module.recap.h"
 
-/* Surface menu utama — loop TUI */
+/* Loop menu utama. */
 int cli_surfaces_menu_run(RegistrationAggregate *reg,
                           ScoringAggregate *sc, RankingAggregate *rk,
                           SearchAggregate *sr, RecapAggregate *rc,
                           CompetitionState *state);
 
-/* Surface per fitur */
+/* Layar tiap fitur. */
 void cli_surfaces_registration_execute(RegistrationAggregate *agg, CompetitionState *state);
 void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state);
 void cli_surfaces_ranking_execute(RankingAggregate *agg, CompetitionState *state);
