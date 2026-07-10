@@ -1,31 +1,31 @@
 #!/usr/bin/env python3
-"""Terminal ANSI → PNG via aha + Chromium, auto-crop bottom whitespace."""
+"""Terminal ANSI → PNG via aha + Chromium. Bright colors, full black bg, auto-crop."""
 
 import sys, os, subprocess, tempfile, re
 from PIL import Image
 
 COLOR_FIX = {
     'color:gray':         'color:#cccccc',
-    'color:teal':         'color:#00aaaa',
-    'color:green':        'color:#00aa00',
-    'color:red':          'color:#aa0000',
-    'color:blue':         'color:#0000aa',
-    'color:cyan':         'color:#00aaaa',
-    'color:yellow':       'color:#aa5500',
-    'color:magenta':      'color:#aa00aa',
+    'color:teal':         'color:#00cccc',
+    'color:green':        'color:#00cc00',
+    'color:red':          'color:#cc0000',
+    'color:blue':         'color:#0000cc',
+    'color:cyan':         'color:#00cccc',
+    'color:yellow':       'color:#ccaa00',
+    'color:magenta':      'color:#cc00cc',
     'color:white':        'color:#ffffff',
     'color:black':        'color:#000000',
-    'background-color:gray':   'background-color:#555555',
-    'background-color:teal':   'background-color:#00aaaa',
-    'background-color:green':  'background-color:#00aa00',
-    'background-color:red':    'background-color:#aa0000',
-    'background-color:blue':   'background-color:#0000aa',
-    'background-color:cyan':   'background-color:#00aaaa',
-    'background-color:yellow': 'background-color:#aa5500',
-    'background-color:magenta':'background-color:#aa00aa',
+    'background-color:gray':   'background-color:#666666',
+    'background-color:teal':   'background-color:#00cccc',
+    'background-color:green':  'background-color:#00cc00',
+    'background-color:red':    'background-color:#cc0000',
+    'background-color:blue':   'background-color:#0000cc',
+    'background-color:cyan':   'background-color:#00cccc',
+    'background-color:yellow': 'background-color:#ccaa00',
+    'background-color:magenta':'background-color:#cc00cc',
     'background-color:white':  'background-color:#ffffff',
     'background-color:black':  'background-color:#000000',
-    'background-color:navy':   'background-color:#0000aa',
+    'background-color:navy':   'background-color:#0000cc',
 }
 
 HTML_TEMPLATE = """\
@@ -36,13 +36,14 @@ HTML_TEMPLATE = """\
 * {{ margin:0; padding:0; }}
 body {{
   background: #000000;
-  font-family: 'Noto Sans Mono', 'DejaVu Sans Mono', 'Liberation Mono', monospace;
+  font-family: 'Noto Sans Mono', 'DejaVu Sans Mono', monospace;
   font-size: {font_size}px;
-  line-height: 1.3;
+  line-height: 1.15;
   color: #cccccc;
   white-space: pre;
   display: inline-block;
-  padding: 8px 12px;
+  padding: 4px 8px;
+  letter-spacing: 0;
 }}
 </style>
 </head>
@@ -55,7 +56,6 @@ def fix_colors(html):
     return html
 
 def trim_ansi(text):
-    """Remove empty lines outside box borders."""
     lines = text.split("\n")
     result = []
     in_box = False
@@ -73,11 +73,9 @@ def trim_ansi(text):
     return "\n".join(result)
 
 def auto_crop(png_path):
-    """Crop bottom whitespace from PNG."""
     img = Image.open(png_path)
     w, h = img.size
-    bg = img.getpixel((w//2, h-1))
-    # Find last non-background row
+    bg = (0, 0, 0)
     bottom = h
     for y in range(h - 1, 0, -1):
         row_bg = all(img.getpixel((x, y)) == bg for x in range(0, w, 4))

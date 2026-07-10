@@ -6,6 +6,7 @@
   h3 { font-size: 12.5pt; }
   pre { background:#f5f5f5; padding:10px; border-radius:4px; font-family:Consolas,monospace; font-size:9pt; overflow-x:auto; }
   code { font-family:Consolas,monospace; font-size:9pt; }
+  strong { font-weight:bold; }
   table { border-collapse:collapse; width:60%; margin:10px 0; }
   th,td { border:1px solid #999; padding:5px 8px; text-align:left; }
   .fig { text-align:center; margin:14px 0; page-break-inside: avoid; }
@@ -13,7 +14,7 @@
   hr { margin:18px 0; }
 </style></head><body><h1>LAPORAN PROJECT</h1>
 
-<p>**Aplikasi Perhitungan Hasil Lomba Tendangan Penalti**</p>
+<p><strong>Aplikasi Perhitungan Hasil Lomba Tendangan Penalti</strong></p>
 
 <table><tbody><tr><td>Nama</td><td>Raka Arwaky</td></tr><tr><td>Nim</td><td>22342030</td></tr><tr><td>Mata Kuliah</td><td>Pengantar Coding</td></tr><tr><td>Sesi</td><td>863</td></tr></tbody></table>
 
@@ -47,7 +48,7 @@
 
 <h3>1.3 Hambatan</h3>
 
-<ul><li>**Masalah 1** - Pembatasan input zona 0-5 (Ketentuan 2 &amp; 4). Tanpa pembatasan, pengguna dapat memasukkan nilai di luar rentang yang merusak perhitungan</li><li>**Masalah 2** - Batas jumlah peserta 5-7 (aturan lomba). Data peserta harus dialokasikan menampung maksimal 7 tanpa meluap, namun tetap menerima minimal 5.</li><li>**Masalah 3** - Konversi zona ke skor dan akumulasi (Ketentuan 3 &amp; 4). Setiap zona harus dipetakan ke poin, lalu dijumlahkan menjadi total skor tiap peserta.</li><li>**Masalah 4** - Penentuan juara dan aturan seri bertingkat (Ketentuan 5 &amp; 6). Pengurutan tidak cukup hanya by total skor; diperlukan pemecah seri 5 -&gt; 4 -&gt; 3 -&gt; 2 -&gt; 1, dan peringkat sama bila seluruh komponen identik.</li><li>**Masalah 5** - Kelola data antar-fitur (simpan, catat, cari, rekap, ranking). Seluruh fitur harus beroperasi pada satu kesatuan data peserta yang konsisten.</li></ul>
+<ul><li><strong>Masalah 1</strong> - Pembatasan input zona 0-5 (Ketentuan 2 &amp; 4). Tanpa pembatasan, pengguna dapat memasukkan nilai di luar rentang yang merusak perhitungan</li><li><strong>Masalah 2</strong> - Batas jumlah peserta 5-7 (aturan lomba). Data peserta harus dialokasikan menampung maksimal 7 tanpa meluap, namun tetap menerima minimal 5.</li><li><strong>Masalah 3</strong> - Konversi zona ke skor dan akumulasi (Ketentuan 3 &amp; 4). Setiap zona harus dipetakan ke poin, lalu dijumlahkan menjadi total skor tiap peserta.</li><li><strong>Masalah 4</strong> - Penentuan juara dan aturan seri bertingkat (Ketentuan 5 &amp; 6). Pengurutan tidak cukup hanya by total skor; diperlukan pemecah seri 5 -&gt; 4 -&gt; 3 -&gt; 2 -&gt; 1, dan peringkat sama bila seluruh komponen identik.</li><li><strong>Masalah 5</strong> - Kelola data antar-fitur (simpan, catat, cari, rekap, ranking). Seluruh fitur harus beroperasi pada satu kesatuan data peserta yang konsisten.</li></ul>
 
 <hr/>
 
@@ -55,21 +56,19 @@
 
 <p>Alur penggunaan aplikasi dalam satu sesi:</p>
 
-<ul><li>Menu utama menampilkan 6 fitur + 1 fitur simpan/muat, dengan status tiap fitur (Aktif / Terkunci / Selesai) sesuai tahap lomba.</li><li>Tahap 1 — Pendaftaran: pengguna memasukkan nama peserta (5–7). Tombol peserta ke-8 ditolak; nama kosong mengakhiri pendaftaran.</li><li>Tahap 2 — Input Tendangan &amp; Skor: untuk tiap peserta, masukkan 7 zona (0–5). Zona divalidasi; total skor diakumulasi otomatis.</li><li>Tahap 3 — Ranking &amp; Rekap: setelah semua peserta selesai, pengguna dapat melihat peringkat (dengan aturan seri) dan rekapitulasi lengkap.</li><li>Fitur Cari Peserta: mencari peserta berdasarkan nama (cocok persis).</li><li>Fitur Simpan / Muat Data: menyimpan seluruh lomba ke file `data_lomba.bin`, memuatnya kembali saat startup, menghapus file, atau me-reset lomba dari memori.</li></ul>
+<ul><li>Menu utama menampilkan 6 fitur + 1 fitur simpan/muat, dengan status tiap fitur (Aktif / Terkunci / Selesai) sesuai tahap lomba.</li><li>Tahap 1 — Pendaftaran: pengguna memasukkan nama peserta (5–7). Tombol peserta ke-8 ditolak; nama kosong mengakhiri pendaftaran.</li><li>Tahap 2 — Input Tendangan &amp; Skor: untuk tiap peserta, masukkan 7 zona (0–5). Zona divalidasi; total skor diakumulasi otomatis.</li><li>Tahap 3 — Ranking &amp; Rekap: setelah semua peserta selesai, pengguna dapat melihat peringkat (dengan aturan seri) dan rekapitulasi lengkap.</li><li>Fitur Cari Peserta: mencari peserta berdasarkan nama (cocok persis).</li><li>Fitur Simpan / Muat Data: menyimpan seluruh lomba ke file <code>data_lomba.bin</code>, memuatnya kembali saat startup, menghapus file, atau me-reset lomba dari memori.</li></ul>
 
-<p>Verifikasi alur penuh (daftar → tendang → ranking → cari → rekap) telah ditutupi oleh test otomatis `test_full_game_via_surfaces`.</p>
+<p>Verifikasi alur penuh (daftar → tendang → ranking → cari → rekap) telah ditutupi oleh test otomatis <code>test_full_game_via_surfaces</code>.</p>
+
+<p><div class="fig"><img src="file:///home/raka/Study/PengantarCoding/aplikasi-penalty/build_assets/mermaid_0.png"/></div></p>
 
 <hr/>
 
 <h2>3. Konstruksi Program</h2>
 
-<p>Arsitektur yang digunakan adalah **AES (Agentic Engineering System)** — pola berlapis ketat (strict layered) dengan dependency inversion dilakukan lewat struct of function pointers sebagai pengganti interface. Arah dependensi downward-only: `taxonomy -&gt; contract -&gt; capabilities/infrastructure -&gt; agent -&gt; surfaces -&gt; root (wiring only)`. Capabilities dan Infrastructure adalah layer setara (peer) yang sama-sama bergantung ke bawah pada Contract, dan tidak saling mengimpor.</p>
+<p>Arsitektur yang digunakan adalah <strong>AES (Agentic Engineering System)</strong> — pola berlapis ketat (strict layered) dengan dependency inversion dilakukan lewat struct of function pointers sebagai pengganti interface. Arah dependensi downward-only: <code>taxonomy -&gt; contract -&gt; capabilities/infrastructure -&gt; agent -&gt; surfaces -&gt; root (wiring only)</code>. Capabilities dan Infrastructure adalah layer setara (peer) yang sama-sama bergantung ke bawah pada Contract, dan tidak saling mengimpor.</p>
 
 <h3>3.1 Hierarki Layer</h3>
-
-<p><div class="fig"><img src="file:///home/raka/Study/PengantarCoding/aplikasi-penalty/build_assets/mermaid_0.png"/></div></p>
-
-<h3>3.2 Alur Data Utama</h3>
 
 <p><div class="fig"><img src="file:///home/raka/Study/PengantarCoding/aplikasi-penalty/build_assets/mermaid_1.png"/></div></p>
 
@@ -77,56 +76,25 @@
 
 <h2>4. Struktur (struct)</h2>
 
-<p>Struct utama (diekstrak dari source):</p>
+<p>Seluruh data dibungkus dalam *Value Object* (VO) di <code>src/shared/</code> supaya tipe tidak tertukar saat kompilasi. Berikut struct yang ada di source:</p>
 
-<h3>CompetitionState (wadah status lomba)</h3>
-
-<pre><code>typedef struct {
-    ParticipantEntity     participants[MAX_PARTICIPANTS];
-    int                   participant_count;
-    CompetitionStateKind  state;   /* INIT | REGISTERED | COMPLETED */
-} CompetitionState;</code></pre>
-
-<h3>ParticipantEntity (satu peserta)</h3>
-
-<pre><code>typedef struct {
-    ParticipantIdVO   id;          /* nomor urut */
-    ParticipantNameVO name;        /* nama (dibungkus VO) */
-    KickVO            kicks[TOTAL_KICKS]; /* 7 hasil tendangan */
-    TotalScoreVO      total_score; /* akumulasi poin */
-    ZoneFreqVO        zone_freq;   /* hitungan tiap zona (pemecah seri) */
-    KickCountVO       kick_count;  /* 0..7 tendangan dilakukan */
-} ParticipantEntity;</code></pre>
-
-<h3>CompetitionStateKind (enum tahap)</h3>
-
-<pre><code>typedef enum {
-    STATE_INIT = 0,       /* belum ada peserta */
-    STATE_REGISTERED = 1, /* boleh tendang &amp; cari */
-    STATE_COMPLETED = 2   /* boleh ranking &amp; recap */
-} CompetitionStateKind;</code></pre>
+<ul><li><strong>CompetitionState</strong> — wadah status lomba utama; menampung array peserta, jumlah peserta, dan tahap lomba; di-pass via pointer dari <code>main()</code> (tanpa variabel global).</li><li><strong>CompetitionStateKind</strong> — enum tahap lomba: <code>STATE_INIT</code> (belum ada peserta), <code>STATE_REGISTERED</code> (boleh tendang &amp; cari), <code>STATE_COMPLETED</code> (boleh ranking &amp; recap).</li><li><strong>ParticipantEntity</strong> — satu peserta lengkap: id, nama, 7 hasil tendangan (<code>kicks</code>), total skor, frekuensi zona, dan jumlah tendangan dilakukan.</li><li><strong>ParticipantIdVO</strong> — pembungkus nomor urut peserta (indeks dalam array data).</li><li><strong>ParticipantNameVO</strong> — pembungkus nama peserta (<code>char[MAX_NAME_LENGTH+1]</code>) agar batas panjang terjaga.</li><li><strong>KickVO</strong> — satu tendangan: <code>zone</code> (0–5) dan <code>points</code> (sama dengan zone).</li><li><strong>ZoneVO</strong> — pembungkus nilai zona (0..5, 0 = miss) agar tidak tertukar dengan id/poin.</li><li><strong>TotalScoreVO</strong> — pembungkus total skor peserta (0..35 = 7 × 5).</li><li><strong>ZoneFreqVO</strong> — frekuensi tiap zona (0..5), dipakai pemecah seri peringkat.</li><li><strong>KickCountVO</strong> — pembungkus jumlah tendangan yang sudah dilakukan (0..TOTAL_KICKS).</li><li><strong>RankingEntryVO</strong> — satu baris hasil peringkat (ranking &amp; recap): id, total skor, frekuensi zona, dan posisi rank.</li><li><strong>SearchResultVO</strong> — balikan pencarian peserta: status ketemu, id, nama, skor, riwayat tendangan, dan frekuensi zona.</li></ul>
 
 <hr/>
 
 <h2>5. Konstanta</h2>
 
-<p>Konstanta terpusat di `taxonomy_game_constant.h`:</p>
+<p>Konstanta terpusat di <code>taxonomy_game_constant.h</code>:</p>
 
-<pre><code>MIN_PARTICIPANTS 5     /* peserta minimal */
-MAX_PARTICIPANTS 7     /* peserta maksimal (batas array) */
-TOTAL_KICKS      7     /* tendangan per peserta */
-MIN_ZONE         0     /* zona terendah (miss) */
-MAX_ZONE         5     /* zona tertinggi (top) */
-MAX_NAME_LENGTH  30    /* panjang nama maksimal */
-DEFAULT_STORAGE_FILENAME &quot;data_lomba.bin&quot;</code></pre>
+<ul><li><strong>MIN_PARTICIPANTS = 5</strong> — jumlah peserta minimal yang harus didaftarkan.</li><li><strong>MAX_PARTICIPANTS = 7</strong> — batas maksimal peserta (ukuran array data lomba).</li><li><strong>TOTAL_KICKS = 7</strong> — jumlah tendangan per peserta.</li><li><strong>MIN_ZONE = 0</strong> — zona terendah (tendangan meleset / miss).</li><li><strong>MAX_ZONE = 5</strong> — zona tertinggi (poin maksimal per tendangan).</li><li><strong>MAX_NAME_LENGTH = 30</strong> — panjang maksimal nama peserta (karakter, tanpa null-terminator).</li><li><strong>DEFAULT_STORAGE_FILENAME = &quot;data_lomba.bin&quot;</strong> — nama file penyimpanan lomba default.</li><li><strong>MENU_EXIT = 0</strong> — kode pilihan menu: keluar dari program.</li><li><strong>MENU_REGISTRATION = 1</strong> — kode pilihan menu: layar pendaftaran peserta.</li><li><strong>MENU_SCORING = 2</strong> — kode pilihan menu: layar input tendangan &amp; skor.</li><li><strong>MENU_RANKING = 3</strong> — kode pilihan menu: layar tampilkan peringkat.</li><li><strong>MENU_SEARCH = 4</strong> — kode pilihan menu: layar cari peserta.</li><li><strong>MENU_RECAP = 5</strong> — kode pilihan menu: layar rekapitulasi lengkap.</li></ul>
 
 <hr/>
 
 <h2>6. Variabel</h2>
 
-<p>Aplikasi sengaja TIDAK menggunakan variabel global untuk data lomba. Variabel utama:</p>
+<p>Aplikasi sengaja TIDAK menggunakan variabel global untuk data lomba. Seluruh state lomba disimpan di <code>main()</code> lalu di-pass via pointer ke tiap fitur. Variabel yang ada di <code>root_cli_main_entry.c</code>:</p>
 
-<ul><li>`CompetitionState state` — dideklarasikan di `main()`, di-pass ke seluruh fitur via pointer (satu sumber data).</li><li>Aggregate lokal di main(): `reg, sc, rk, sr, rc, st, sn` — masing-masing berisi function pointer ke implementasi domain.</li><li>`DisplayPort dp` — antarmuka render, dirakit oleh `root_display_build()`.</li><li>Variabel lokal di tiap fungsi: loop index (`i, z`), buffer (`buf[128]`), state sementara (`RankingEntryVO entries[]`).</li></ul>
+<ul><li><strong><code>CompetitionState state</code></strong> — satu-satunya wadah data lomba; diinisialisasi <code>participant_count = 0</code> dan <code>state = STATE_INIT</code>, lalu di-pass ke seluruh fitur via pointer.</li><li><strong><code>RegistrationAggregate reg</code></strong> — aggregate pendaftaran, hasil <code>root_registration_build()</code>.</li><li><strong><code>ScoringAggregate sc</code></strong> — aggregate scoring, hasil <code>root_scoring_build()</code>.</li><li><strong><code>RankingAggregate rk</code></strong> — aggregate ranking, hasil <code>root_ranking_build()</code>.</li><li><strong><code>SearchAggregate sr</code></strong> — aggregate pencarian, hasil <code>root_search_build()</code>.</li><li><strong><code>RecapAggregate rc</code></strong> — aggregate rekap, hasil <code>root_recap_build(rk.protocol)</code>.</li><li><strong><code>SanitizeAggregate sn</code></strong> — aggregate validasi input, hasil <code>root_sanitize_build()</code>.</li><li><strong><code>StorageAggregate st</code></strong> — aggregate penyimpanan, hasil <code>root_storage_build()</code>.</li><li><strong><code>ExportAggregate ex</code></strong> — aggregate ekspor, hasil <code>root_export_build()</code>.</li><li><strong><code>DisplayPort dp</code></strong> — antarmuka render (struct function-pointer), dirakit oleh <code>root_display_build()</code>; surfaces hanya pegang pointer ke ini.</li><li><strong><code>RankingEntryVO entries[MAX_PARTICIPANTS]</code></strong> — array hasil peringkat sementara, diisi <code>agent_ranking_compute()</code> sebelum menampilkan juara.</li><li><strong>Variabel lokal layar penutup</strong> — <code>char line[64]</code> (buffer baris) dan <code>const char *winner</code>, <code>*second</code>, <code>*third</code> (pointer nama juara 1–3).</li></ul>
 
 <hr/>
 
@@ -134,15 +102,15 @@ DEFAULT_STORAGE_FILENAME &quot;data_lomba.bin&quot;</code></pre>
 
 <p>Fungsi domain &amp; infrastruktur utama:</p>
 
-<ul><li>`root_registration_build` / `agent_registration_append` (pendaftaran peserta)</li><li>`capabilities_scoring_validate_zone` / `capabilities_scoring_record_kick` (input tendangan &amp; skor)</li><li>`capabilities_ranking_compute` (urutkan + aturan seri zona 5→4→3→2→1)</li><li>`capabilities_search_resolver` (cari peserta)</li><li>`agent_recap_orchestrator` / `capabilities_recap_formatter` (rekapitulasi)</li><li>`agent_storage_save` / `agent_storage_load` / `agent_storage_delete` (simpan/muat/hapus file)</li><li>`sanitizer_validate_int` / `sanitizer_validate_string` (validasi input)</li><li>`cli_surfaces_menu_run` + `cli_surfaces_*_execute` (navigasi &amp; layar tiap fitur)</li><li>`root_display_build` (rakit DisplayPort / antarmuka ncurses)</li><li>`cli_surfaces_storage_execute` (fitur Simpan/Muat/Reset)</li></ul>
+<ul><li><code>root_registration_build</code> / <code>agent_registration_append</code> (pendaftaran peserta)</li><li><code>capabilities_scoring_validate_zone</code> / <code>capabilities_scoring_record_kick</code> (input tendangan &amp; skor)</li><li><code>capabilities_ranking_compute</code> (urutkan + aturan seri zona 5→4→3→2→1)</li><li><code>capabilities_search_resolver</code> (cari peserta)</li><li><code>agent_recap_orchestrator</code> / <code>capabilities_recap_formatter</code> (rekapitulasi)</li><li><code>agent_storage_save</code> / <code>agent_storage_load</code> / <code>agent_storage_delete</code> (simpan/muat/hapus file)</li><li><code>sanitizer_validate_int</code> / <code>sanitizer_validate_string</code> (validasi input)</li><li><code>cli_surfaces_menu_run</code> + <code>cli_surfaces_*_execute</code> (navigasi &amp; layar tiap fitur)</li><li><code>root_display_build</code> (rakit DisplayPort / antarmuka ncurses)</li><li><code>cli_surfaces_storage_execute</code> (fitur Simpan/Muat/Reset)</li></ul>
 
 <hr/>
 
 <h2>8. Kode Sumber (Script Program)</h2>
 
-<p>Kode sumber lengkap terdapat di folder `src/` (41 file .c/.h) dengan struktur:</p>
+<p>Kode sumber lengkap terdapat di folder <code>src/</code> (41 file .c/.h) dengan struktur:</p>
 
-<ul><li>`src/shared/`        — konstanta, struct (VO), enum, kontrak antarmuka</li><li>`src/registration/`  — pendaftaran peserta</li><li>`src/scoring/`       — validasi &amp; pencatatan zona → skor</li><li>`src/ranking/`       — peringkat + aturan seri</li><li>`src/search/`        — pencarian peserta</li><li>`src/recap/`         — rekapitulasi</li><li>`src/storage/`       — simpan/muat/hapus file</li><li>`src/sanitizer/`     — validasi input</li><li>`src/cli/`           — layar menu &amp; tiap fitur (command + page)</li><li>`src/tui/`           — adaptor ncurses (DisplayPort)</li><li>`root_cli_main_entry.c` — titik masuk program</li></ul>
+<ul><li><code>src/shared/</code>        — konstanta, struct (VO), enum, kontrak antarmuka</li><li><code>src/registration/</code>  — pendaftaran peserta</li><li><code>src/scoring/</code>       — validasi &amp; pencatatan zona → skor</li><li><code>src/ranking/</code>       — peringkat + aturan seri</li><li><code>src/search/</code>        — pencarian peserta</li><li><code>src/recap/</code>         — rekapitulasi</li><li><code>src/storage/</code>       — simpan/muat/hapus file</li><li><code>src/sanitizer/</code>     — validasi input</li><li><code>src/cli/</code>           — layar menu &amp; tiap fitur (command + page)</li><li><code>src/tui/</code>           — adaptor ncurses (DisplayPort)</li><li><code>root_cli_main_entry.c</code> — titik masuk program</li></ul>
 
 <p>Cuplikan fungsi inti — aturan seri (ranking):</p>
 
@@ -156,5 +124,5 @@ DEFAULT_STORAGE_FILENAME &quot;data_lomba.bin&quot;</code></pre>
     return 0;                                  /* seri sempurna */
 }</code></pre>
 
-<p>Kompilasi &amp; pengujian: `make` (build) dan `make test` (semua test lolos).</p>
+<p>Kompilasi &amp; pengujian: <code>make</code> (build) dan <code>make test</code> (semua test lolos).</p>
 </body></html>

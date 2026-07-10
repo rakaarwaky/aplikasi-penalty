@@ -58,51 +58,6 @@ Alur penggunaan aplikasi dalam satu sesi:
 
 Verifikasi alur penuh (daftar → tendang → ranking → cari → rekap) telah ditutupi oleh test otomatis `test_full_game_via_surfaces`.
 
----
-
-## 3. Konstruksi Program
-
-Arsitektur yang digunakan adalah **AES (Agentic Engineering System)** — pola berlapis ketat (strict layered) dengan dependency inversion dilakukan lewat struct of function pointers sebagai pengganti interface. Arah dependensi downward-only: `taxonomy -> contract -> capabilities/infrastructure -> agent -> surfaces -> root (wiring only)`. Capabilities dan Infrastructure adalah layer setara (peer) yang sama-sama bergantung ke bawah pada Contract, dan tidak saling mengimpor.
-
-### 3.1 Hierarki Layer
-
-```mermaid
-graph TD
-    subgraph ROOT["root_  ── Wiring Layer (wraps all layers)"]
-        direction TB
-
-        S["surface_<br/>(CLI, MCP Server, API)"]
-        A["agent_<br/>(Orchestrators)"]
-
-        subgraph PEER["Peer Layers (no direct sibling import)"]
-            direction LR
-            C["capabilities_<br/>(Checkers, Analyzers)"]
-            I["infrastructure_<br/>(Adapters, Scanners)"]
-        end
-
-        CT["contract_<br/>(Ports, Protocols, Aggregates)"]
-        T["taxonomy_<br/>(VOs, Entities, Errors, Events, Constants)"]
-
-        S -->|"imports"| CT
-        S -->|"imports"| T
-        A -->|"imports"| CT
-        A -->|"imports"| T
-        C -->|"imports"| CT
-        C -->|"imports"| T
-        I -->|"imports"| CT
-        I -->|"imports"| T
-        CT -->|"imports"| T
-    end
-
-    ROOT_CONT["root_container<br/>(DI Wiring — instantiates & injects all)"]
-    ROOT_ENTRY["root_entry<br/>(Binary Bootstrap)"]
-
-    ROOT_CONT -->|"wires"| ROOT
-    ROOT_ENTRY -->|"starts"| ROOT_CONT
-```
-
-### 3.2 Alur Data Utama
-
 ```mermaid
 graph TD
     subgraph R1
@@ -125,42 +80,65 @@ graph TD
 
 ---
 
+## 3. Konstruksi Program
+
+Arsitektur yang digunakan adalah **AES (Agentic Engineering System)** — pola berlapis ketat (strict layered) dengan dependency inversion dilakukan lewat struct of function pointers sebagai pengganti interface. Arah dependensi downward-only: `taxonomy -> contract -> capabilities/infrastructure -> agent -> surfaces -> root (wiring only)`. Capabilities dan Infrastructure adalah layer setara (peer) yang sama-sama bergantung ke bawah pada Contract, dan tidak saling mengimpor.
+
+### 3.1 Hierarki Layer
+
+```mermaid
+graph TD
+    subgraph ROOT["root_  ── Wiring Layer (wraps all layers)"]
+        direction TB
+
+        S["surface_<br/>(CLI surfaces)"]
+        A["agent_<br/>(Orchestrators)"]
+
+        subgraph PEER["Peer Layers (no direct sibling import)"]
+            direction LR
+            C["capabilities_<br/>(Validators, Calculators, Resolvers)"]
+            I["infrastructure_<br/>(Adapters)"]
+        end
+
+        CT["contract_<br/>(Ports, Protocols, Aggregates)"]
+        T["taxonomy_<br/>(VOs, Entities, Errors, Constants)"]
+
+        S -->|"imports"| CT
+        S -->|"imports"| T
+        A -->|"imports"| CT
+        A -->|"imports"| T
+        C -->|"imports"| CT
+        C -->|"imports"| T
+        I -->|"imports"| CT
+        I -->|"imports"| T
+        CT -->|"imports"| T
+    end
+
+    ROOT_CONT["root_container<br/>(DI Wiring — instantiates & injects all)"]
+    ROOT_ENTRY["root_entry<br/>(Binary Bootstrap)"]
+
+    ROOT_CONT -->|"wires"| ROOT
+    ROOT_ENTRY -->|"starts"| ROOT_CONT
+```
+
+---
+
 ## 4. Struktur (struct)
 
-Struct utama (diekstrak dari source):
+Seluruh data dibungkus dalam *Value Object* (VO) di `src/shared/` supaya tipe tidak tertukar saat kompilasi. Berikut struct yang ada di source:
 
-### CompetitionState (wadah status lomba)
-
-```c
-typedef struct {
-    ParticipantEntity     participants[MAX_PARTICIPANTS];
-    int                   participant_count;
-    CompetitionStateKind  state;   /* INIT | REGISTERED | COMPLETED */
-} CompetitionState;
-```
-
-### ParticipantEntity (satu peserta)
-
-```c
-typedef struct {
-    ParticipantIdVO   id;          /* nomor urut */
-    ParticipantNameVO name;        /* nama (dibungkus VO) */
-    KickVO            kicks[TOTAL_KICKS]; /* 7 hasil tendangan */
-    TotalScoreVO      total_score; /* akumulasi poin */
-    ZoneFreqVO        zone_freq;   /* hitungan tiap zona (pemecah seri) */
-    KickCountVO       kick_count;  /* 0..7 tendangan dilakukan */
-} ParticipantEntity;
-```
-
-### CompetitionStateKind (enum tahap)
-
-```c
-typedef enum {
-    STATE_INIT = 0,       /* belum ada peserta */
-    STATE_REGISTERED = 1, /* boleh tendang & cari */
-    STATE_COMPLETED = 2   /* boleh ranking & recap */
-} CompetitionStateKind;
-```
+- **CompetitionState** — wadah status lomba utama; menampung array peserta, jumlah peserta, dan tahap lomba; di-pass via pointer dari `main()` (tanpa variabel global).
+- **CompetitionStateKind** — enum tahap lomba: `STATE_INIT` (belum ada peserta), `STATE_REGISTERED` (boleh tendang & cari), `STATE_COMPLETED` (boleh ranking & recap).
+- **ParticipantEntity** — satu peserta lengkap: id, nama, 7 hasil tendangan (`kicks`), total skor, frekuensi zona, dan jumlah tendangan dilakukan.
+- **ParticipantIdVO** — pembungkus nomor urut peserta (indeks dalam array data).
+- **ParticipantNameVO** — pembungkus nama peserta (`char[MAX_NAME_LENGTH+1]`) agar batas panjang terjaga.
+- **KickVO** — satu tendangan: `zone` (0–5) dan `points` (sama dengan zone).
+- **ZoneVO** — pembungkus nilai zona (0..5, 0 = miss) agar tidak tertukar dengan id/poin.
+- **TotalScoreVO** — pembungkus total skor peserta (0..35 = 7 × 5).
+- **ZoneFreqVO** — frekuensi tiap zona (0..5), dipakai pemecah seri peringkat.
+- **KickCountVO** — pembungkus jumlah tendangan yang sudah dilakukan (0..TOTAL_KICKS).
+- **RankingEntryVO** — satu baris hasil peringkat (ranking & recap): id, total skor, frekuensi zona, dan posisi rank.
+- **SearchResultVO** — balikan pencarian peserta: status ketemu, id, nama, skor, riwayat tendangan, dan frekuensi zona.
 
 ---
 
@@ -168,26 +146,38 @@ typedef enum {
 
 Konstanta terpusat di `taxonomy_game_constant.h`:
 
-```c
-MIN_PARTICIPANTS 5     /* peserta minimal */
-MAX_PARTICIPANTS 7     /* peserta maksimal (batas array) */
-TOTAL_KICKS      7     /* tendangan per peserta */
-MIN_ZONE         0     /* zona terendah (miss) */
-MAX_ZONE         5     /* zona tertinggi (top) */
-MAX_NAME_LENGTH  30    /* panjang nama maksimal */
-DEFAULT_STORAGE_FILENAME "data_lomba.bin"
-```
+- **MIN_PARTICIPANTS = 5** — jumlah peserta minimal yang harus didaftarkan.
+- **MAX_PARTICIPANTS = 7** — batas maksimal peserta (ukuran array data lomba).
+- **TOTAL_KICKS = 7** — jumlah tendangan per peserta.
+- **MIN_ZONE = 0** — zona terendah (tendangan meleset / miss).
+- **MAX_ZONE = 5** — zona tertinggi (poin maksimal per tendangan).
+- **MAX_NAME_LENGTH = 30** — panjang maksimal nama peserta (karakter, tanpa null-terminator).
+- **DEFAULT_STORAGE_FILENAME = "data_lomba.bin"** — nama file penyimpanan lomba default.
+- **MENU_EXIT = 0** — kode pilihan menu: keluar dari program.
+- **MENU_REGISTRATION = 1** — kode pilihan menu: layar pendaftaran peserta.
+- **MENU_SCORING = 2** — kode pilihan menu: layar input tendangan & skor.
+- **MENU_RANKING = 3** — kode pilihan menu: layar tampilkan peringkat.
+- **MENU_SEARCH = 4** — kode pilihan menu: layar cari peserta.
+- **MENU_RECAP = 5** — kode pilihan menu: layar rekapitulasi lengkap.
 
 ---
 
 ## 6. Variabel
 
-Aplikasi sengaja TIDAK menggunakan variabel global untuk data lomba. Variabel utama:
+Aplikasi sengaja TIDAK menggunakan variabel global untuk data lomba. Seluruh state lomba disimpan di `main()` lalu di-pass via pointer ke tiap fitur. Variabel yang ada di `root_cli_main_entry.c`:
 
-- `CompetitionState state` — dideklarasikan di `main()`, di-pass ke seluruh fitur via pointer (satu sumber data).
-- Aggregate lokal di main(): `reg, sc, rk, sr, rc, st, sn` — masing-masing berisi function pointer ke implementasi domain.
-- `DisplayPort dp` — antarmuka render, dirakit oleh `root_display_build()`.
-- Variabel lokal di tiap fungsi: loop index (`i, z`), buffer (`buf[128]`), state sementara (`RankingEntryVO entries[]`).
+- **`CompetitionState state`** — satu-satunya wadah data lomba; diinisialisasi `participant_count = 0` dan `state = STATE_INIT`, lalu di-pass ke seluruh fitur via pointer.
+- **`RegistrationAggregate reg`** — aggregate pendaftaran, hasil `root_registration_build()`.
+- **`ScoringAggregate sc`** — aggregate scoring, hasil `root_scoring_build()`.
+- **`RankingAggregate rk`** — aggregate ranking, hasil `root_ranking_build()`.
+- **`SearchAggregate sr`** — aggregate pencarian, hasil `root_search_build()`.
+- **`RecapAggregate rc`** — aggregate rekap, hasil `root_recap_build(rk.protocol)`.
+- **`SanitizeAggregate sn`** — aggregate validasi input, hasil `root_sanitize_build()`.
+- **`StorageAggregate st`** — aggregate penyimpanan, hasil `root_storage_build()`.
+- **`ExportAggregate ex`** — aggregate ekspor, hasil `root_export_build()`.
+- **`DisplayPort dp`** — antarmuka render (struct function-pointer), dirakit oleh `root_display_build()`; surfaces hanya pegang pointer ke ini.
+- **`RankingEntryVO entries[MAX_PARTICIPANTS]`** — array hasil peringkat sementara, diisi `agent_ranking_compute()` sebelum menampilkan juara.
+- **Variabel lokal layar penutup** — `char line[64]` (buffer baris) dan `const char *winner`, `*second`, `*third` (pointer nama juara 1–3).
 
 ---
 

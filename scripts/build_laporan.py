@@ -92,31 +92,31 @@ def simple_markdown(md: str) -> str:
             def cells(r):
                 return [c.strip() for c in r.strip().strip('|').split('|')]
             if has_sep:
-                thead = '<tr>' + ''.join(f'<th>{_esc(c)}</th>' for c in cells(rows[0])) + '</tr>'
+                thead = '<tr>' + ''.join(f'<th>{_inline(_esc(c))}</th>' for c in cells(rows[0])) + '</tr>'
                 data = rows[1:]
                 tbl = f'<table><thead>{thead}</thead><tbody>'
             else:
                 tbl = '<table><tbody>'
                 data = rows
             for r in data:
-                tbl += '<tr>' + ''.join(f'<td>{_esc(c)}</td>' for c in cells(r)) + '</tr>'
+                tbl += '<tr>' + ''.join(f'<td>{_inline(_esc(c))}</td>' for c in cells(r)) + '</tr>'
             tbl += '</tbody></table>'
             html_lines.append(tbl)
             continue
         if s.startswith('# '):
-            html_lines.append(f'<h1>{_esc(s[2:])}</h1>')
+            html_lines.append(f'<h1>{_inline(_esc(s[2:]))}</h1>')
         elif s.startswith('## '):
-            html_lines.append(f'<h2>{_esc(s[3:])}</h2>')
+            html_lines.append(f'<h2>{_inline(_esc(s[3:]))}</h2>')
         elif s.startswith('### '):
-            html_lines.append(f'<h3>{_esc(s[4:])}</h3>')
+            html_lines.append(f'<h3>{_inline(_esc(s[4:]))}</h3>')
         elif s.startswith('- '):
-            html_lines.append(f'<li>{_esc(s[2:])}</li>')
+            html_lines.append(f'<li>{_inline(_esc(s[2:]))}</li>')
         elif s.strip() == '---':
             html_lines.append('<hr/>')
         elif s.strip() == '':
             html_lines.append('')
         else:
-            html_lines.append(f'<p>{_esc(s)}</p>')
+            html_lines.append(f'<p>{_inline(_esc(s))}</p>')
         i += 1
     # wrap consecutive <li> in <ul>
     wrapped = []
@@ -136,6 +136,16 @@ def simple_markdown(md: str) -> str:
 def _esc(t: str) -> str:
     import html
     return html.escape(t)
+
+
+def _inline(t: str) -> str:
+    """Apply inline markdown AFTER html-escaping the raw text:
+    **bold** -> <strong>, `code` -> <code>."""
+    # t is already escaped; replace markers with tags.
+    import re
+    t = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', t)
+    t = re.sub(r'`(.+?)`', r'<code>\1</code>', t)
+    return t
 
 
 def build():
@@ -173,6 +183,7 @@ def build():
   h3 {{ font-size: 12.5pt; }}
   pre {{ background:#f5f5f5; padding:10px; border-radius:4px; font-family:Consolas,monospace; font-size:9pt; overflow-x:auto; }}
   code {{ font-family:Consolas,monospace; font-size:9pt; }}
+  strong {{ font-weight:bold; }}
   table {{ border-collapse:collapse; width:60%; margin:10px 0; }}
   th,td {{ border:1px solid #999; padding:5px 8px; text-align:left; }}
   .fig {{ text-align:center; margin:14px 0; page-break-inside: avoid; }}
