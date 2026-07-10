@@ -173,20 +173,11 @@ Konstanta terpusat di `taxonomy_game_constant.h`:
 | Variabel | Jenis | Keterangan |
 |---|---|---|
 | `CompetitionState state` | Struct (`CompetitionState`, Sect. 4) | Satu-satunya wadah data lomba; diinisialisasi `participant_count = 0` dan `state = STATE_INIT`, lalu di-pass ke seluruh fitur via pointer. |
-| `RegistrationAggregate reg` | Struct (`RegistrationAggregate`, contract) | Instance aggregate pendaftaran — facade pintu masuk surfaces ke fitur pendaftaran; dirakit `root_registration_build()`. |
-| `ScoringAggregate sc` | Struct (`ScoringAggregate`, contract) | Instance aggregate scoring; surfaces pakai ini untuk input tendangan & skor. |
-| `RankingAggregate rk` | Struct (`RankingAggregate`, contract) | Instance aggregate ranking; surfaces pakai ini untuk peringkat & seri. |
-| `SearchAggregate sr` | Struct (`SearchAggregate`, contract) | Instance aggregate pencarian; surfaces pakai ini untuk cari peserta. |
-| `RecapAggregate rc` | Struct (`RecapAggregate`, contract) | Instance aggregate rekap; dirakit `root_recap_build(rk.protocol)`. |
-| `SanitizeAggregate sn` | Struct (`SanitizeAggregate`, contract) | Instance aggregate validasi input; surfaces pakai ini sebelum menerima input. |
-| `StorageAggregate st` | Struct (`StorageAggregate`, contract) | Instance aggregate penyimpanan; surfaces pakai ini untuk simpan/muat/hapus. |
-| `ExportAggregate ex` | Struct (`ExportAggregate`, contract) | Instance aggregate ekspor; surfaces pakai ini untuk ekspor lomba. |
-| `DisplayPort dp` | Struct (`DisplayPort`, contract) | Antarmuka render (struct function-pointer); surfaces pegang pointer ke ini untuk menampilkan hasil. |
 | `RankingEntryVO entries[MAX_PARTICIPANTS]` | Array of struct (`RankingEntryVO`, Sect. 4) | Array hasil peringkat sementara, diisi `agent_ranking_compute()` sebelum menampilkan juara. |
 | `char line[64]` | Dasar (`char`) | Buffer baris untuk menampilkan juara di layar penutup. |
 | `const char *winner`, `*second`, `*third` | Dasar (pointer `char`) | Pointer nama juara 1–3 di layar penutup. |
 
-Catatan aggregate: dalam AES (`ARCHITECTURE.md`), `XxxAggregate` adalah **contract** — struct berisi function-pointer yang bertindak sebagai *facade* mengomposisi port/protocol, dan menjadi **satu-satunya pintu masuk surfaces ke domain**. Surfaces memanggil domain **lewat aggregate**, bukan langsung ke agent; agent mengimplementasikan orkestrasinya di balik contract tersebut. Variabel `reg, sc, rk, …` di atas adalah **instance** dari struct aggregate itu (dibuat oleh `_container`, dirakit di `main()`) — jadi merekalah yang menyimpan (sebagai variabel) contract yang menghubungkan surfaces ke agent, bukan sebaliknya.
+Catatan: tipe-tipe contract (`RegistrationAggregate`, `ScoringAggregate`, `RankingAggregate`, `SearchAggregate`, `RecapAggregate`, `SanitizeAggregate`, `StorageAggregate`, `ExportAggregate`, `DisplayPort`) **bukan variabel** — mereka adalah struct/contract yang didefinisikan di `contract_*_aggregate.h` / `module.*.h` (lihat Section 4 & ARCHITECTURE.md). Di `main()`, yang diinstansiasi menjadi variabel bertipe contract tersebut adalah `reg, sc, rk, sr, rc, sn, st, ex` (aggregate) dan `dp` (DisplayPort); surfaces memanggil domain **lewat** variabel-variabel contract itu sebagai pintu masuk (AES: aggregate = satu-satunya pintu masuk surfaces ke domain).
 
 
 Fungsi domain & infrastruktur utama (semua ada di `src/`):
