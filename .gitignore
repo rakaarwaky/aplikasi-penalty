@@ -1,5 +1,4 @@
 # Clang analysis output
 *.plist
-
 # IDE
 .clangd
