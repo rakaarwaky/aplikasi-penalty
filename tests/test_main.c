@@ -27,6 +27,7 @@ int main(void) {
     run_integration_tests();
     run_export_tests();
     run_logger_tests();
+    run_coverage_gap_tests();
 
     printf("========================================\n");
     printf("  ALL TESTS PASSED!\n");

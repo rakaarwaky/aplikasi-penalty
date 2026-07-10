@@ -4,6 +4,7 @@
  */
 
 #include "cli/module.cli.h"
+#include "sanitizer/module.sanitizer.h"
 #include "tui/infrastructure_tui_adapter.h"
 
 #include <signal.h>
@@ -32,6 +33,7 @@ int main(void) {
     RankingAggregate      rk  = root_ranking_build();
     SearchAggregate       sr  = root_search_build();
     RecapAggregate        rc  = root_recap_build(rk.protocol);
+    SanitizeAggregate     sn  = root_sanitize_build();
 
     /* Hidupkan layar ncurses lalu tampilkan splash screen. */
     tui_init();
