@@ -27,17 +27,13 @@ TEST_INC   := -I$(SRC_DIR) -I$(SRC_DIR)/shared \
               -I$(SRC_DIR)/recap -I$(SRC_DIR)/cli -I$(SRC_DIR)/tui \
               -I$(SRC_DIR)/storage -I$(SRC_DIR)/sanitizer \
               -I$(SRC_DIR)/export
-TEST_LIB_SRC := $(filter-out $(SRC_DIR)/root_cli_main_entry.c \
-                  $(SRC_DIR)/cli/surfaces_menu_command.c \
-                  $(SRC_DIR)/cli/surfaces_registration_command.c \
-                  $(SRC_DIR)/cli/surfaces_scoring_command.c \
-                  $(SRC_DIR)/cli/surfaces_ranking_command.c \
-                  $(SRC_DIR)/cli/surfaces_search_command.c \
-                  $(SRC_DIR)/cli/surfaces_recap_command.c \
-                  $(SRC_DIR)/tui/infrastructure_tui_adapter.c \
-                  $(SRC_DIR)/root_display_container.c \
-                  $(SRC_DIR)/tui/root_display_container.c, $(C_SOURCES))
+TEST_LIB_SRC := $(filter-out $(SRC_DIR)/root_cli_main_entry.c, $(C_SOURCES))
+/* fake ncurses (headless) untuk coverage CLI/TUI tanpa terminal */
+TEST_FAKE_SRC := tests/fake_ncurses.c
 TEST_BIN   := run_tests
+
+/* Test build TIDAK link -lncurses (pakai stub di TEST_FAKE_SRC). */
+TEST_LDFLAGS :=
 
 PREFIX ?= /usr/local
 BINDIR  = $(PREFIX)/bin
