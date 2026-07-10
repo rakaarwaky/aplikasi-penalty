@@ -52,10 +52,19 @@ void cli_surfaces_search_execute(SearchAggregate *agg, CompetitionState *state,
     char buffer[64];
     dp->input_string(BOX_ROW + 4, BOX_COL + 8, buffer, 30);
 
-    /* Buang newline */
+    /* Buang newline & spasi di awal/akhir */
     size_t len = strlen(buffer);
     while (len > 0 && (buffer[len - 1] == '\n' || buffer[len - 1] == '\r'))
         buffer[--len] = '\0';
+    /* Trim spasi depan */
+    char *start = buffer;
+    while (*start == ' ') start++;
+    if (start != buffer) {
+        memmove(buffer, start, strlen(start) + 1);
+        len = strlen(buffer);
+    }
+    /* Trim spasi belakang */
+    while (len > 0 && buffer[len - 1] == ' ') buffer[--len] = '\0';
 
     /* Nama kosong */
     if (len == 0) {
