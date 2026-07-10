@@ -4,7 +4,7 @@
 #ifndef MODULE_SCORING_H
 #define MODULE_SCORING_H
 
-#include "shared/module.shared.h"
+#include "shared/contract_scoring_aggregate.h"
 
 /* CAPABILITIES — implementasi ScoringProtocol (pure, tanpa I/O) */
 ScoringError capabilities_scoring_validate_zone(ZoneVO zone);

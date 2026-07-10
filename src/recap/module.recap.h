@@ -4,7 +4,7 @@
 #ifndef MODULE_RECAP_H
 #define MODULE_RECAP_H
 
-#include "shared/module.shared.h"
+#include "shared/contract_recap_aggregate.h"
 
 /* CAPABILITIES — implementasi RecapProtocol: susun detail per peserta (pure) */
 RecapError capabilities_recap_prepare_details(const CompetitionState *state,

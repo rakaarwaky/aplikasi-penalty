@@ -4,7 +4,7 @@
 #ifndef MODULE_REGISTRATION_H
 #define MODULE_REGISTRATION_H
 
-#include "shared/module.shared.h"
+#include "shared/contract_registration_aggregate.h"
 
 /* CAPABILITIES — implementasi RegistrationProtocol (pure, tanpa I/O) */
 RegistrationError capabilities_registration_validate_name(const CompetitionState *state,

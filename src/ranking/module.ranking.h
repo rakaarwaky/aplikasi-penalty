@@ -4,7 +4,7 @@
 #ifndef MODULE_RANKING_H
 #define MODULE_RANKING_H
 
-#include "shared/module.shared.h"
+#include "shared/contract_ranking_aggregate.h"
 
 /* CAPABILITIES — implementasi RankingProtocol (pure, tanpa I/O) */
 RankingError capabilities_ranking_compute(const CompetitionState *state,

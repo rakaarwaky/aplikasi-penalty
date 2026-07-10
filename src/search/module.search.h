@@ -4,7 +4,7 @@
 #ifndef MODULE_SEARCH_H
 #define MODULE_SEARCH_H
 
-#include "shared/module.shared.h"
+#include "shared/contract_search_aggregate.h"
 
 /* CAPABILITIES — implementasi SearchProtocol (pure, tanpa I/O) */
 SearchError capabilities_search_find(const CompetitionState *state,
