@@ -93,9 +93,14 @@ int getch(void) {
 
 static void pop_str(char *buf, int n) {
     if (g_strs_len > 0) {
-        const char *s = g_strs + (size_t)(--g_strs_len) * 64;
+        const char *s = g_strs;  /* ambil index 0 (FIFO) */
         strncpy(buf, s, (size_t)n - 1);
         buf[n - 1] = '\0';
+        /* geser sisa string ke depan */
+        int i;
+        for (i = 1; i < g_strs_len; i++)
+            memcpy(g_strs + (size_t)(i - 1) * 64, g_strs + (size_t)i * 64, 64);
+        g_strs_len--;
     } else {
         buf[0] = '\0';
     }
