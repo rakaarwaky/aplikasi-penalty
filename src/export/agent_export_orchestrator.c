@@ -1,6 +1,15 @@
+/**
+ * @file agent_export_orchestrator.c
+ * @brief Agent: orkestrasi ekspor ranking via protocol (tanpa I/O langsung).
+ */
+
 /* EXPORT — Agent Orchestrator */
 #include "module.export.h"
 
+/**
+ * Ekspor hasil ranking ke file via protocol (delegate ke infrastructure).
+ * Guard NULL agar tidak dereferensi pointer kosong.
+ */
 ExportError agent_export_ranking(const ExportAggregate *agg,
                                  const char *filename,
                                  const CompetitionState *state,

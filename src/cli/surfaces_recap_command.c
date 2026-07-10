@@ -1,8 +1,19 @@
+/**
+ * @file surfaces_recap_command.c
+ * @brief Surface: layar rekapitulasi lengkap (I/O ncurses + delegasi ke agent).
+ */
+
 #include "cli/module.cli.h"
 #include "tui/infrastructure_tui_adapter.h"
 
 #include <stdio.h>
 
+/**
+ * Layar recap: delegasikan penyusunan ke agent_recap_prepare()
+ * (mengembalikan ranking + detail), lalu render tabel lengkap per
+ * peserta berikut garis pemisah antar-baris. Guard state: blokir
+ * bila belum STATE_COMPLETED.
+ */
 void cli_surfaces_recap_execute(RecapAggregate *agg, CompetitionState *state) {
     if (agg == NULL || state == NULL) return;
     if (state->state != STATE_COMPLETED) {
@@ -15,6 +26,7 @@ void cli_surfaces_recap_execute(RecapAggregate *agg, CompetitionState *state) {
         return;
     }
 
+    /* Siapkan data via agent (ranking + detail). */
     RankingEntryVO ranking[MAX_PARTICIPANTS];
     SearchResultVO details[MAX_PARTICIPANTS];
     RecapError e = agent_recap_prepare(agg, state, ranking, details, MAX_PARTICIPANTS);
@@ -30,10 +42,12 @@ void cli_surfaces_recap_execute(RecapAggregate *agg, CompetitionState *state) {
 
     tui_clear();
 
+    /* Judul. */
     attron(COLOR_PAIR(COLOR_TITLE) | A_BOLD);
     tui_print_centered(1, "REKAPITULASI LENGKAP");
     attroff(COLOR_PAIR(COLOR_TITLE) | A_BOLD);
 
+    /* Dimensi kotak & bingkai luar. */
     int box_col = 1;
     int box_width = 64;
     int box_row = 3;
@@ -41,12 +55,12 @@ void cli_surfaces_recap_execute(RecapAggregate *agg, CompetitionState *state) {
 
     tui_box(box_row, box_col, box_width, box_height);
 
-    /* Header Text */
+    /* Header teks kolom. */
     attron(COLOR_PAIR(COLOR_HIGHLIGHT));
     mvprintw(box_row + 1, box_col + 2, "%-4s %-24s %-6s %s", "Rank", "Nama", "Skor", "Zona(0 1 2 3 4 5)");
     attroff(COLOR_PAIR(COLOR_HIGHLIGHT));
 
-    /* Header Separator Line */
+    /* Garis pemisah header (ACS tee/koneksi). */
     attron(COLOR_PAIR(COLOR_BORDER));
     mvaddch(box_row + 2, box_col, ACS_LTEE);
     int c;
@@ -54,7 +68,7 @@ void cli_surfaces_recap_execute(RecapAggregate *agg, CompetitionState *state) {
     mvaddch(box_row + 2, box_col + box_width - 1, ACS_RTEE);
     attroff(COLOR_PAIR(COLOR_BORDER));
 
-    /* Data Rows */
+    /* Baris data per peserta. */
     int i;
     for (i = 0; i < state->participant_count; i++) {
         const RankingEntryVO *r = &ranking[i];
@@ -73,7 +87,7 @@ void cli_surfaces_recap_execute(RecapAggregate *agg, CompetitionState *state) {
         attroff(COLOR_PAIR(COLOR_MENU));
         attroff(COLOR_PAIR(COLOR_BORDER));
 
-        /* Row Separator Line (kecuali baris paling bawah) */
+        /* Garis pemisah antar-baris (kecuali baris terbawah). */
         if (i < state->participant_count - 1) {
             attron(COLOR_PAIR(COLOR_BORDER));
             mvaddch(row + 1, box_col, ACS_LTEE);
@@ -83,6 +97,7 @@ void cli_surfaces_recap_execute(RecapAggregate *agg, CompetitionState *state) {
         }
     }
 
+    /* Penutup. */
     attron(COLOR_PAIR(COLOR_MENU));
     mvprintw(box_row + box_height - 1, box_col + 2, "Tekan Enter untuk kembali...");
     attroff(COLOR_PAIR(COLOR_MENU));

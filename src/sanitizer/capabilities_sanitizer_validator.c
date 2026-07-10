@@ -1,9 +1,23 @@
+/**
+ * @file capabilities_sanitizer_validator.c
+ * @brief Sanitizer: validasi input string & integer (murni, tanpa I/O terminal).
+ *
+ * Catatan: file ini berada di folder sanitizer/ dengan awalan
+ * capabilities_ (bukan infrastructure_) — ia berisi logika validasi
+ * murni; pemanggilan langsung (sanitizer_validate_*) juga disediakan
+ * sebagai convenience wrapper di bawah.
+ */
+
 /* SANITIZER — Capabilities (Validation Logic) */
 #include "module.sanitizer.h"
 #include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
 
+/* ──────────────────────────────────────────────
+ * Validasi string: NULL, panjang > max, atau
+ * karakter non-printable = tidak sah.
+ * ────────────────────────────────────────────── */
 static SanitizeError validate_string_impl(const char *input, size_t max_length) {
     if (input == NULL) {
         return SANITIZE_ERROR_NULL_INPUT;
@@ -20,6 +34,11 @@ static SanitizeError validate_string_impl(const char *input, size_t max_length) 
     return SANITIZE_OK;
 }
 
+/* ──────────────────────────────────────────────
+ * Validasi integer dari string: pakai strtol,
+ * cek sisa (endptr) harus '\0' (input murni
+ * angka), lalu cek rentang [min_val, max_val].
+ * ────────────────────────────────────────────── */
 static SanitizeError validate_int_impl(const char *input, int min_val, int max_val) {
     if (input == NULL) {
         return SANITIZE_ERROR_NULL_INPUT;
@@ -35,6 +54,9 @@ static SanitizeError validate_int_impl(const char *input, int min_val, int max_v
     return SANITIZE_OK;
 }
 
+/**
+ * Bangun SanitizeProtocol: sambungkan function-pointer ke impl di atas.
+ */
 SanitizeProtocol sanitizer_create(void) {
     SanitizeProtocol p;
     p.validate_string = validate_string_impl;
@@ -42,6 +64,10 @@ SanitizeProtocol sanitizer_create(void) {
     return p;
 }
 
+/* ──────────────────────────────────────────────
+ * Convenience wrapper: pemanggilan langsung tanpa
+ * harus merakit protocol. Didelegasikan ke impl.
+ * ────────────────────────────────────────────── */
 SanitizeError sanitizer_validate_string(const char *input, size_t max_length) {
     return validate_string_impl(input, max_length);
 }

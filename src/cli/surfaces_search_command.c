@@ -1,9 +1,19 @@
+/**
+ * @file surfaces_search_command.c
+ * @brief Surface: layar cari peserta (I/O ncurses + delegasi ke agent).
+ */
+
 #include "cli/module.cli.h"
 #include "tui/infrastructure_tui_adapter.h"
 
 #include <stdio.h>
 #include <string.h>
 
+/**
+ * Layar pencarian: baca nama, delegasikan ke agent_search_find(),
+ * lalu tampilkan detail peserta (skor, tendangan, zona) atau pesan
+ * "tidak ditemukan". Guard state: blokir bila STATE_INIT.
+ */
 void cli_surfaces_search_execute(SearchAggregate *agg, CompetitionState *state) {
     if (agg == NULL || state == NULL) return;
     if (state->state == STATE_INIT) {
@@ -18,6 +28,7 @@ void cli_surfaces_search_execute(SearchAggregate *agg, CompetitionState *state) 
 
     tui_clear();
 
+    /* Judul + prompt. */
     attron(COLOR_PAIR(COLOR_TITLE) | A_BOLD);
     tui_print_centered(1, "CARI PESERTA");
     attroff(COLOR_PAIR(COLOR_TITLE) | A_BOLD);
@@ -29,6 +40,7 @@ void cli_surfaces_search_execute(SearchAggregate *agg, CompetitionState *state) 
     attroff(COLOR_PAIR(COLOR_MENU));
     refresh();
 
+    /* Baca nama dari pengguna. */
     char buffer[64];
     echo();
     curs_set(1);
@@ -37,10 +49,12 @@ void cli_surfaces_search_execute(SearchAggregate *agg, CompetitionState *state) 
     curs_set(0);
     noecho();
 
+    /* Buang newline/CR. */
     size_t len = strlen(buffer);
     while (len > 0 && (buffer[len - 1] == '\n' || buffer[len - 1] == '\r'))
         buffer[--len] = '\0';
 
+    /* Guard: query kosong. */
     if (len == 0) {
         tui_clear();
         attron(COLOR_PAIR(COLOR_ERROR));
@@ -51,6 +65,7 @@ void cli_surfaces_search_execute(SearchAggregate *agg, CompetitionState *state) 
         return;
     }
 
+    /* Salin ke VO lalu delegasikan ke agent. */
     ParticipantNameVO name;
     strncpy(name.value, buffer, MAX_NAME_LENGTH);
     name.value[MAX_NAME_LENGTH] = '\0';
@@ -60,6 +75,7 @@ void cli_surfaces_search_execute(SearchAggregate *agg, CompetitionState *state) 
 
     tui_clear();
 
+    /* Hasil pencarian. */
     attron(COLOR_PAIR(COLOR_TITLE) | A_BOLD);
     tui_print_centered(1, "HASIL PENCARIAN");
     attroff(COLOR_PAIR(COLOR_TITLE) | A_BOLD);
@@ -75,6 +91,7 @@ void cli_surfaces_search_execute(SearchAggregate *agg, CompetitionState *state) 
         mvprintw(6, 4, "Nama       : %s", r.name);
         mvprintw(7, 4, "Total Skor : %d", r.total_score);
         mvprintw(8, 4, "Tendangan  : ");
+        /* Tampilkan riwayat tendangan (- bila belum dilakukan). */
         int k;
         for (k = 0; k < TOTAL_KICKS; k++) {
             if (r.kicks[k] == -1) printw("- ");

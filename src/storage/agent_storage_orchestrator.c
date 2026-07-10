@@ -1,6 +1,15 @@
+/**
+ * @file agent_storage_orchestrator.c
+ * @brief Agent: orkestrasi save/load storage melalui protocol (tanpa I/O langsung).
+ */
+
 /* STORAGE — Agent Orchestrator */
 #include "module.storage.h"
 
+/**
+ * Simpan state ke file via protocol (delegate ke infrastructure adapter).
+ * Guard NULL agar tidak dereferensi pointer kosong.
+ */
 StorageError agent_storage_save(const StorageAggregate *agg,
                                 const char *filename,
                                 const CompetitionState *state) {
@@ -13,6 +22,10 @@ StorageError agent_storage_save(const StorageAggregate *agg,
     return agg->protocol->save(filename, state);
 }
 
+/**
+ * Muat state dari file via protocol (delegate ke infrastructure adapter).
+ * Guard NULL agar tidak dereferensi pointer kosong.
+ */
 StorageError agent_storage_load(const StorageAggregate *agg,
                                 const char *filename,
                                 CompetitionState *state) {

@@ -1,8 +1,21 @@
+/**
+ * @file infrastructure_export_adapter.c
+ * @brief Infrastructure: implementasi ExportProtocol — tulis ranking ke file TXT (AES404: port impl).
+ */
+
 /* EXPORT — Infrastructure Adapter (TXT file writer) */
 #include "module.export.h"
 #include <stdio.h>
 #include <string.h>
 
+/* ──────────────────────────────────────────────
+ * Tulis hasil ranking ke file teks (.txt) berformat
+ * tabel: header + baris per peserta (rank, nama, skor)
+ * + footer jumlah peserta.
+ *
+ * Nama diambil dari state->participants[pid].name
+ * (bukan dari entries) agar selalu konsisten dgn state.
+ * ────────────────────────────────────────────── */
 static ExportError export_ranking_txt(const char *filename,
                                       const CompetitionState *state,
                                       const RankingEntryVO *entries,
@@ -27,6 +40,7 @@ static ExportError export_ranking_txt(const char *filename,
     fprintf(file, "%-6s %-20s %s\n", "Rank", "Name", "Score");
     fprintf(file, "------ -------------------- -----\n");
 
+    /* Baris per peserta. */
     for (int i = 0; i < count; i++) {
         int pid = entries[i].participant_id;
         const char *name = "Unknown";
@@ -39,6 +53,7 @@ static ExportError export_ranking_txt(const char *filename,
                 entries[i].total_score);
     }
 
+    /* Footer */
     fprintf(file, "\n========================================\n");
     fprintf(file, "  Total participants: %d\n", count);
     fprintf(file, "========================================\n");
@@ -47,6 +62,10 @@ static ExportError export_ranking_txt(const char *filename,
     return EXP_OK;
 }
 
+/**
+ * Bangun ExportProtocol dengan menyambungkan function-pointer
+ * ke penulis file TXT di atas. Dipanggil oleh root container.
+ */
 ExportProtocol export_adapter_create(void) {
     ExportProtocol p;
     p.export_ranking = export_ranking_txt;
