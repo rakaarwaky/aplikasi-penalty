@@ -17,7 +17,7 @@ RecapError agent_recap_prepare(RecapAggregate *agg,
                                SearchResultVO *details,
                                int capacity);
 
-/* ROOT — container builder (wiring only) */
-RecapAggregate root_recap_build(void);
+/* ROOT — container builder (wiring only) — menerima RankingProtocol yang sudah di-build */
+RecapAggregate root_recap_build(RankingProtocol *ranking_protocol);
 
 #endif /* MODULE_RECAP_H */
