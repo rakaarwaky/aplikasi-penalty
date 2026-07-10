@@ -73,17 +73,17 @@ static void draw_menu(DisplayPort *dp, int selected, CompetitionStateKind state)
             if (state == STATE_INIT)      { status = "[AKTIF]";  status_color = COLOR_SUCCESS; }
             else                          { status = "[SUDAH]";  status_color = COLOR_WARNING; }
         } else if (i == 2) {
-            if (state == STATE_INIT)      { status = "[KUNCI]";  status_color = COLOR_ERROR;   }
+            if (state == STATE_INIT)      { status = "[Terkunci]";  status_color = COLOR_ERROR;   }
             else if (state == STATE_COMPLETED) { status = "[SELESAI]"; status_color = COLOR_WARNING; }
             else                          { status = "[AKTIF]";  status_color = COLOR_SUCCESS; }
         } else if (i == 3) {
-            if (state != STATE_COMPLETED) { status = "[KUNCI]";  status_color = COLOR_ERROR;   }
+            if (state != STATE_COMPLETED) { status = "[Terkunci]";  status_color = COLOR_ERROR;   }
             else                          { status = "[AKTIF]";  status_color = COLOR_SUCCESS; }
         } else if (i == 4) {
-            if (state == STATE_INIT)      { status = "[KUNCI]";  status_color = COLOR_ERROR;   }
+            if (state == STATE_INIT)      { status = "[Terkunci]";  status_color = COLOR_ERROR;   }
             else                          { status = "[AKTIF]";  status_color = COLOR_SUCCESS; }
         } else if (i == 5) {
-            if (state != STATE_COMPLETED) { status = "[KUNCI]";  status_color = COLOR_ERROR;   }
+            if (state != STATE_COMPLETED) { status = "[Terkunci]";  status_color = COLOR_ERROR;   }
             else                          { status = "[AKTIF]";  status_color = COLOR_SUCCESS; }
         }
 
