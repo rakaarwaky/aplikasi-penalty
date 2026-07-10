@@ -22,8 +22,8 @@ void recap_page_draw(DisplayPort *dp, RankingEntryVO *ranking,
     int cols = dp->get_cols();
 
     int gw = cols - 4;
-    if (gw > 72) gw = 72;
-    if (gw < 48) gw = 48;
+    if (gw > BOX_WIDTH_RECAP) gw = BOX_WIDTH_RECAP;
+    if (gw < BOX_WIDTH_MIN) gw = BOX_WIDTH_MIN;
     int box_col = (cols - gw) / 2;
     int box_row = 4;
 
