@@ -22,9 +22,11 @@ void tui_init(void) {
 
     if (has_colors()) {
         start_color();
-        /* Paksa seluruh layar背景 hitam agar konsisten di semua terminal. */
-        init_pair(0, COLOR_WHITE, COLOR_BLACK);
-        bkgd(COLOR_PAIR(0));
+        /* Paksa seluruh layar background hitam agar konsisten di semua terminal.
+         * Pasangan warna 0 dicadangkan oleh ncurses dan tidak bisa diubah dengan init_pair.
+         * Kita gunakan pasangan warna 15 sebagai default background hitam. */
+        init_pair(15, COLOR_WHITE, COLOR_BLACK);
+        bkgd(COLOR_PAIR(15));
         init_pair(COLOR_TITLE,     COLOR_CYAN,    COLOR_BLACK);
         init_pair(COLOR_MENU,      COLOR_WHITE,   COLOR_BLACK);
         init_pair(COLOR_HIGHLIGHT, COLOR_BLACK,   COLOR_CYAN);

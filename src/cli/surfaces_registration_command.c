@@ -107,6 +107,7 @@ void cli_surfaces_registration_execute(RegistrationAggregate *agg,
             buffer[--len] = '\0';
         trim_spaces(buffer);
         len = strlen(buffer);
+        fprintf(stderr, "DBG iter count=%d buf=[%s] len=%zu\n", state->participant_count, buffer, len);
 
         if (len == 0) {
             /* Kosong = selesai bila sudah cukup, atau kembali bila belum ada peserta */
