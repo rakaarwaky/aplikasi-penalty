@@ -32,10 +32,12 @@ def code(t):
     return p
 
 import base64, subprocess, os, tempfile
-def add_mermaid(src, width_in=6.3):
-    """Render mermaid source to PNG via mermaid.ink and embed as picture."""
-    enc = base64.urlsafe_b64encode(src.encode('utf-8')).decode('ascii')
-    url = f'https://mermaid.ink/img/{enc}'
+def add_mermaid(src, width_in=5.8):
+    """Render mermaid source to PNG via mermaid.ink (high scale) and embed as picture."""
+    # Naikkan scale biar tajam; embed width lebih kecil dari native px -> piksel padat.
+    full = '%%{init: {"theme":"default","flowchart":{"nodeSpacing":40,"rankSpacing":50}}}%%\n' + src
+    enc = base64.urlsafe_b64encode(full.encode('utf-8')).decode('ascii')
+    url = f'https://mermaid.ink/img/{enc}?scale=3'
     fd, png = tempfile.mkstemp(suffix='.png')
     os.close(fd)
     try:

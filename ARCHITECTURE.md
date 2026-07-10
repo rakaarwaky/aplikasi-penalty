@@ -4,7 +4,6 @@ The **Agentic Engineering System (AES)** adalah pola arsitektur berlapis ketat, 
 
 ---
 
-
 ## Pilar Utama dan Filosofi
 
 ### 1. Strict Layered Boundary Enforcement
