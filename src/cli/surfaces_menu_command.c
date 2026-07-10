@@ -5,6 +5,7 @@
 
 #include "cli/module.cli.h"
 #include "tui/infrastructure_tui_adapter.h"
+#include "storage/module.storage.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -21,15 +22,6 @@ static const char *menu_labels[MENU_ITEMS] = {
     "  Tampilkan Ranking",
     "  Cari Peserta",
     "  Rekapitulasi Lengkap"
-};
-
-static const char *menu_icons[MENU_ITEMS] = {
-    "[X]",
-    "[>]",
-    "[*]",
-    "[#]",
-    "[?]",
-    "[=]"
 };
 
 /* Gambar ulang layar menu; tambahkan label status sesuai kondisi lomba. */
@@ -51,54 +43,89 @@ static void draw_menu(int selected, CompetitionStateKind state) {
 
     tui_print_centered_colored(2, "+----------------------------------------------------------+", COLOR_BORDER, 0);
 
-    /* Bingkai kotak. */
-    tui_box(BOX_START_ROW, BOX_START_COL, BOX_WIDTH, MENU_ITEMS + 4);
+    /* Bingkai kotak - grid 2 kolom */
+    int grid_width = 56;
+    int grid_height = 10;
+    tui_box(BOX_START_ROW, BOX_START_COL, grid_width, grid_height);
 
     /* Garis pemisah setelah judul box */
-    tui_separator(BOX_START_ROW + 1, BOX_START_COL, BOX_WIDTH);
+    tui_separator(BOX_START_ROW + 1, BOX_START_COL, grid_width);
 
-    /* Tiap pilihan + label statusnya */
-    int i;
-    for (i = 0; i < MENU_ITEMS; i++) {
-        int row = BOX_START_ROW + 2 + i;
-        char label[80];
-        snprintf(label, sizeof label, "%s %s", menu_icons[i], menu_labels[i]);
+    /* Grid 2 kolom: item 0 di kiri, 1-5 di grid */
+    int col_width = (grid_width - 4) / 2;
+    int col_left = BOX_START_COL + 2;
+    int col_right = BOX_START_COL + col_width + 3;
 
-        /* Status tags */
-        const char *status = "";
+    /* Header kolom */
+    attron(COLOR_PAIR(COLOR_HEADER) | A_BOLD);
+    mvprintw(BOX_START_ROW + 2, col_left, "%-*s", col_width, "  MENU");
+    mvprintw(BOX_START_ROW + 2, col_right, "%-*s", col_width, "  STATUS");
+    attroff(COLOR_PAIR(COLOR_HEADER) | A_BOLD);
+    tui_separator(BOX_START_ROW + 3, BOX_START_COL, grid_width);
 
-        if (i == 0) {
-            /* Keluar - tidak ada status */
-        } else if (i == 1) {
-            if (state == STATE_INIT) status = "[AKTIF]";
-            else status = "[SUDAH]";
-        } else if (i == 2) {
-            if (state == STATE_INIT) status = "[KUNCI]";
-            else if (state == STATE_COMPLETED) status = "[SELESAI]";
-            else status = "[AKTIF]";
-        } else if (i == 3) {
-            if (state != STATE_COMPLETED) status = "[KUNCI]";
-            else status = "[AKTIF]";
-        } else if (i == 4) {
-            if (state == STATE_INIT) status = "[KUNCI]";
-            else status = "[AKTIF]";
-        } else if (i == 5) {
-            if (state != STATE_COMPLETED) status = "[KUNCI]";
-            else status = "[AKTIF]";
-        }
+    /* Grid: 2 item per baris, 3 baris untuk 5 menu items (1-5) */
+    int grid_items[3][2] = {
+        {1, 2},  /* Pendaftaran, Input Skor */
+        {3, 4},  /* Ranking, Cari */
+        {5, 0}   /* Rekap, (kosong) */
+    };
 
-        char full_label[128];
-        snprintf(full_label, sizeof full_label, "%-28s %s", label, status);
+    int row_idx;
+    for (row_idx = 0; row_idx < 3; row_idx++) {
+        int row = BOX_START_ROW + 4 + row_idx;
 
-        if (i == selected) {
-            tui_highlight_row(row, BOX_START_COL, BOX_WIDTH, full_label);
-        } else {
-            tui_normal_row(row, BOX_START_COL, BOX_WIDTH, full_label);
+        int col_idx;
+        for (col_idx = 0; col_idx < 2; col_idx++) {
+            int item = grid_items[row_idx][col_idx];
+            if (item == 0) continue;
+
+            int cx = (col_idx == 0) ? col_left : col_right;
+
+            /* Status tags */
+            const char *status = "";
+            int status_color = COLOR_DIM;
+
+            if (item == 1) {
+                if (state == STATE_INIT) { status = "[AKTIF]"; status_color = COLOR_SUCCESS; }
+                else { status = "[SUDAH]"; status_color = COLOR_WARNING; }
+            } else if (item == 2) {
+                if (state == STATE_INIT) { status = "[KUNCI]"; status_color = COLOR_ERROR; }
+                else if (state == STATE_COMPLETED) { status = "[SELESAI]"; status_color = COLOR_WARNING; }
+                else { status = "[AKTIF]"; status_color = COLOR_SUCCESS; }
+            } else if (item == 3) {
+                if (state != STATE_COMPLETED) { status = "[KUNCI]"; status_color = COLOR_ERROR; }
+                else { status = "[AKTIF]"; status_color = COLOR_SUCCESS; }
+            } else if (item == 4) {
+                if (state == STATE_INIT) { status = "[KUNCI]"; status_color = COLOR_ERROR; }
+                else { status = "[AKTIF]"; status_color = COLOR_SUCCESS; }
+            } else if (item == 5) {
+                if (state != STATE_COMPLETED) { status = "[KUNCI]"; status_color = COLOR_ERROR; }
+                else { status = "[AKTIF]"; status_color = COLOR_SUCCESS; }
+            }
+
+            /* Highlight jika dipilih */
+            if (item == selected) {
+                attron(COLOR_PAIR(COLOR_HIGHLIGHT));
+                int w;
+                for (w = 0; w < col_width + 4; w++) mvaddch(row, cx - 1 + w, ' ');
+                attroff(COLOR_PAIR(COLOR_HIGHLIGHT));
+            }
+
+            /* Nomor + nama menu */
+            int item_color = (item == selected) ? COLOR_HIGHLIGHT : COLOR_MENU;
+            attron(COLOR_PAIR(item_color) | ((item <= 3) ? A_BOLD : 0));
+            mvprintw(row, cx, "[%d] %s", item, menu_labels[item] + 2);
+            attroff(COLOR_PAIR(item_color) | ((item <= 3) ? A_BOLD : 0));
+
+            /* Status */
+            attron(COLOR_PAIR(status_color));
+            mvprintw(row, cx + col_width - 6, "%s", status);
+            attroff(COLOR_PAIR(status_color));
         }
     }
 
-    /* Separator sebelum footer */
-    tui_separator(BOX_START_ROW + MENU_ITEMS + 2, BOX_START_COL, BOX_WIDTH);
+    /* Garis pemisah */
+    tui_separator(BOX_START_ROW + 7, BOX_START_COL, grid_width);
 
     /* Info status lomba */
     const char *state_text = "";
@@ -108,10 +135,16 @@ static void draw_menu(int selected, CompetitionStateKind state) {
         case STATE_REGISTERED: state_text = "Fase: Input Tendangan"; state_color = COLOR_WARNING; break;
         case STATE_COMPLETED: state_text = "Fase: Selesai"; state_color = COLOR_SUCCESS; break;
     }
-    tui_print_colored(BOX_START_ROW + MENU_ITEMS + 3, BOX_START_COL + 2, state_text, state_color);
+    tui_print_colored(BOX_START_ROW + 8, BOX_START_COL + 2, state_text, state_color);
+
+    /* Keluar button */
+    int exit_color = (selected == 0) ? COLOR_HIGHLIGHT : COLOR_ERROR;
+    attron(COLOR_PAIR(exit_color) | A_BOLD);
+    mvprintw(BOX_START_ROW + 9, BOX_START_COL + 2, "[0] Keluar");
+    attroff(COLOR_PAIR(exit_color) | A_BOLD);
 
     /* Petunjuk navigasi */
-    tui_footer("[↑/↓] Pilih  [ENTER] OK  [1-5] Shortcut  [h] Bantuan  [q/0/ESC] Keluar");
+    tui_footer("[↑/↓] Pilih  [ENTER] OK  [1-5] Shortcut  [h] Bantuan  [q] Keluar");
 
     refresh();
 }
@@ -169,6 +202,7 @@ static void show_help_screen(void) {
 int cli_surfaces_menu_run(RegistrationAggregate *reg,
                           ScoringAggregate *sc, RankingAggregate *rk,
                           SearchAggregate *sr, RecapAggregate *rc,
+                          StorageAggregate *st,
                           CompetitionState *state) {
     int selected = 1;
     int running = 1;
@@ -202,11 +236,15 @@ int cli_surfaces_menu_run(RegistrationAggregate *reg,
                     if (tui_confirm("Yakin ingin keluar?"))
                         running = 0;
                 } else if (selected == 1) {
-                    if (state->state == STATE_INIT || state->state == STATE_REGISTERED)
+                    if (state->state == STATE_INIT || state->state == STATE_REGISTERED) {
                         cli_surfaces_registration_execute(reg, state);
+                        agent_storage_save(st, "lomba.penalty", state);
+                    }
                 } else if (selected == 2) {
-                    if (state->state == STATE_REGISTERED)
+                    if (state->state == STATE_REGISTERED) {
                         cli_surfaces_scoring_execute(sc, state);
+                        agent_storage_save(st, "lomba.penalty", state);
+                    }
                 } else if (selected == 3) {
                     if (state->state == STATE_COMPLETED)
                         cli_surfaces_ranking_execute(rk, state);
