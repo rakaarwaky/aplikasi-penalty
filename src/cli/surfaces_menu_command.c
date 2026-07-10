@@ -59,15 +59,9 @@ static void resolve_state_text(CompetitionStateKind state,
 }
 
 static void draw_double_line(DisplayPort *dp, int row, int col, int width) {
-    char line[256];
-    int i, pos = 0;
-    for (i = 0; i < width && pos < 252; i++) {
-        line[pos++] = '\xe2';
-        line[pos++] = '\x95';
-        line[pos++] = '\x90';
-    }
-    line[pos] = '\0';
-    dp->draw_colored(row, col, COLOR_DIM, 0, line);
+    int i;
+    for (i = 0; i < width; i++)
+        dp->draw_at(row, col + i, "\xe2\x95\x90");
 }
 
 static void draw_menu(DisplayPort *dp, int selected, CompetitionState *state) {
@@ -85,10 +79,12 @@ static void draw_menu(DisplayPort *dp, int selected, CompetitionState *state) {
     int box_col = (cols - gw) / 2;
     int box_row = 3;
 
-    /* Header: ═══ selebar box, center */
-    draw_double_line(dp, 0, box_col, gw);
+    /* Header: full-width ═══ seperti footer */
+    int hdr_col = 2;
+    int hdr_w = cols - 4;
+    draw_double_line(dp, 0, hdr_col, hdr_w);
     dp->print_centered_colored(1, "  APLIKASI PERHITUNGAN PENALTI  ", COLOR_TITLE, 1);
-    draw_double_line(dp, 2, box_col, gw);
+    draw_double_line(dp, 2, hdr_col, hdr_w);
 
     dp->box(box_row, box_col, gw, 14);
     dp->separator(box_row + 1, box_col, gw);
@@ -150,9 +146,9 @@ static void draw_help(DisplayPort *dp) {
     if (gw < 40) gw = 40;
     int box_col = (cols - gw) / 2;
 
-    draw_double_line(dp, 0, box_col, gw);
+    draw_double_line(dp, 0, 2, cols - 4);
     dp->print_centered_colored(1, "  PANDUAN PENGGUNAAN  ", COLOR_TITLE, 1);
-    draw_double_line(dp, 2, box_col, gw);
+    draw_double_line(dp, 2, 2, cols - 4);
 
     dp->box(3, box_col, gw, 18);
     dp->separator(4, box_col, gw);
