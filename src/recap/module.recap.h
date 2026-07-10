@@ -1,6 +1,6 @@
 /* AES_BYPASS: module declaration (barrel) — 1 header per feature folder.
-   Menyatukan deklarasi publik recap: contract, capabilities, infrastructure,
-   agent, root. */
+   Domain recap: contract, capabilities, agent, root.
+   Tanpa I/O: presentasi ada di cli/surfaces_recap_command.c. */
 #ifndef MODULE_RECAP_H
 #define MODULE_RECAP_H
 
@@ -18,27 +18,14 @@ typedef struct {
 } RecapProtocol;
 
 /* ============================================================
-   CONTRACT — PORT
-   ============================================================ */
-typedef struct {
-    void (*display_header)(void);
-    void (*display_row)(const CompetitionState *state,
-                        const RankingEntryVO *e,
-                        const SearchResultVO *d);
-    void (*display_not_ready)(void);
-    void (*display_wait)(void);
-} RecapPort;
-
-/* ============================================================
    CONTRACT — AGGREGATE
    ============================================================ */
 typedef struct {
     RecapProtocol *protocol;
-    RecapPort *port;
 } RecapAggregate;
 
 /* ============================================================
-   CAPABILITIES
+   CAPABILITIES — pure logic
    ============================================================ */
 RecapError capabilities_recap_prepare(const CompetitionState *state,
                                       RankingEntryVO *ranking,
@@ -46,14 +33,13 @@ RecapError capabilities_recap_prepare(const CompetitionState *state,
                                       int capacity);
 
 /* ============================================================
-   INFRASTRUCTURE — port factory
+   AGENT — koordinasi; tanpa I/O
    ============================================================ */
-RecapPort *create_recap_port(void);
-
-/* ============================================================
-   AGENT — orchestrator
-   ============================================================ */
-RecapError agent_recap_run(RecapAggregate *agg, CompetitionState *state);
+RecapError agent_recap_prepare(RecapAggregate *agg,
+                               const CompetitionState *state,
+                               RankingEntryVO *ranking,
+                               SearchResultVO *details,
+                               int capacity);
 
 /* ============================================================
    ROOT — container builder (wiring only)

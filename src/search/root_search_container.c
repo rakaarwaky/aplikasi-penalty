@@ -6,6 +6,5 @@ SearchAggregate root_search_build(void) {
 
     SearchAggregate a;
     a.protocol = &protocol;
-    a.port = create_search_port();
     return a;
 }
