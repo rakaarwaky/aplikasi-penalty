@@ -6,12 +6,11 @@
 #include <stdarg.h>
 
 /*
- * Default level = LOG_WARN.
+ * Default level = LOG_ERROR.
  *
  * Aplikasi ini berjalan di mode TUI (ncurses). Logger menulis ke stderr,
  * dan tulisan bebas ke terminal akan merusak layar ncurses — makanya pesan
- * INFO bertipe "chatter" (memulai validasi, berhasil, dst) disembunyikan
- * secara default. Hanya WARN/ERROR/FATAL yang tampil.
+ * INFO dan WARN disembunyikan secara default. Hanya ERROR/FATAL yang tampil.
  *
  * Untuk debug, set env PENALTI_LOG=DEBUG (atau INFO/WARN/ERROR/FATAL).
  */
@@ -30,7 +29,7 @@ static LogLevel resolve_initial_level(void) {
     if (strcmp(env, "WARN")  == 0) return LOG_WARN;
     if (strcmp(env, "ERROR") == 0) return LOG_ERROR;
     if (strcmp(env, "FATAL") == 0) return LOG_FATAL;
-    return LOG_WARN; /* nilai env tak dikenal → fallback ke WARN */
+    return LOG_ERROR; /* nilai env tak dikenal → fallback ke ERROR */
 }
 
 void log_set_level(LogLevel level) {
