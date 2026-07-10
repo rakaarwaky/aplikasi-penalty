@@ -23,8 +23,8 @@ static size_t trim_spaces(char *str) {
 static void get_box_dims(DisplayPort *dp, int *out_col, int *out_w) {
     int cols = dp->get_cols();
     int gw = cols - 4;
-    if (gw > 64) gw = 64;
-    if (gw < 40) gw = 40;
+    if (gw > BOX_WIDTH_MAX) gw = BOX_WIDTH_MAX;
+    if (gw < BOX_WIDTH_MIN) gw = BOX_WIDTH_MIN;
     *out_col = (cols - gw) / 2;
     *out_w = gw;
 }

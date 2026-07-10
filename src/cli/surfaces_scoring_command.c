@@ -55,8 +55,8 @@ void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state
 
     int cols = dp->get_cols();
     int gw = cols - 4;
-    if (gw > 64) gw = 64;
-    if (gw < 40) gw = 40;
+    if (gw > BOX_WIDTH_MAX) gw = BOX_WIDTH_MAX;
+    if (gw < BOX_WIDTH_MIN) gw = BOX_WIDTH_MIN;
     int box_col = (cols - gw) / 2;
 
     if (state->state == STATE_INIT) {
@@ -104,6 +104,8 @@ void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state
             if (raw[0] == '\0') {
                 if (dp->confirm("Kembali ke menu? Progres yang belum tersimpan akan hilang."))
                     cancelled = 1;
+                else
+                    continue;
                 break;
             }
 

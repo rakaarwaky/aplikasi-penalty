@@ -180,7 +180,7 @@ static void draw_help(DisplayPort *dp) {
     dp->draw_colored(12, box_col + 2, COLOR_GOLD, 1, "NAVIGASI:");
     const char *navs[] = {
         "[Panah \xe2\x86\x91/\xe2\x86\x93]  : Pindah pilihan menu",
-        "[1-5]        : Langsung pilih menu 1-5",
+        "[1-6]        : Langsung pilih menu 1-6",
         "[ENTER]      : Konfirmasi pilihan",
         "[q / 0]      : Keluar dari aplikasi",
         "[h]          : Tampilkan layar bantuan ini",

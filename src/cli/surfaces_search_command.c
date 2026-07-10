@@ -49,8 +49,8 @@ void cli_surfaces_search_execute(SearchAggregate *agg, CompetitionState *state,
 
     int cols = dp->get_cols();
     int gw = cols - 4;
-    if (gw > 64) gw = 64;
-    if (gw < 40) gw = 40;
+    if (gw > BOX_WIDTH_MAX) gw = BOX_WIDTH_MAX;
+    if (gw < BOX_WIDTH_MIN) gw = BOX_WIDTH_MIN;
     int box_col = (cols - gw) / 2;
 
     char buffer[64];

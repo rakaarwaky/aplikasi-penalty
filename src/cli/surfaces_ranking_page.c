@@ -24,7 +24,7 @@ void ranking_page_draw(DisplayPort *dp, RankingEntryVO *entries,
     if (gw > BOX_WIDTH_RANKING) gw = BOX_WIDTH_RANKING;
     if (gw < BOX_WIDTH_MIN) gw = BOX_WIDTH_MIN;
     int box_col = (cols - gw) / 2;
-    int box_row = 4;
+    int box_row = BOX_ROW;
 
     int box_height = state->participant_count * 2 + 9;
     int max_h = dp->get_lines() - 6;

@@ -26,7 +26,7 @@ void registration_page_draw(DisplayPort *dp, CompetitionState *state) {
     if (gw > BOX_WIDTH_MAX) gw = BOX_WIDTH_MAX;
     if (gw < BOX_WIDTH_MIN) gw = BOX_WIDTH_MIN;
     int box_col = (cols - gw) / 2;
-    int box_row = 4;
+    int box_row = BOX_ROW;
 
     int box_height = count + BOX_HEIGHT_MIN;
     int max_h = dp->get_lines() - 6;

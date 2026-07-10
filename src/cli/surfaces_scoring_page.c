@@ -26,7 +26,7 @@ void scoring_page_draw(DisplayPort *dp, ParticipantEntity *part,
     if (gw > BOX_WIDTH_MAX) gw = BOX_WIDTH_MAX;
     if (gw < BOX_WIDTH_MIN) gw = BOX_WIDTH_MIN;
     int box_col = (cols - gw) / 2;
-    int box_row = 4;
+    int box_row = BOX_ROW;
 
     dp->print_centered_colored(0, "Menu Utama > Input Tendangan", COLOR_DIM, 0);
     draw_double_line(dp, 1, 2, cols - 4);
