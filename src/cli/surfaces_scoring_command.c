@@ -15,7 +15,7 @@
 #define BOX_ROW 3
 #define BOX_COL 2
 
-static ScoringError read_zone(ZoneVO *out) {
+static ScoringError read_zone(ZoneVO *out, char *raw_out, size_t raw_size) {
     char buf[32];
     echo();
     curs_set(1);
@@ -23,6 +23,12 @@ static ScoringError read_zone(ZoneVO *out) {
     getnstr(buf, 10);
     curs_set(0);
     noecho();
+
+    /* Simpan input mentah untuk pesan error */
+    if (raw_out != NULL && raw_size > 0) {
+        strncpy(raw_out, buf, raw_size - 1);
+        raw_out[raw_size - 1] = '\0';
+    }
 
     int i = 0;
     while (buf[i] != '\0' && buf[i] != '\n') {
@@ -136,10 +142,15 @@ void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state
             draw_scoring_screen(part, NULL, 0);
 
             ZoneVO z;
-            if (read_zone(&z) != SC_OK || z.value < MIN_ZONE || z.value > MAX_ZONE) {
-                char err_msg[64];
-                snprintf(err_msg, sizeof err_msg, "[GAGAL] Zona harus %d-%d!", MIN_ZONE, MAX_ZONE);
-                draw_scoring_screen(part, err_msg, 1);
+            char raw[32] = "";
+            if (read_zone(&z, raw, sizeof raw) != SC_OK || z.value < MIN_ZONE || z.value > MAX_ZONE) {
+                /* Tampilkan error di baris feedback saja, tanpa clear layar. */
+                char err_msg[96];
+                snprintf(err_msg, sizeof err_msg,
+                         "[GAGAL] Zona harus %d-%d. Input: '%s'.", MIN_ZONE, MAX_ZONE, raw);
+                attron(COLOR_PAIR(COLOR_ERROR) | A_BOLD);
+                mvprintw(BOX_ROW + BOX_HEIGHT - 2, BOX_COL + 2, "%s", err_msg);
+                attroff(COLOR_PAIR(COLOR_ERROR) | A_BOLD);
                 refresh();
                 tui_getch();
                 continue;
@@ -151,8 +162,8 @@ void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state
                 snprintf(ok_msg, sizeof ok_msg, "[OK] Zona %d -> %d poin", z.value, z.value);
                 draw_scoring_screen(part, ok_msg, 0);
             } else if (e == SC_INVALID_ZONE) {
-                char err_msg[64];
-                snprintf(err_msg, sizeof err_msg, "[GAGAL] Zona harus %d-%d!", MIN_ZONE, MAX_ZONE);
+                char err_msg[80];
+                snprintf(err_msg, sizeof err_msg, "[GAGAL] Zona harus %d-%d. Anda masukkan: '%s'", MIN_ZONE, MAX_ZONE, raw_input);
                 draw_scoring_screen(part, err_msg, 1);
             } else {
                 draw_scoring_screen(part, "[GAGAL] Kesalahan pencatatan!", 1);

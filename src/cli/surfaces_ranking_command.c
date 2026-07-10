@@ -35,10 +35,13 @@ void cli_surfaces_ranking_execute(RankingAggregate *agg, CompetitionState *state
 
     tui_clear();
 
+    /* Breadcrumb */
+    tui_print_centered_colored(0, "Menu Utama > Ranking Peserta", COLOR_DIM, 0);
+
     /* Judul dengan dekorasi */
-    tui_print_centered_colored(0, "============================================", COLOR_GOLD, 1);
-    tui_print_centered_colored(1, "RANKING PESERTA", COLOR_TITLE, 1);
-    tui_print_centered_colored(2, "============================================", COLOR_GOLD, 1);
+    tui_print_centered_colored(1, "============================================", COLOR_GOLD, 1);
+    tui_print_centered_colored(2, "RANKING PESERTA", COLOR_TITLE, 1);
+    tui_print_centered_colored(3, "============================================", COLOR_GOLD, 1);
 
     /* Bingkai */
     int box_height = state->participant_count + 8;
@@ -86,6 +89,11 @@ void cli_surfaces_ranking_execute(RankingAggregate *agg, CompetitionState *state
                  r->zone_freq[5], r->zone_freq[4], r->zone_freq[3],
                  r->zone_freq[2], r->zone_freq[1], r->zone_freq[0]);
         attroff(COLOR_PAIR(row_color) | (r->rank <= 3 ? A_BOLD : 0));
+
+        /* Bar skor relatif terhadap skor tertinggi. */
+        int max_score = entries[0].total_score;
+        int score_pct = (max_score > 0) ? (r->total_score * 100) / max_score : 0;
+        tui_progress_bar(row, 52, 10, score_pct, COLOR_SUCCESS);
 
         /* Separator antar baris */
         if (i < state->participant_count - 1) {

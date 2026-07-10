@@ -30,6 +30,9 @@ void cli_surfaces_search_execute(SearchAggregate *agg, CompetitionState *state) 
 
     tui_clear();
 
+    /* Breadcrumb */
+    tui_print_centered_colored(0, "Menu Utama > Cari Peserta", COLOR_DIM, 0);
+
     /* Judul */
     tui_print_centered_colored(1, "CARI PESERTA", COLOR_TITLE, 1);
 

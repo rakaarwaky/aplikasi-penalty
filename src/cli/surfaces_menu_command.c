@@ -111,8 +111,39 @@ static void draw_menu(int selected, CompetitionStateKind state) {
     tui_print_colored(BOX_START_ROW + MENU_ITEMS + 3, BOX_START_COL + 2, state_text, state_color);
 
     /* Petunjuk navigasi */
-    tui_footer("[v/^] Pilih  [ENTER] OK  [q/0/ESC] Keluar");
+    tui_footer("[v/^] Pilih  [ENTER] OK  [1-5] Langsung  [h] Bantuan  [q/0/ESC] Keluar");
 
+    refresh();
+}
+
+/* Layar bantuan singkat "Cara Bermain". */
+static void draw_help(void) {
+    tui_clear();
+    tui_print_centered_colored(1, "CARA BERMAIN", COLOR_TITLE, 1);
+    tui_box(3, 2, 70, 18);
+    tui_separator(4, 2, 70);
+
+    attron(COLOR_PAIR(COLOR_MENU));
+    mvprintw(5, 4, "1. Daftar 5-7 peserta (Menu 1). Nama huruf & spasi, maks 30.");
+    mvprintw(6, 4, "2. Tiap peserta menendang 7 kali (Menu 2). Zona 0-5 = poin.");
+    mvprintw(7, 4, "3. Zona tinggi (5) dapat lebih banyak poin.");
+    mvprintw(8, 4, "4. Setelah semua selesai, lihat Ranking (Menu 3) & Rekap (Menu 5).");
+    mvprintw(9, 4, "5. Cari peserta tertentu lewat Menu 4.");
+    attroff(COLOR_PAIR(COLOR_MENU));
+
+    tui_separator(10, 2, 70);
+
+    attron(COLOR_PAIR(COLOR_WARNING) | A_BOLD);
+    mvprintw(11, 4, "Navigasi:");
+    attroff(COLOR_PAIR(COLOR_WARNING) | A_BOLD);
+    attron(COLOR_PAIR(COLOR_MENU));
+    mvprintw(12, 4, "  ^ / v        : pindah pilihan");
+    mvprintw(13, 4, "  ENTER / 1-5 : pilih menu");
+    mvprintw(14, 4, "  h           : layar bantuan ini");
+    mvprintw(15, 4, "  q / 0 / ESC : keluar (dengan konfirmasi)");
+    attroff(COLOR_PAIR(COLOR_MENU));
+
+    tui_footer("Tekan tombol apa saja untuk kembali");
     refresh();
 }
 
@@ -142,6 +173,16 @@ int cli_surfaces_menu_run(RegistrationAggregate *reg,
                 selected++;
                 if (selected >= MENU_ITEMS) selected = 0;
                 break;
+            case 'h':
+            case 'H':
+                draw_help();
+                tui_getch();
+                break;
+            case '1': case '2': case '3': case '4': case '5':
+                if (key >= '1' && key <= '5')
+                    selected = key - '0';
+                /* lanjut ke penanganan seperti ENTER di bawah */
+                /* fallthrough */
             case TUI_KEY_ENTER:
                 if (selected == 0) {
                     if (tui_confirm("Yakin ingin keluar?"))

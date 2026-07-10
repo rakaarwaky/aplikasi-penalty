@@ -92,14 +92,14 @@ void tui_box(int row, int col, int width, int height) {
     attroff(COLOR_PAIR(COLOR_BORDER));
 }
 
-/* Baris terpilih: latar terang + teks. */
+/* Baris terpilih: latar terang + teks + bold untuk kontras lebih tinggi (A4). */
 void tui_highlight_row(int row, int col, int width, const char *text) {
     if (text == NULL || width < 2) return;
     int i;
-    attron(COLOR_PAIR(COLOR_HIGHLIGHT));
+    attron(COLOR_PAIR(COLOR_HIGHLIGHT) | A_BOLD);
     for (i = 0; i < width - 2; i++) mvaddch(row, col + 1 + i, ' ');
     mvprintw(row, col + 2, "%s", text);
-    attroff(COLOR_PAIR(COLOR_HIGHLIGHT));
+    attroff(COLOR_PAIR(COLOR_HIGHLIGHT) | A_BOLD);
 }
 
 /* Baris biasa: latar default + teks. */

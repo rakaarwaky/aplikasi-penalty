@@ -73,7 +73,15 @@ void cli_surfaces_recap_execute(RecapAggregate *agg, CompetitionState *state) {
         attron(COLOR_PAIR(row_color) | (r->rank <= 3 ? A_BOLD : 0));
         mvprintw(row, box_col + 2, " %-4d %-22s %-6d ", r->rank, d->name, d->total_score);
         int z;
-        for (z = 0; z <= MAX_ZONE; z++) printw("%d ", d->zone_freq[z]);
+        for (z = 0; z <= MAX_ZONE; z++) {
+            int zc = COLOR_DIM;
+            if (z == 5) zc = COLOR_SUCCESS;
+            else if (z == 0) zc = COLOR_ERROR;
+            else if (z == 4) zc = COLOR_WARNING;
+            attron(COLOR_PAIR(zc) | (r->rank <= 3 ? A_BOLD : 0));
+            printw("%d ", d->zone_freq[z]);
+            attroff(COLOR_PAIR(zc) | (r->rank <= 3 ? A_BOLD : 0));
+        }
         attroff(COLOR_PAIR(row_color) | (r->rank <= 3 ? A_BOLD : 0));
 
         /* Garis pemisah antar baris */
