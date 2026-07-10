@@ -37,7 +37,7 @@ void tui_init(void) {
         init_pair(COLOR_BRONZE,    COLOR_YELLOW,  COLOR_BLACK);
         init_pair(COLOR_WARNING,   COLOR_YELLOW,  COLOR_BLACK);
         init_pair(COLOR_INFO,      COLOR_BLUE,    COLOR_BLACK);
-        init_pair(COLOR_HEADER,    COLOR_BLACK,   COLOR_CYAN);
+        init_pair(COLOR_HEADER,    COLOR_CYAN,    COLOR_BLACK);
     }
 }
 
@@ -66,28 +66,29 @@ void tui_print_centered(int row, const char *text) {
     mvprintw(row, col, "%s", text);
 }
 
-/* Gambar kotak berbingkai di posisi & ukuran tertentu. */
+/* Gambar kotak berbingkai di posisi & ukuran tertentu (Unicode Box Drawing). */
 void tui_box(int row, int col, int width, int height) {
     if (width < 2 || height < 2) return;
     int i;
     attron(COLOR_PAIR(COLOR_BORDER));
 
-    /* Bingkai atas. */
-    mvaddch(row, col, ACS_ULCORNER);
-    for (i = 1; i < width - 1; i++) mvaddch(row, col + i, ACS_HLINE);
-    mvaddch(row, col + width - 1, ACS_URCORNER);
+    /* Bingkai atas: ╔ ═ ╗ */
+    mvprintw(row, col, "\xe2\x95\x94");                         /* ╔ */
+    for (i = 1; i < width - 1; i++)
+        mvprintw(row, col + i, "\xe2\x95\x90");                /* ═ */
+    mvprintw(row, col + width - 1, "\xe2\x95\x97");            /* ╗ */
 
-    /* Bingkai sisi. */
+    /* Bingkai sisi: ║ */
     for (i = 1; i < height - 1; i++) {
-        mvaddch(row + i, col, ACS_VLINE);
-        mvaddch(row + i, col + width - 1, ACS_VLINE);
+        mvprintw(row + i, col, "\xe2\x95\x91");                /* ║ */
+        mvprintw(row + i, col + width - 1, "\xe2\x95\x91");    /* ║ */
     }
 
-    /* Bingkai bawah. */
-    mvaddch(row + height - 1, col, ACS_LLCORNER);
+    /* Bingkai bawah: ╚ ═ ╝ */
+    mvprintw(row + height - 1, col, "\xe2\x95\x9a");           /* ╚ */
     for (i = 1; i < width - 1; i++)
-        mvaddch(row + height - 1, col + i, ACS_HLINE);
-    mvaddch(row + height - 1, col + width - 1, ACS_LRCORNER);
+        mvprintw(row + height - 1, col + i, "\xe2\x95\x90");  /* ═ */
+    mvprintw(row + height - 1, col + width - 1, "\xe2\x95\x9d"); /* ╝ */
 
     attroff(COLOR_PAIR(COLOR_BORDER));
 }
@@ -149,49 +150,53 @@ void tui_progress_bar(int row, int col, int width, int percent, int color) {
     attroff(COLOR_PAIR(COLOR_MENU));
 }
 
-/* Garis pemisah horizontal. */
+/* Garis pemisah horizontal (Unicode Box Drawing: ─). */
 void tui_separator(int row, int col, int width) {
     if (width < 2) return;
     int i;
     attron(COLOR_PAIR(COLOR_BORDER));
-    mvaddch(row, col, ACS_LTEE);
-    for (i = 1; i < width - 1; i++) mvaddch(row, col + i, ACS_HLINE);
-    mvaddch(row, col + width - 1, ACS_RTEE);
+    mvprintw(row, col, "\xe2\x94\x9c");                         /* ├ */
+    for (i = 1; i < width - 1; i++)
+        mvprintw(row, col + i, "\xe2\x94\x80");                /* ─ */
+    mvprintw(row, col + width - 1, "\xe2\x94\xa4");            /* ┤ */
     attroff(COLOR_PAIR(COLOR_BORDER));
 }
 
-/* Garis pemisah tebal. */
+/* Garis pemisah tebal (Unicode Box Drawing: ━). */
 void tui_separator_thick(int row, int col, int width) {
     if (width < 2) return;
     int i;
     attron(COLOR_PAIR(COLOR_BORDER) | A_BOLD);
-    mvaddch(row, col, ACS_LTEE);
-    for (i = 1; i < width - 1; i++) mvaddch(row, col + i, ACS_HLINE);
-    mvaddch(row, col + width - 1, ACS_RTEE);
+    mvprintw(row, col, "\xe2\x94\x9c");                         /* ├ */
+    for (i = 1; i < width - 1; i++)
+        mvprintw(row, col + i, "\xe2\x94\x81");                /* ━ */
+    mvprintw(row, col + width - 1, "\xe2\x94\xa4");            /* ┤ */
     attroff(COLOR_PAIR(COLOR_BORDER) | A_BOLD);
 }
 
-/* Kotak dengan garis ganda. */
+/* Kotak dengan garis ganda (Unicode Box Drawing Double). */
 void tui_box_double(int row, int col, int width, int height) {
     if (width < 2 || height < 2) return;
     int i;
     attron(COLOR_PAIR(COLOR_TITLE) | A_BOLD);
 
-    /* Sudut atas. */
-    mvaddch(row, col, ACS_ULCORNER);
-    for (i = 1; i < width - 1; i++) mvaddch(row, col + i, ACS_HLINE);
-    mvaddch(row, col + width - 1, ACS_URCORNER);
+    /* Sudut atas: ╔ ═ ╗ */
+    mvprintw(row, col, "\xe2\x95\x94");                         /* ╔ */
+    for (i = 1; i < width - 1; i++)
+        mvprintw(row, col + i, "\xe2\x95\x90");                /* ═ */
+    mvprintw(row, col + width - 1, "\xe2\x95\x97");            /* ╗ */
 
-    /* Sisi. */
+    /* Sisi: ║ */
     for (i = 1; i < height - 1; i++) {
-        mvaddch(row + i, col, ACS_VLINE);
-        mvaddch(row + i, col + width - 1, ACS_VLINE);
+        mvprintw(row + i, col, "\xe2\x95\x91");                /* ║ */
+        mvprintw(row + i, col + width - 1, "\xe2\x95\x91");    /* ║ */
     }
 
-    /* Sudut bawah. */
-    mvaddch(row + height - 1, col, ACS_LLCORNER);
-    for (i = 1; i < width - 1; i++) mvaddch(row + height - 1, col + i, ACS_HLINE);
-    mvaddch(row + height - 1, col + width - 1, ACS_LRCORNER);
+    /* Sudut bawah: ╚ ═ ╝ */
+    mvprintw(row + height - 1, col, "\xe2\x95\x9a");           /* ╚ */
+    for (i = 1; i < width - 1; i++)
+        mvprintw(row + height - 1, col + i, "\xe2\x95\x90");  /* ═ */
+    mvprintw(row + height - 1, col + width - 1, "\xe2\x95\x9d"); /* ╝ */
 
     attroff(COLOR_PAIR(COLOR_TITLE) | A_BOLD);
 }
@@ -227,9 +232,10 @@ void tui_footer(const char *help) {
     int sep_col = 2;
     int sep_w = COLS - 4;
     int j;
-    mvaddch(sep_row, sep_col, ACS_LTEE);
-    for (j = 1; j < sep_w - 1; j++) mvaddch(sep_row, sep_col + j, ACS_HLINE);
-    mvaddch(sep_row, sep_col + sep_w - 1, ACS_RTEE);
+    mvprintw(sep_row, sep_col, "\xe2\x94\x9c");                /* ├ */
+    for (j = 1; j < sep_w - 1; j++)
+        mvprintw(sep_row, sep_col + j, "\xe2\x94\x80");       /* ─ */
+    mvprintw(sep_row, sep_col + sep_w - 1, "\xe2\x94\xa4");   /* ┤ */
     tui_print_centered(row, help);
     attroff(COLOR_PAIR(COLOR_DIM));
 }

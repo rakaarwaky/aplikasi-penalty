@@ -7,6 +7,7 @@
 #include "sanitizer/module.sanitizer.h"
 #include "tui/infrastructure_tui_adapter.h"
 
+#include <locale.h>
 #include <signal.h>
 #include <stdlib.h>
 
@@ -18,6 +19,9 @@ static void cleanup_handler(int sig) {
 }
 
 int main(void) {
+    /* Aktifkan UTF-8 locale agar karakter Unicode Box Drawing bisa dirender. */
+    setlocale(LC_ALL, "");
+
     /* Tangani tombol interupsi agar terminal kembali normal. */
     signal(SIGINT, cleanup_handler);
     signal(SIGTERM, cleanup_handler);

@@ -32,10 +32,10 @@ static void draw_menu(DisplayPort *dp, int selected, CompetitionStateKind state,
     char buf[128];
     dp->cls();
 
-    /* ── Header: double-line border ── */
-    dp->print_centered_colored(0, "==========================================================", COLOR_GOLD, 1);
+    /* ── Header: Unicode double-line border (═) ── */
+    dp->print_centered_colored(0, "\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90", COLOR_DIM, 0);
     dp->print_centered_colored(1, "    APLIKASI PERHITUNGAN PENALTI    ", COLOR_TITLE, 1);
-    dp->print_centered_colored(2, "==========================================================", COLOR_GOLD, 1);
+    dp->print_centered_colored(2, "\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90", COLOR_DIM, 0);
 
     /* ── Bingkai utama (1 baris kosong dari header = Gestalt Proximity) ── */
     int gw = BOX_WIDTH;
@@ -43,16 +43,14 @@ static void draw_menu(DisplayPort *dp, int selected, CompetitionStateKind state,
     dp->box(BOX_START_ROW, BOX_START_COL, gw, grid_height);
     dp->separator(BOX_START_ROW + 1, BOX_START_COL, gw);
 
-    /* ── Layout 2 kolom ── */
+    /* ── Layout 2 kolom (Grid System yang Disiplin) ── */
     int col1_x = BOX_START_COL + 3;                          /* Kolom kiri: menu    */
     int col2_x = BOX_START_COL + gw - 16;            /* Kolom kanan: status */
     int col2_width = 14;
 
-    /* Header kolom */
-    snprintf(buf, sizeof buf, "%-*s", col2_x - col1_x, "MENU");
-    dp->draw_colored(BOX_START_ROW + 2, col1_x, COLOR_HEADER, 1, buf);
-    snprintf(buf, sizeof buf, "%-*s", col2_width, "STATUS");
-    dp->draw_colored(BOX_START_ROW + 2, col2_x, COLOR_HEADER, 1, buf);
+    /* Header kolom: teks foreground saja, tanpa blok background yang berat */
+    dp->draw_colored(BOX_START_ROW + 2, col1_x, COLOR_INFO, 1, "MENU");
+    dp->draw_colored(BOX_START_ROW + 2, col2_x, COLOR_INFO, 1, "STATUS");
     dp->separator(BOX_START_ROW + 3, BOX_START_COL, gw);
 
     /* ── Baris menu 1-5 ── */
