@@ -83,7 +83,7 @@ static void draw_scoring_screen(DisplayPort *dp, ParticipantEntity *part,
 
     dp->separator(BOX_ROW + 9, BOX_COL, BOX_WIDTH);
     dp->draw_colored(BOX_ROW + 10, BOX_COL + 2, COLOR_DIM, 0,
-                     "Zona: 0=Miss 1=Mudah 2=Sedang 3=Sulit 4=SkSlt 5=Top");
+                     "Zona: 0=Miss 1=Mudah 2=Sedang 3=Sulit 4=SgtSulit 5=Top");
 
     snprintf(buf, sizeof buf, "Masukkan zona (0-%d, contoh: 5): ", MAX_ZONE);
     dp->draw_colored(BOX_ROW + 11, BOX_COL + 2, COLOR_INFO, 1, buf);

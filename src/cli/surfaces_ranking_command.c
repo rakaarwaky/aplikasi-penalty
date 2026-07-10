@@ -44,8 +44,10 @@ void cli_surfaces_ranking_execute(RankingAggregate *agg, CompetitionState *state
     dp->print_centered_colored(2, "RANKING PESERTA", COLOR_TITLE, 1);
     dp->print_centered_colored(3, "============================================", COLOR_GOLD, 1);
 
-    /* Bingkai */
+    /* Bingkai — cap height agar tidak overflow terminal */
     int box_height = state->participant_count + 8 + 2; /* +2 untuk baris bar chart */
+    int max_h = dp->get_lines() - 4; /* sisakan ruang untuk header + footer */
+    if (box_height > max_h) box_height = max_h;
     dp->box(4, 2, 64, box_height);
 
     /* Separator header */

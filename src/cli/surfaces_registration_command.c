@@ -36,6 +36,8 @@ static void draw_registration_screen(DisplayPort *dp, CompetitionState *state) {
 
     int count = state->participant_count;
     int box_height = count + 13;
+    int max_h = dp->get_lines() - 4; /* sisakan ruang untuk header + footer */
+    if (box_height > max_h) box_height = max_h;
 
     /* Breadcrumb */
     dp->print_centered_colored(0, "Menu Utama > Pendaftaran Peserta", COLOR_DIM, 0);
