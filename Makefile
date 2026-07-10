@@ -20,7 +20,7 @@ LDFLAGS  := -lncursesw
 
 # Test
 TEST_DIR   := tests
-TEST_SRCS  := $(wildcard $(TEST_DIR)/*.c)
+TEST_SRCS  := $(filter-out $(TEST_DIR)/screenshooter.c, $(wildcard $(TEST_DIR)/*.c))
 TEST_INC   := -I$(SRC_DIR) -I$(SRC_DIR)/shared \
               -I$(SRC_DIR)/registration -I$(SRC_DIR)/scoring \
               -I$(SRC_DIR)/ranking -I$(SRC_DIR)/search \
