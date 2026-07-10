@@ -92,11 +92,8 @@ void cli_surfaces_registration_execute(RegistrationAggregate *agg,
         dp->draw_colored(row, BOX_COL + 2, COLOR_INFO, 1, buf);
         dp->screen_refresh();
 
-        /* Input baca dari ncurses — harus melalui getnstr karena butuh posisi kursor */
-        /* Ini adalah satu-satunya sisa interaksi langsung: echo/getnstr tidak ada di DisplayPort */
-        /* karena ini bukan display melainkan input stream. */
-        extern void tui_input_string(int row, int col, char *buf, int maxlen);
-        tui_input_string(row, BOX_COL + 21, buffer, 30);
+        /* Input baca melalui DisplayPort */
+        dp->input_string(row, BOX_COL + 21, buffer, 30);
 
         size_t len = strlen(buffer);
         while (len > 0 && (buffer[len - 1] == '\n' || buffer[len - 1] == '\r'))
@@ -105,7 +102,12 @@ void cli_surfaces_registration_execute(RegistrationAggregate *agg,
         len = strlen(buffer);
 
         if (len == 0) {
+            /* Kosong = selesai bila sudah cukup, atau kembali bila belum ada peserta */
             if (state->participant_count >= MIN_PARTICIPANTS) break;
+            if (state->participant_count == 0) {
+                if (dp->confirm("Kembali ke menu utama?"))
+                    return;
+            }
             show_error(dp, "Minimal 5 peserta untuk melanjutkan!", error_row);
             dp->screen_refresh();
             continue;

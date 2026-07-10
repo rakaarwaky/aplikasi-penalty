@@ -16,11 +16,10 @@
 #define BOX_COL 2
 
 /* Baca zona dari input pengguna; kembalikan SC_OK atau SC_INVALID_ZONE. */
-static ScoringError read_zone(ZoneVO *out, char *raw_out, size_t raw_size) {
-    extern void tui_input_string(int row, int col, char *buf, int maxlen);
+static ScoringError read_zone(DisplayPort *dp, ZoneVO *out, char *raw_out, size_t raw_size) {
     char buf[32];
     /* Posisi -1 berarti gunakan kursor saat ini */
-    tui_input_string(-1, -1, buf, 10);
+    dp->input_string(-1, -1, buf, 10);
 
     if (raw_out != NULL && raw_size > 0)
         snprintf(raw_out, raw_size, "%s", buf);
@@ -120,14 +119,24 @@ void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state
     }
 
     int p;
-    for (p = 0; p < state->participant_count; p++) {
+    int cancelled = 0;
+    for (p = 0; p < state->participant_count && !cancelled; p++) {
         ParticipantEntity *part = &state->participants[p];
         while (part->kick_count.value < TOTAL_KICKS) {
             draw_scoring_screen(dp, part, NULL, 0);
 
             ZoneVO z;
             char raw[32] = "";
-            read_zone(&z, raw, sizeof raw);
+            read_zone(dp, &z, raw, sizeof raw);
+
+            /* ESC = batal kembali ke menu */
+            if (raw[0] == '\0' && part->kick_count.value == 0 && p == 0) {
+                /* Kosong di awal = user mau kembali */
+                if (!dp->confirm("Kembali ke menu? Progres yang belum tersimpan akan hilang."))
+                    continue;
+                cancelled = 1;
+                break;
+            }
 
             /* Validasi mentah via sanitizer agent sebelum domain agent */
             if (sn != NULL && raw[0] != '\0' &&
@@ -163,6 +172,8 @@ void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state
             dp->screen_refresh();
             dp->readkey();
         }
+
+        if (cancelled) break;
 
         dp->cls();
         dp->print_centered_colored(4, "[SELESAI]", COLOR_SUCCESS, 1);

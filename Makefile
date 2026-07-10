@@ -65,10 +65,11 @@ test: $(TEST_BIN)
 COV_DIR := coverage
 coverage:
 	@mkdir -p $(COV_DIR)
+	@rm -f run_tests-*.gcno run_tests-*.gcda $(COV_DIR)/run_tests-*.gcno $(COV_DIR)/run_tests-*.gcda
 	$(MAKE) $(TEST_BIN) CFLAGS="$(CFLAGS) --coverage" LDFLAGS="$(LDFLAGS) --coverage"
 	./$(TEST_BIN)
 	@mv -f run_tests-*.gcno run_tests-*.gcda $(COV_DIR)/ 2>/dev/null || true
-	@cd $(COV_DIR) && for f in run_tests-*.gcno; do gcov -n "$$f" >/dev/null 2>&1; done
+	@cd $(COV_DIR) && shopt -s nullglob; for f in run_tests-*.gcno; do gcov -n "$$f" >/dev/null 2>&1; done; shopt -u nullglob
 	@echo "Coverage artefacts in ./$(COV_DIR)/ — jalankan: cd $(COV_DIR) && gcov run_tests-*.gcno"
 
 $(TEST_BIN): $(TEST_LIB_SRC) $(TEST_SRCS)

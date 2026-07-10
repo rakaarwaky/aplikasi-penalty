@@ -400,6 +400,7 @@ DisplayPort tui_display_port_create(void) {
     dp.medal                = tui_medal;
     dp.readkey              = tui_getch;
     dp.confirm              = tui_confirm;
+    dp.input_string         = tui_input_string;
     dp.get_lines            = tui_dp_get_lines;
     dp.get_cols             = tui_dp_get_cols;
 

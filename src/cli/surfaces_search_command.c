@@ -50,8 +50,7 @@ void cli_surfaces_search_execute(SearchAggregate *agg, CompetitionState *state,
 
     /* Baca nama */
     char buffer[64];
-    extern void tui_input_string(int row, int col, char *buf, int maxlen);
-    tui_input_string(BOX_ROW + 4, BOX_COL + 8, buffer, 30);
+    dp->input_string(BOX_ROW + 4, BOX_COL + 8, buffer, 30);
 
     /* Buang newline */
     size_t len = strlen(buffer);
@@ -141,24 +140,27 @@ void cli_surfaces_search_execute(SearchAggregate *agg, CompetitionState *state,
         snprintf(buf, sizeof buf, "Peserta '%s' tidak ditemukan.", buffer);
         dp->draw_colored(BOX_ROW + 6, BOX_COL + 4, COLOR_MENU, 0, buf);
 
-        /* Fuzzy search: cari nama yang mirip */
-        dp->draw_colored(BOX_ROW + 8, BOX_COL + 4, COLOR_INFO, 0, "Mungkin maksud Anda:");
-
+        /* Fuzzy search: hitung similarity threshold ≥ 50% karakter */
         int suggestions = 0;
         int si;
         for (si = 0; si < state->participant_count && suggestions < 3; si++) {
             const char *pname = state->participants[si].name.value;
-            int match = 0;
+            /* Hitung jumlah karakter query yang ada di nama */
+            int matched = 0;
+            int qlen = (int)len;
             size_t pi;
-            for (pi = 0; pname[pi] != '\0' && !match; pi++) {
+            for (pi = 0; pname[pi] != '\0'; pi++) {
                 char lower_p = (char)tolower((unsigned char)pname[pi]);
                 size_t bi;
-                for (bi = 0; buffer[bi] != '\0' && !match; bi++) {
-                    if (tolower((unsigned char)buffer[bi]) == lower_p)
-                        match = 1;
+                for (bi = 0; buffer[bi] != '\0'; bi++) {
+                    if (tolower((unsigned char)buffer[bi]) == lower_p) {
+                        matched++;
+                        break;
+                    }
                 }
             }
-            if (match) {
+            /* Threshold: minimal 50% karakter query cocok di nama */
+            if (qlen > 0 && matched * 2 >= qlen) {
                 snprintf(buf, sizeof buf, "- %s", pname);
                 dp->draw_colored(BOX_ROW + 9 + suggestions, BOX_COL + 6,
                                  COLOR_SUCCESS, 0, buf);

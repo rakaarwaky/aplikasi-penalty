@@ -37,6 +37,7 @@ typedef struct {
     /* Input */
     int  (*readkey)(void);
     int  (*confirm)(const char *prompt);
+    void (*input_string)(int row, int col, char *buf, int maxlen);
 
     /* Terminal info */
     int  (*get_lines)(void);
