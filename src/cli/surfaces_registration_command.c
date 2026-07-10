@@ -4,7 +4,6 @@
  */
 
 #include "cli/module.cli.h"
-#include "cli/surfaces_registration_page.h"
 #include "sanitizer/module.sanitizer.h"
 
 #include <stdio.h>

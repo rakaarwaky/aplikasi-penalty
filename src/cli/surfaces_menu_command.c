@@ -1,25 +1,56 @@
 /**
  * @file surfaces_menu_command.c
- * @brief SMART surface — layar menu utama.
- *
- * Command memegang LOGIC: loop input, navigasi, guard ukuran terminal,
- * mapping fase lomba -> status tiap menu, dan validasi sebelum membuka fitur.
- * Ia MENYIAPKAN view model lalu memanggil page (dumb) untuk render. Tidak ada
- * gambar langsung ke DisplayPort di sini — semua via page/component.
+ * @brief Smart surface: navigasi menu utama & dispatch ke fitur.
  */
 
 #include "cli/module.cli.h"
-#include "cli/surfaces_menu_page.h"
-#include "shared/taxonomy_game_constant.h"
 
 #include <stdio.h>
-#include <string.h>
 
-#define MENU_ITEMS 6   /* 0=keluar, 1..5=fitur */
+#define MENU_ITEMS 6
+#define BOX_WIDTH  60
+#define BOX_START_ROW 3
+#define BOX_START_COL 2
 #define MIN_LINES  18
 #define MIN_COLS   64
 
-/* Fase lomba -> teks + warna info bawah. */
+static const char *menu_labels[MENU_ITEMS] = {
+    "Keluar",
+    "Pendaftaran Peserta",
+    "Input Tendangan dan Skor",
+    "Tampilkan Ranking",
+    "Cari Peserta",
+    "Rekapitulasi Lengkap"
+};
+
+static void resolve_status(int item, CompetitionStateKind state,
+                           const char **out_status, int *out_color) {
+    const char *aktif   = "[Aktif]";
+    const char *kunci   = "[Terkunci]";
+    const char *selesai = "[Selesai]";
+    switch (item) {
+        case 1:
+            if (state == STATE_INIT) { *out_status = aktif; *out_color = COLOR_SUCCESS; }
+            else { *out_status = selesai; *out_color = COLOR_WARNING; }
+            break;
+        case 2:
+            if (state == STATE_INIT) { *out_status = kunci; *out_color = COLOR_DIM; }
+            else if (state == STATE_COMPLETED) { *out_status = selesai; *out_color = COLOR_WARNING; }
+            else { *out_status = aktif; *out_color = COLOR_SUCCESS; }
+            break;
+        case 3: case 5:
+            if (state != STATE_COMPLETED) { *out_status = kunci; *out_color = COLOR_DIM; }
+            else { *out_status = aktif; *out_color = COLOR_SUCCESS; }
+            break;
+        case 4:
+            if (state == STATE_INIT) { *out_status = kunci; *out_color = COLOR_DIM; }
+            else { *out_status = aktif; *out_color = COLOR_SUCCESS; }
+            break;
+        default:
+            *out_status = ""; *out_color = COLOR_DIM; break;
+    }
+}
+
 static void resolve_state_text(CompetitionStateKind state,
                                const char **out_text, int *out_color) {
     switch (state) {
@@ -30,74 +61,77 @@ static void resolve_state_text(CompetitionStateKind state,
     }
 }
 
-/* Hitung badge status untuk satu item menu (1..5). */
-static void resolve_item_status(int item, CompetitionStateKind state,
-                                const char **out_status, int *out_color) {
-    const char *aktif   = "[Aktif]";
-    const char *kunci   = "[Terkunci]";
-    const char *selesai = "[Selesai]";
+static void draw_menu(DisplayPort *dp, int selected, CompetitionState *state) {
+    char buf[128];
+    dp->cls();
 
-    switch (item) {
-        case 1:
-            if (state == STATE_INIT)      { *out_status = aktif;   *out_color = COLOR_SUCCESS; }
-            else                          { *out_status = selesai; *out_color = COLOR_WARNING; }
-            break;
-        case 2:
-            if (state == STATE_INIT)          { *out_status = kunci;   *out_color = COLOR_DIM; }
-            else if (state == STATE_COMPLETED){ *out_status = selesai; *out_color = COLOR_WARNING; }
-            else                              { *out_status = aktif;   *out_color = COLOR_SUCCESS; }
-            break;
-        case 3:
-        case 5:
-            if (state != STATE_COMPLETED) { *out_status = kunci;   *out_color = COLOR_DIM; }
-            else                          { *out_status = aktif;   *out_color = COLOR_SUCCESS; }
-            break;
-        case 4:
-            if (state == STATE_INIT)      { *out_status = kunci;   *out_color = COLOR_DIM; }
-            else                          { *out_status = aktif;   *out_color = COLOR_SUCCESS; }
-            break;
-        default:
-            *out_status = ""; *out_color = COLOR_DIM; break;
-    }
-}
+    dp->print_centered_colored(0, UTF_DOUBLE_H_40, COLOR_DIM, 0);
+    dp->print_centered_colored(1, "    APLIKASI PERHITUNGAN PENALTI    ", COLOR_TITLE, 1);
+    dp->print_centered_colored(2, UTF_DOUBLE_H_40, COLOR_DIM, 0);
 
-/* Susun view model dari state lomba + pilihan. */
-static void build_menu_view(CompetitionState *state, int selected,
-                            MenuPageView *vm) {
-    static const char *labels[MENU_ITEMS] = {
-        "Keluar",
-        "Pendaftaran Peserta",
-        "Input Tendangan dan Skor",
-        "Tampilkan Ranking",
-        "Cari Peserta",
-        "Rekapitulasi Lengkap"
-    };
+    int gw = BOX_WIDTH;
+    dp->box(BOX_START_ROW, BOX_START_COL, gw, 14);
+    dp->separator(BOX_START_ROW + 1, BOX_START_COL, gw);
 
-    vm->selected = selected;
-    vm->participant_count = state->participant_count;
+    int col1_x = BOX_START_COL + 3;
+    int col2_x = BOX_START_COL + gw - 16;
+    int col2_width = 14;
+
+    dp->draw_colored(BOX_START_ROW + 2, col1_x, COLOR_INFO, 1, "MENU");
+    dp->draw_colored(BOX_START_ROW + 2, col2_x, COLOR_INFO, 1, "STATUS");
+    dp->separator(BOX_START_ROW + 3, BOX_START_COL, gw);
 
     int i;
-    for (i = 0; i < MENU_ITEMS; i++) {
-        vm->rows[i].label = labels[i];
-        vm->rows[i].selected = (i == selected);
+    for (i = 1; i <= 5; i++) {
+        int row = BOX_START_ROW + 3 + i;
+        int item_sel = (i == selected);
+        int item_color = item_sel ? COLOR_HIGHLIGHT : COLOR_MENU;
 
-        if (i == 0) {
-            /* Baris keluar: tidak punya badge status. */
-            vm->rows[i].status = "";
-            vm->rows[i].status_color = COLOR_DIM;
-        } else {
-            resolve_item_status(i, state->state,
-                                &vm->rows[i].status, &vm->rows[i].status_color);
+        if (item_sel) {
+            int j;
+            for (j = 1; j < gw - 1; j++)
+                dp->draw_at(row, BOX_START_COL + j, " ");
         }
+
+        snprintf(buf, sizeof buf, "  [%d]  %s", i, menu_labels[i]);
+        dp->draw_colored(row, col1_x, item_color, item_sel, buf);
+
+        const char *status = "";
+        int status_color = COLOR_DIM;
+        resolve_status(i, state->state, &status, &status_color);
+
+        snprintf(buf, sizeof buf, "%-*s", col2_width, status);
+        dp->draw_colored(row, col2_x, status_color, 0, buf);
     }
 
-    resolve_state_text(state->state, &vm->state_text, &vm->state_color);
-    /* participant_max diambil dari MAX_PARTICIPANTS (konstanta domain). */
-    vm->participant_max = MAX_PARTICIPANTS;
+    dp->separator(BOX_START_ROW + 9, BOX_START_COL, gw);
+
+    const char *state_text = "";
+    int state_color = COLOR_DIM;
+    resolve_state_text(state->state, &state_text, &state_color);
+    dp->draw_colored(BOX_START_ROW + 10, BOX_START_COL + 2, state_color, 0, state_text);
+
+    snprintf(buf, sizeof buf, "Peserta: %d/7", state->participant_count);
+    dp->draw_colored(BOX_START_ROW + 10, BOX_START_COL + 24, COLOR_MENU, 0, buf);
+
+    int exit_color = (0 == selected) ? COLOR_HIGHLIGHT : COLOR_ERROR;
+    dp->draw_colored(BOX_START_ROW + 10, BOX_START_COL + gw - 18, exit_color, 1, "  [0] Keluar  ");
+
+    dp->footer("[\xe2\x86\x91/\xe2\x86\x93] Navigasi  \xe2\x94\x82  [ENTER] Pilih  \xe2\x94\x82  [1-5] Shortcut  \xe2\x94\x82  [h] Bantuan");
+    dp->screen_refresh();
 }
 
-/* Tampilkan layar bantuan (page dumb). */
-static void show_help_screen(DisplayPort *dp) {
+static void draw_help(DisplayPort *dp) {
+    dp->cls();
+    dp->print_centered_colored(0, UTF_DOUBLE_H_40, COLOR_DIM, 0);
+    dp->print_centered_colored(1, "  PANDUAN PENGGUNAAN  ", COLOR_TITLE, 1);
+    dp->print_centered_colored(2, UTF_DOUBLE_H_40, COLOR_DIM, 0);
+
+    int box_col = 2;
+    dp->box(3, box_col, BOX_WIDTH, 18);
+    dp->separator(4, box_col, BOX_WIDTH);
+
+    dp->draw_colored(5, box_col + 2, COLOR_GOLD, 1, "ATURAN LOMBA:");
     const char *rules[] = {
         "- Jumlah peserta : 5 sampai 7 orang",
         "- Setiap peserta : 7 tendangan penalti",
@@ -106,22 +140,31 @@ static void show_help_screen(DisplayPort *dp) {
         "- Pemenang       : peserta dengan total skor tertinggi",
         NULL
     };
+    int ri;
+    for (ri = 0; rules[ri] != NULL; ri++)
+        dp->draw_colored(6 + ri, box_col + 4, COLOR_MENU, 0, rules[ri]);
+
+    dp->separator(11, box_col, BOX_WIDTH);
+
+    dp->draw_colored(12, box_col + 2, COLOR_GOLD, 1, "NAVIGASI:");
     const char *navs[] = {
-        "[Panah ↑/↓]  : Pindah pilihan menu",
+        "[Panah \xe2\x86\x91/\xe2\x86\x93]  : Pindah pilihan menu",
         "[1-5]        : Langsung pilih menu 1-5",
         "[ENTER]      : Konfirmasi pilihan",
         "[q / 0]      : Keluar dari aplikasi",
         "[h]          : Tampilkan layar bantuan ini",
         NULL
     };
-    int rc = 0, nc = 0, k;
-    for (k = 0; rules[k] != NULL; k++) rc++;
-    for (k = 0; navs[k] != NULL; k++) nc++;
-    menu_page_render_help(dp, rules, rc, navs, nc);
+    int ni;
+    for (ni = 0; navs[ni] != NULL; ni++)
+        dp->draw_colored(13 + ni, box_col + 4, COLOR_MENU, 0, navs[ni]);
+
+    dp->separator(18, box_col, BOX_WIDTH);
+    dp->footer("Tekan sembarang tombol untuk kembali ke menu");
+    dp->screen_refresh();
     dp->readkey();
 }
 
-/* Buka fitur terpilih bila fase lomba mengizinkan. */
 static void dispatch_feature(int selected, RegistrationAggregate *reg,
                              ScoringAggregate *sc, RankingAggregate *rk,
                              SearchAggregate *sr, RecapAggregate *rc,
@@ -145,7 +188,6 @@ static void dispatch_feature(int selected, RegistrationAggregate *reg,
     }
 }
 
-/* Loop menu utama. */
 int cli_surfaces_menu_run(RegistrationAggregate *reg,
                           ScoringAggregate *sc, RankingAggregate *rk,
                           SearchAggregate *sr, RecapAggregate *rc,
@@ -156,7 +198,6 @@ int cli_surfaces_menu_run(RegistrationAggregate *reg,
     int running = 1;
 
     while (running) {
-        /* Guard ukuran terminal. */
         int lines = dp->get_lines();
         int cols  = dp->get_cols();
         if (lines < MIN_LINES || cols < MIN_COLS) {
@@ -174,10 +215,7 @@ int cli_surfaces_menu_run(RegistrationAggregate *reg,
             continue;
         }
 
-        MenuPageView vm;
-        build_menu_view(state, selected, &vm);
-        menu_page_render(dp, &vm);
-
+        draw_menu(dp, selected, state);
         int key = dp->readkey();
 
         switch (key) {
@@ -189,27 +227,22 @@ int cli_surfaces_menu_run(RegistrationAggregate *reg,
                 selected++;
                 if (selected >= MENU_ITEMS) selected = 0;
                 break;
-
             case TUI_KEY_RESIZE:
-                break;  /* loop ulang, page pakai LINES/COLS baru */
-
+                break;
             case '1': selected = 1; goto do_enter;
             case '2': selected = 2; goto do_enter;
             case '3': selected = 3; goto do_enter;
             case '4': selected = 4; goto do_enter;
             case '5': selected = 5; goto do_enter;
-
             case TUI_KEY_ENTER:
             do_enter:
                 if (selected == 0) {
                     if (dp->confirm("Yakin ingin keluar?"))
                         running = 0;
                 } else {
-                    dispatch_feature(selected, reg, sc, rk, sr, rc,
-                                     state, dp, sn);
+                    dispatch_feature(selected, reg, sc, rk, sr, rc, state, dp, sn);
                 }
                 break;
-
             case TUI_KEY_ESC:
             case '0':
             case 'q':
@@ -217,10 +250,9 @@ int cli_surfaces_menu_run(RegistrationAggregate *reg,
                 if (dp->confirm("Yakin ingin keluar?"))
                     running = 0;
                 break;
-
             case 'h':
             case 'H':
-                show_help_screen(dp);
+                draw_help(dp);
                 break;
         }
     }
