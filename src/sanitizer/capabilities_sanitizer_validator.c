@@ -3,7 +3,7 @@
  * @brief Periksa keabsahan input teks & angka dari pengguna.
  */
 
-/* SANITIZER — Capabilities (Validation Logic) */
+/* SANITIZER — Capabilities (Logika Validasi) */
 #include "module.sanitizer.h"
 #include <ctype.h>
 #include <string.h>

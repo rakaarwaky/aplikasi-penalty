@@ -3,7 +3,7 @@
  * @brief Tulis hasil peringkat ke file teks berformat tabel.
  */
 
-/* EXPORT — Infrastructure Adapter (TXT file writer) */
+/* EXPORT — Adapter Infrastruktur (penulis file TXT) */
 #include "module.export.h"
 #include <stdio.h>
 #include <string.h>

@@ -2,20 +2,8 @@
 
 The **Agentic Engineering System (AES)** adalah pola arsitektur berlapis ketat, sangat terdekopling, dan dirancang untuk kejelasan navigasi Developer. Dokumen ini adalah **adaptasi C99** dari AES v3.0 — semua konsep ditulis dalam terminologi bahasa C.
 
-> **Bahasa Target:** C (C99). Tidak ada Rust, Python, atau TypeScript di proyek ini.
-> Semua contoh menggunakan ekstensi `.c` dan `.h`.
-
 ---
 
-## Terminologi
-
-| Term                        | Definisi                                                                                                     |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| **Workspace**         | Root direktori proyek yang berisi semua konfigurasi dan source.                                              |
-| **Feature directory** | Satu subdirektori di dalam`src/` yang mewakili satu fitur vertikal (mis. `registration/`, `scoring/`). |
-| **Member**            | Satu file C  yang mewakili satu unit layer dalam satu fitur.                                               |
-
----
 
 ## Pilar Utama dan Filosofi
 
@@ -32,22 +20,7 @@ Tidak seperti arsitektur tiga tier tradisional, **Capabilities** dan **Infrastru
 
 ### 3. Dependency Inversion di C
 
-Di C, dependency inversion dilakukan melalui **struct of function pointers** sebagai pengganti interface/trait:
-
-```c
-/* contract_scoring_port.h  — outbound interface (diimplementasikan oleh infrastructure) */
-typedef struct {
-    int (*save_score)(int participant_id, int score);
-    int (*load_score)(int participant_id, int *out_score);
-} ScoringPort;
-
-/* contract_scoring_protocol.h  — inbound interface (diimplementasikan oleh capabilities) */
-typedef struct {
-    int (*calculate_total)(const int kicks[7], int *out_total);
-} ScoringProtocol;
-```
-
-Layer di atasnya (agent/surface) hanya memegang pointer ke struct ini, **bukan** ke implementasi konkretnya. Perakitan (wiring) dilakukan di layer `root_*_container.c`.
+Di C, dependency inversion dilakukan melalui **struct of function pointers** sebagai pengganti interface/trait: Layer di atasnya (agent/surface) hanya memegang pointer ke struct ini, **bukan** ke implementasi konkretnya. Perakitan (wiring) dilakukan di layer `root_*_container.c`.
 
 ### 4. Filosofi Penamaan 3-Struktur (Layer Prefix + Konsep + Role Suffix)
 

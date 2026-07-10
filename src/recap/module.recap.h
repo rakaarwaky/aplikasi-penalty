@@ -1,12 +1,11 @@
-/* AES_BYPASS: module declaration (barrel) — 1 header per feature folder.
-   Kontrak (protocol/aggregate) ada di shared/module.shared.h.
+/* Deklarasi modul rekapitulasi — capabilities, agent, root.
    Recap meminjam RankingProtocol dari shared untuk urutan ranking. */
 #ifndef MODULE_RECAP_H
 #define MODULE_RECAP_H
 
 #include "shared/contract_recap_aggregate.h"
 
-/* CAPABILITIES — implementasi RecapProtocol: susun detail per peserta (pure) */
+/* CAPABILITIES — implementasi RecapProtocol: susun detail per peserta (murni) */
 RecapError capabilities_recap_prepare_details(const CompetitionState *state,
                                               SearchResultVO *details, int capacity);
 

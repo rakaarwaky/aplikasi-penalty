@@ -1,4 +1,4 @@
-/* LOG — Implementation */
+/* Implementasi logger — pengaturan level dan pencatatan pesan log. */
 #include "shared/taxonomy_logger.h"
 #include <stdio.h>
 #include <stdarg.h>

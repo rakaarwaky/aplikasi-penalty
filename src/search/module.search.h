@@ -1,12 +1,10 @@
-/* AES_BYPASS: module declaration (barrel) — 1 header per feature folder.
-   Kontrak (protocol/aggregate) ada di shared/module.shared.h.
-   File ini hanya deklarasi implementasi: capabilities, agent, root. */
+/* Deklarasi modul pencarian — capabilities, agent, root. */
 #ifndef MODULE_SEARCH_H
 #define MODULE_SEARCH_H
 
 #include "shared/contract_search_aggregate.h"
 
-/* CAPABILITIES — implementasi SearchProtocol (pure, tanpa I/O) */
+/* CAPABILITIES — implementasi SearchProtocol (murni, tanpa I/O) */
 SearchError capabilities_search_find(const CompetitionState *state,
                                      const ParticipantNameVO *name,
                                      SearchResultVO *out);

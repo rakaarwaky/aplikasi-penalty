@@ -1,10 +1,10 @@
-/*File ini hanya deklarasi implementasi: capabilities, agent, root. */
+/* Deklarasi modul ranking — capabilities, agent, root. */
 #ifndef MODULE_RANKING_H
 #define MODULE_RANKING_H
 
 #include "shared/contract_ranking_aggregate.h"
 
-/* CAPABILITIES — implementasi RankingProtocol (pure, tanpa I/O) */
+/* CAPABILITIES — implementasi RankingProtocol (murni, tanpa I/O) */
 RankingError capabilities_ranking_compute(const CompetitionState *state,
                                           RankingEntryVO *out, int capacity);
 

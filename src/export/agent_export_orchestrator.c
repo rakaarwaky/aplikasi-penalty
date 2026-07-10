@@ -3,7 +3,7 @@
  * @brief Ekspor hasil peringkat ke file melalui fungsi penulisan.
  */
 
-/* EXPORT — Agent Orchestrator */
+/* EXPORT — Agent Orkestrator */
 #include "module.export.h"
 
 /**

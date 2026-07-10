@@ -3,7 +3,7 @@
  * @brief Baca/tulis data lomba dari/ke file biner.
  */
 
-/* STORAGE — Infrastructure Adapter (file I/O) */
+/* STORAGE — Adapter Infrastruktur (file I/O) */
 #include "module.storage.h"
 #include <stdio.h>
 #include <string.h>

@@ -55,7 +55,7 @@ void cli_surfaces_recap_execute(RecapAggregate *agg, CompetitionState *state) {
 
     /* Header kolom. */
     attron(COLOR_PAIR(COLOR_HIGHLIGHT));
-    mvprintw(box_row + 1, box_col + 2, "%-4s %-24s %-6s %s", "Rank", "Nama", "Skor", "Zona(0 1 2 3 4 5)");
+    mvprintw(box_row + 1, box_col + 2, "%-4s %-24s %-6s %s", "No", "Nama", "Skor", "Zona(0 1 2 3 4 5)");
     attroff(COLOR_PAIR(COLOR_HIGHLIGHT));
 
     /* Garis pemisah header. */
