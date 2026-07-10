@@ -20,20 +20,26 @@ static size_t trim_spaces(char *str) {
     return len;
 }
 
-static int get_box_col(DisplayPort *dp) {
+static void get_box_dims(DisplayPort *dp, int *out_col, int *out_w) {
     int cols = dp->get_cols();
     int gw = cols - 4;
     if (gw > 64) gw = 64;
     if (gw < 40) gw = 40;
-    return (cols - gw) / 2;
+    *out_col = (cols - gw) / 2;
+    *out_w = gw;
 }
 
-static void show_error(DisplayPort *dp, const char *msg, int row, int box_col, int gw) {
+static void clear_row(DisplayPort *dp, int row, int col, int width) {
+    int i;
+    for (i = 0; i < width; i++) dp->draw_at(row, col + i, " ");
+}
+
+static void show_status(DisplayPort *dp, const char *msg, int color,
+                        int row, int box_col, int gw) {
+    clear_row(dp, row, box_col + 2, gw - 4);
     char buf[128];
-    int pad;
-    for (pad = 0; pad < gw - 4; pad++) dp->draw_at(row, box_col + 2 + pad, " ");
-    snprintf(buf, sizeof buf, "  [!] %s", msg);
-    dp->draw_colored(row, box_col + 2, COLOR_ERROR, 1, buf);
+    snprintf(buf, sizeof buf, "  %s", msg);
+    dp->draw_colored(row, box_col + 2, color, 1, buf);
 }
 
 void cli_surfaces_registration_execute(RegistrationAggregate *agg,
@@ -44,7 +50,8 @@ void cli_surfaces_registration_execute(RegistrationAggregate *agg,
 
     registration_page_draw(dp, state);
 
-    int box_col = get_box_col(dp);
+    int box_col, gw;
+    get_box_dims(dp, &box_col, &gw);
     int count = state->participant_count;
     int row = registration_page_input_row(count);
     int error_row = registration_page_error_row();
@@ -69,17 +76,15 @@ void cli_surfaces_registration_execute(RegistrationAggregate *agg,
 
         if (len == 0) {
             if (state->participant_count >= MIN_PARTICIPANTS) break;
-            if (state->participant_count == 0) {
-                if (dp->confirm("Kembali ke menu utama?"))
-                    return;
-            }
-            show_error(dp, "Minimal 5 peserta untuk melanjutkan!", error_row, box_col);
+            show_status(dp, "[!] Minimal 5 peserta untuk melanjutkan!",
+                        COLOR_ERROR, error_row, box_col, gw);
             dp->screen_refresh();
             continue;
         }
 
         if (sn != NULL && agent_sanitize_validate_string(sn, buffer, MAX_NAME_LENGTH) != SANITIZE_OK) {
-            show_error(dp, "Input nama tidak valid!", error_row, box_col);
+            show_status(dp, "[!] Input nama tidak valid!",
+                        COLOR_ERROR, error_row, box_col, gw);
             dp->screen_refresh();
             continue;
         }
@@ -91,20 +96,20 @@ void cli_surfaces_registration_execute(RegistrationAggregate *agg,
         RegistrationError e = agent_registration_add(agg, state, &name);
         if (e == REG_OK) {
             registration_page_draw(dp, state);
-            snprintf(buf, sizeof buf, "  [+] %s berhasil terdaftar!", name.value);
-            dp->draw_colored(error_row, box_col + 2, COLOR_SUCCESS, 1, buf);
+            snprintf(buf, sizeof buf, "[+] %s berhasil terdaftar!", name.value);
+            show_status(dp, buf, COLOR_SUCCESS, error_row, box_col, gw);
             dp->screen_refresh();
         } else {
-            const char *emsg = "Kesalahan pendaftaran!";
+            const char *emsg = "[!] Kesalahan pendaftaran!";
             switch (e) {
-                case REG_NAME_EMPTY:        emsg = "Nama tidak boleh kosong!"; break;
-                case REG_NAME_TOO_LONG:     emsg = "Nama maksimal 30 karakter!"; break;
-                case REG_NAME_INVALID_CHAR: emsg = "Nama hanya boleh huruf dan spasi!"; break;
-                case REG_NAME_DUPLICATE:    emsg = "Nama sudah terdaftar!"; break;
-                case REG_FULL:              emsg = "Kuota peserta penuh!"; break;
+                case REG_NAME_EMPTY:        emsg = "[!] Nama tidak boleh kosong!"; break;
+                case REG_NAME_TOO_LONG:     emsg = "[!] Nama maksimal 30 karakter!"; break;
+                case REG_NAME_INVALID_CHAR: emsg = "[!] Nama hanya boleh huruf dan spasi!"; break;
+                case REG_NAME_DUPLICATE:    emsg = "[!] Nama sudah terdaftar!"; break;
+                case REG_FULL:              emsg = "[!] Kuota peserta penuh!"; break;
                 default: break;
             }
-            show_error(dp, emsg, error_row, box_col);
+            show_status(dp, emsg, COLOR_ERROR, error_row, box_col, gw);
             dp->screen_refresh();
         }
     }
@@ -113,8 +118,8 @@ void cli_surfaces_registration_execute(RegistrationAggregate *agg,
     int final_count = state->participant_count;
     int final_error_row = registration_page_error_row();
 
-    snprintf(buf, sizeof buf, "Total peserta: %d", final_count);
-    dp->draw_colored(final_error_row, box_col + 2, COLOR_SUCCESS, 1, buf);
+    snprintf(buf, sizeof buf, "[+] Total peserta: %d", final_count);
+    show_status(dp, buf, COLOR_SUCCESS, final_error_row, box_col, gw);
 
     dp->footer("[ENTER] Lanjut  \xe2\x94\x82  [q] Kembali");
     dp->screen_refresh();

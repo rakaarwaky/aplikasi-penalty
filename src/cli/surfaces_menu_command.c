@@ -187,6 +187,14 @@ static void draw_help(DisplayPort *dp) {
     dp->readkey();
 }
 
+static void show_locked_message(DisplayPort *dp, const char *msg) {
+    dp->cls();
+    dp->print_centered_colored(10, msg, COLOR_WARNING, 1);
+    dp->footer("[ENTER] Kembali ke menu");
+    dp->screen_refresh();
+    dp->readkey();
+}
+
 static void dispatch_feature(int selected, RegistrationAggregate *reg,
                              ScoringAggregate *sc, RankingAggregate *rk,
                              SearchAggregate *sr, RecapAggregate *rc,
@@ -195,18 +203,30 @@ static void dispatch_feature(int selected, RegistrationAggregate *reg,
     if (selected == 1) {
         if (state->state == STATE_INIT || state->state == STATE_REGISTERED)
             cli_surfaces_registration_execute(reg, state, dp, sn);
+        else
+            show_locked_message(dp, "[INFO] Pendaftaran sudah selesai.");
     } else if (selected == 2) {
         if (state->state == STATE_REGISTERED)
             cli_surfaces_scoring_execute(sc, state, dp, sn);
+        else if (state->state == STATE_INIT)
+            show_locked_message(dp, "[INFO] Daftar peserta dulu (Menu 1).");
+        else
+            show_locked_message(dp, "[INFO] Semua tendangan sudah selesai.");
     } else if (selected == 3) {
         if (state->state == STATE_COMPLETED)
             cli_surfaces_ranking_execute(rk, state, dp);
+        else
+            show_locked_message(dp, "[INFO] Ranking terkunci. Selesaikan tendangan semua peserta dulu.");
     } else if (selected == 4) {
         if (state->state == STATE_REGISTERED || state->state == STATE_COMPLETED)
             cli_surfaces_search_execute(sr, state, dp);
+        else
+            show_locked_message(dp, "[INFO] Belum ada peserta. Daftar dulu (Menu 1).");
     } else if (selected == 5) {
         if (state->state == STATE_COMPLETED)
             cli_surfaces_recap_execute(rc, state, dp);
+        else
+            show_locked_message(dp, "[INFO] Rekap terkunci. Selesaikan tendangan semua peserta dulu.");
     }
 }
 
