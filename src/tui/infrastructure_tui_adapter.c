@@ -1,10 +1,6 @@
 /**
  * @file infrastructure_tui_adapter.c
- * @brief Infrastructure: pembungkus ncurses untuk semua I/O layar (AES404-style wrapper).
- *
- * Semua fungsi di sini murni pembungkus (wrapper) panggilan ncurses;
- * ia tidak memegang logika bisnis — hanya gambar/beri input. Dipakai
- * oleh layer surfaces (cli) agar surfaces tetap bebas dari detil ncurses.
+ * @brief Pembungkus ncurses untuk menggambar layar & membaca tombol.
  */
 
 #include "infrastructure_tui_adapter.h"
@@ -16,11 +12,7 @@
 #endif
 #include <string.h>
 
-/* ──────────────────────────────────────────────
- * Inisialisasi ncurses: raw mode (cbreak), no echo,
- * keypad aktif, cursor disembunyikan, lalu daftarkan
- * 6 pasang warna (pair) bila terminal mendukung.
- * ────────────────────────────────────────────── */
+/* Hidupkan moda ncurses & daftarkan 6 pasang warna. */
 void tui_init(void) {
     initscr();
     cbreak();
@@ -39,23 +31,23 @@ void tui_init(void) {
     }
 }
 
-/* Bebaskan layar ncurses (wajib sebelum keluar). */
+/* Matikan moda ncurses (wajib sebelum keluar). */
 void tui_end(void) {
     endwin();
 }
 
-/* Bersihkan seluruh layar. */
+/* Bersihkan layar. */
 void tui_clear(void) {
     clear();
 }
 
-/* Cetak teks di (row, col) — aman bila text NULL. */
+/* Tulis teks di posisi (baris, kolom). */
 void tui_print(int row, int col, const char *text) {
     if (text == NULL) return;
     mvprintw(row, col, "%s", text);
 }
 
-/* Cetak teks di tengah baris row (berdasar lebar layar COLS). */
+/* Tulis teks di tengah baris. */
 void tui_print_centered(int row, const char *text) {
     if (text == NULL) return;
     int len = (int)strlen(text);
@@ -64,7 +56,7 @@ void tui_print_centered(int row, const char *text) {
     mvprintw(row, col, "%s", text);
 }
 
-/* Gambar kotak berbingkai ACS di (row,col) ukuran width x height. */
+/* Gambar kotak berbingkai di posisi & ukuran tertentu. */
 void tui_box(int row, int col, int width, int height) {
     if (width < 2 || height < 2) return;
     int i;
@@ -75,7 +67,7 @@ void tui_box(int row, int col, int width, int height) {
     for (i = 1; i < width - 1; i++) mvaddch(row, col + i, ACS_HLINE);
     mvaddch(row, col + width - 1, ACS_URCORNER);
 
-    /* Bingkai sisi kiri/kanan. */
+    /* Bingkai sisi. */
     for (i = 1; i < height - 1; i++) {
         mvaddch(row + i, col, ACS_VLINE);
         mvaddch(row + i, col + width - 1, ACS_VLINE);
@@ -90,7 +82,7 @@ void tui_box(int row, int col, int width, int height) {
     attroff(COLOR_PAIR(COLOR_BORDER));
 }
 
-/* Baris terpilih: latar cyan + teks (highlight). */
+/* Baris terpilih: latar terang + teks. */
 void tui_highlight_row(int row, int col, int width, const char *text) {
     if (text == NULL || width < 2) return;
     int i;
@@ -100,7 +92,7 @@ void tui_highlight_row(int row, int col, int width, const char *text) {
     attroff(COLOR_PAIR(COLOR_HIGHLIGHT));
 }
 
-/* Baris biasa: latar default + teks (menu). */
+/* Baris biasa: latar default + teks. */
 void tui_normal_row(int row, int col, int width, const char *text) {
     if (text == NULL || width < 2) return;
     int i;
@@ -110,7 +102,7 @@ void tui_normal_row(int row, int col, int width, const char *text) {
     attroff(COLOR_PAIR(COLOR_MENU));
 }
 
-/* Baca satu tombol dari pengguna (ncurses getch). */
+/* Baca satu tombol dari pengguna. */
 int tui_getch(void) {
     return getch();
 }

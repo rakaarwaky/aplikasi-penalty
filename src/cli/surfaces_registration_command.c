@@ -1,6 +1,6 @@
 /**
  * @file surfaces_registration_command.c
- * @brief Surface: layar pendaftaran peserta (I/O ncurses + delegasi ke agent).
+ * @brief Layar pendaftaran: baca nama peserta & simpan ke data lomba.
  */
 
 #include "cli/module.cli.h"
@@ -10,10 +10,7 @@
 #include <string.h>
 #include <ctype.h>
 
-/* ──────────────────────────────────────────────
- * Pangkas spasi di awal & akhir string (in-place).
- * Mengembalikan panjang string setelah dipangkas.
- * ────────────────────────────────────────────── */
+/* Buang spasi di awal & akhir teks (ubah di tempat). */
 static size_t trim_spaces(char *str) {
     if (str == NULL) return 0;
     char *start = str;
@@ -24,11 +21,7 @@ static size_t trim_spaces(char *str) {
     return len;
 }
 
-/* ──────────────────────────────────────────────
- * Petakan RegistrationError -> pesan ramah pengguna,
- * lalu tampilkan dengan warna ERROR. Dipakai utk
- * semua kegagalan pendaftaran.
- * ────────────────────────────────────────────── */
+/* Tampilkan pesan error pendaftaran yang sesuai dengan kode error. */
 static void show_error(RegistrationError e) {
     const char *msg;
     switch (e) {
@@ -46,16 +39,15 @@ static void show_error(RegistrationError e) {
 }
 
 /**
- * Layar pendaftaran: loop baca nama dari pengguna, delegasikan
- * ke agent_registration_add(), tampilkan hasil/error. Kosongkan nama
- * & Enter = selesai (bila sudah >= MIN_PARTICIPANTS).
+ * Layar pendaftaran: ulang baca nama, simpan bila sah, tampilkan
+ * hasil/error. Kosongkan nama & Enter = selesai (bila >= 5 peserta).
  */
 void cli_surfaces_registration_execute(RegistrationAggregate *agg, CompetitionState *state) {
     if (agg == NULL || state == NULL) return;
 
     tui_clear();
 
-    /* Judul + bingkai + info kuota & daftar terdaftar. */
+    /* Judul, bingkai, info kuota & daftar terdaftar. */
     attron(COLOR_PAIR(COLOR_TITLE) | A_BOLD);
     tui_print_centered(1, "PENDAFTARAN PESERTA");
     attroff(COLOR_PAIR(COLOR_TITLE) | A_BOLD);
@@ -68,7 +60,7 @@ void cli_surfaces_registration_execute(RegistrationAggregate *agg, CompetitionSt
     mvprintw(6, 4, "Peserta terdaftar: %d", state->participant_count);
     attroff(COLOR_PAIR(COLOR_MENU));
 
-    /* Tampilkan daftar peserta yang sudah terdaftar. */
+    /* Tampilkan peserta yang sudah terdaftar. */
     int i;
     for (i = 0; i < state->participant_count; i++) {
         attron(COLOR_PAIR(COLOR_SUCCESS));
@@ -78,7 +70,7 @@ void cli_surfaces_registration_execute(RegistrationAggregate *agg, CompetitionSt
 
     refresh();
 
-    /* Baris input berikutnya (di bawah daftar). */
+    /* Baris input berikutnya. */
     int row = 8 + state->participant_count + 1;
     char buffer[64];
     while (state->participant_count < MAX_PARTICIPANTS) {
@@ -87,7 +79,7 @@ void cli_surfaces_registration_execute(RegistrationAggregate *agg, CompetitionSt
         attroff(COLOR_PAIR(COLOR_MENU));
         refresh();
 
-        /* Aktifkan echo & cursor untuk input teks. */
+        /* Nyalakan echo & kursor untuk mengetik. */
         echo();
         curs_set(1);
         memset(buffer, 0, sizeof buffer);
@@ -95,7 +87,7 @@ void cli_surfaces_registration_execute(RegistrationAggregate *agg, CompetitionSt
         curs_set(0);
         noecho();
 
-        /* Buang newline/CR sisa getnstr. */
+        /* Buang newline sisa. */
         size_t len = strlen(buffer);
         while (len > 0 && (buffer[len - 1] == '\n' || buffer[len - 1] == '\r'))
             buffer[--len] = '\0';
@@ -103,7 +95,7 @@ void cli_surfaces_registration_execute(RegistrationAggregate *agg, CompetitionSt
         trim_spaces(buffer);
         len = strlen(buffer);
 
-        /* Input kosong = selesai (bila quota minimal tercapai). */
+        /* Kosong = selesai (bila sudah cukup peserta). */
         if (len == 0) {
             if (state->participant_count >= MIN_PARTICIPANTS) break;
             show_error(REG_TOO_FEW);
@@ -111,7 +103,7 @@ void cli_surfaces_registration_execute(RegistrationAggregate *agg, CompetitionSt
             continue;
         }
 
-        /* Salin ke VO lalu delegasikan ke agent (validasi+append). */
+        /* Salin ke struct nama lalu simpan. */
         ParticipantNameVO name;
         strncpy(name.value, buffer, MAX_NAME_LENGTH);
         name.value[MAX_NAME_LENGTH] = '\0';
@@ -128,7 +120,7 @@ void cli_surfaces_registration_execute(RegistrationAggregate *agg, CompetitionSt
         refresh();
     }
 
-    /* Penutup layar pendaftaran. */
+    /* Penutup. */
     attron(COLOR_PAIR(COLOR_MENU));
     mvprintw(22, 4, "Total peserta: %d. Tekan Enter untuk kembali.", state->participant_count);
     attroff(COLOR_PAIR(COLOR_MENU));

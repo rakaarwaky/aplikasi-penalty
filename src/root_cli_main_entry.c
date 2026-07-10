@@ -1,6 +1,6 @@
 /**
  * @file root_cli_main_entry.c
- * @brief Entry point aplikasi: bootstrap state, rakit aggregate, jalankan menu, cleanup.
+ * @brief Titik mulai program: siapkan data, jalankan menu, bersihkan layar.
  */
 
 #include "cli/module.cli.h"
@@ -9,7 +9,7 @@
 #include <signal.h>
 #include <stdlib.h>
 
-/* Handler SIGINT/SIGTERM: bebaskan ncurses lalu keluar bersih. */
+/* Bila program dihentikan mendadak, matikan moda ncurses dulu. */
 static void cleanup_handler(int sig) {
     (void)sig;
     tui_end();
@@ -17,29 +17,28 @@ static void cleanup_handler(int sig) {
 }
 
 int main(void) {
-    /* Tangani sinyal agar terminal tidak tinggal di mode ncurses. */
+    /* Tangani tombol interupsi agar terminal kembali normal. */
     signal(SIGINT, cleanup_handler);
     signal(SIGTERM, cleanup_handler);
 
-    /* State tunggal aplikasi — dialokasikan di stack (tanpa global). */
+    /* Satu-satunya data lomba (disimpan di sini, bukan global). */
     CompetitionState state;
     state.participant_count = 0;
     state.state = STATE_INIT;
 
-    /* Rakit seluruh aggregate lewat masing-masing root container.
-       Recap menerima RankingProtocol (pinjaman antar-fitur). */
+    /* Siapkan seluruh fitur (pendaftaran, scoring, ranking, dll). */
     RegistrationAggregate reg = root_registration_build();
     ScoringAggregate sc = root_scoring_build();
     RankingAggregate rk = root_ranking_build();
     SearchAggregate sr = root_search_build();
     RecapAggregate rc = root_recap_build(rk.protocol);
 
-    /* Hidupkan mode ncurses, lalu masuk ke menu utama (TUI loop). */
+    /* Hidupkan layar ncurses lalu tampilkan menu utama. */
     tui_init();
     cli_surfaces_menu_run(&reg, &sc, &rk, &sr, &rc, &state);
     tui_end();
 
-    /* Pesan penutup di terminal biasa (mode ncurses sudah mati). */
+    /* Pesan penutup di terminal biasa. */
     printf("\nTekan Enter untuk keluar...");
     fflush(stdout);
     getchar();
