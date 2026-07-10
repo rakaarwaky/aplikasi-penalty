@@ -90,7 +90,7 @@ static void test_export_adapter_edges(void) {
 
 /* ── Sanitizer: edge int (negatif & kosong) ── */
 static void test_sanitizer_int_edge(void) {
-    assert(sanitizer_validate_int("-5", 0, 10) == SANITIZE_ERROR_TOO_LONG);
+    assert(sanitizer_validate_int("-5", 0, 10) == SANITIZE_ERROR_OUT_OF_RANGE);
     assert(sanitizer_validate_int("", 0, 10) == SANITIZE_ERROR_INVALID_CHARS);
     printf("  [PASS] test_sanitizer_int_edge\n");
 }

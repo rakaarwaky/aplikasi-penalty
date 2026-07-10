@@ -47,7 +47,7 @@ static void test_validate_int_out_of_range(void) {
    Tanpa test ini, mutasi "val < min" -> "val <= min" lolos (survivor). */
 static void test_validate_int_boundary_min(void) {
     assert(sanitizer_validate_int("0", 0, 10) == SANITIZE_OK);
-    assert(sanitizer_validate_int("-1", 0, 10) == SANITIZE_ERROR_TOO_LONG);
+    assert(sanitizer_validate_int("-1", 0, 10) == SANITIZE_ERROR_OUT_OF_RANGE);
     printf("  [PASS] test_validate_int_boundary_min\n");
 }
 
