@@ -32,6 +32,11 @@
 
 /* ── Batas UI ── */
 #define TUI_BAR_WIDTH   26
+#define BOX_ROW         4
+#define BOX_WIDTH_MIN   40
+#define BOX_WIDTH_MAX   64
+#define BOX_WIDTH_RANKING 70
+#define BOX_WIDTH_RECAP   72
 
 /* ── Box Drawing Characters (UTF-8 escape sequences) ── */
 /* ═══════════════════════════════ (32 chars) */
