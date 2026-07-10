@@ -16,10 +16,10 @@ void cli_surfaces_ranking_execute(RankingAggregate *agg, CompetitionState *state
     char buf[128];
     if (agg == NULL || state == NULL) return;
     if (state->state != STATE_COMPLETED) {
-        dp->clear();
+        dp->cls();
         dp->print_centered_colored(10, "[GAGAL] Tendangan belum selesai.", COLOR_ERROR, 1);
         dp->screen_refresh();
-        dp->getch();
+        dp->readkey();
         return;
     }
 
@@ -27,14 +27,14 @@ void cli_surfaces_ranking_execute(RankingAggregate *agg, CompetitionState *state
     RankingEntryVO entries[MAX_PARTICIPANTS];
     RankingError e = agent_ranking_compute(agg, state, entries, MAX_PARTICIPANTS);
     if (e != RK_OK) {
-        dp->clear();
+        dp->cls();
         dp->print_centered_colored(10, "[GAGAL] Ranking belum siap.", COLOR_ERROR, 1);
         dp->screen_refresh();
-        dp->getch();
+        dp->readkey();
         return;
     }
 
-    dp->clear();
+    dp->cls();
 
     /* Breadcrumb */
     dp->print_centered_colored(0, "Menu Utama > Ranking Peserta", COLOR_DIM, 0);
@@ -156,5 +156,5 @@ void cli_surfaces_ranking_execute(RankingAggregate *agg, CompetitionState *state
 
     dp->footer("[ENTER] Kembali ke menu");
     dp->screen_refresh();
-    dp->getch();
+    dp->readkey();
 }

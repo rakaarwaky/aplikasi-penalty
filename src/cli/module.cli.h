@@ -17,6 +17,9 @@
 #include "recap/module.recap.h"
 #include "storage/module.storage.h"
 
+/* Factory DisplayPort (wiring dari root layer). */
+DisplayPort root_display_build(void);
+
 /* Loop menu utama. */
 int cli_surfaces_menu_run(RegistrationAggregate *reg,
                           ScoringAggregate *sc, RankingAggregate *rk,

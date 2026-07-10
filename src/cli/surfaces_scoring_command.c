@@ -4,7 +4,6 @@
  */
 
 #include "cli/module.cli.h"
-#include "tui/infrastructure_tui_adapter.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -15,19 +14,15 @@
 #define BOX_ROW 3
 #define BOX_COL 2
 
-static ScoringError read_zone(int row, int col, ZoneVO *out, char *raw_out, size_t raw_size) {
+/* Baca zona dari input pengguna; kembalikan SC_OK atau SC_INVALID_ZONE. */
+static ScoringError read_zone(ZoneVO *out, char *raw_out, size_t raw_size) {
+    extern void tui_input_string(int row, int col, char *buf, int maxlen);
     char buf[32];
-    echo();
-    curs_set(1);
-    memset(buf, 0, sizeof buf);
-    mvgetnstr(row, col, buf, 10);
-    curs_set(0);
-    noecho();
+    /* Posisi -1 berarti gunakan kursor saat ini */
+    tui_input_string(-1, -1, buf, 10);
 
-    /* Simpan input mentah untuk pesan error */
-    if (raw_out != NULL && raw_size > 0) {
+    if (raw_out != NULL && raw_size > 0)
         snprintf(raw_out, raw_size, "%s", buf);
-    }
 
     int i = 0;
     while (buf[i] != '\0' && buf[i] != '\n') {
@@ -40,35 +35,31 @@ static ScoringError read_zone(int row, int col, ZoneVO *out, char *raw_out, size
     return SC_OK;
 }
 
-static void draw_scoring_screen(ParticipantEntity *part, const char *msg, int msg_is_error) {
+static void draw_scoring_screen(DisplayPort *dp, ParticipantEntity *part,
+                                const char *msg, int msg_is_error) {
+    char buf[128];
     /* A3: Hanya clear bila bukan pesan error, agar tidak flicker saat validasi zona. */
-    if (!msg_is_error) tui_clear();
+    if (!msg_is_error) dp->cls();
 
     /* Breadcrumb */
-    tui_print_centered_colored(0, "Menu Utama > Input Tendangan", COLOR_DIM, 0);
-    tui_print_centered_colored(1, "INPUT TENDANGAN DAN SKOR", COLOR_TITLE, 1);
-    tui_box(BOX_ROW, BOX_COL, BOX_WIDTH, BOX_HEIGHT);
-    tui_separator(BOX_ROW + 1, BOX_COL, BOX_WIDTH);
+    dp->print_centered_colored(0, "Menu Utama > Input Tendangan", COLOR_DIM, 0);
+    dp->print_centered_colored(1, "INPUT TENDANGAN DAN SKOR", COLOR_TITLE, 1);
+    dp->box(BOX_ROW, BOX_COL, BOX_WIDTH, BOX_HEIGHT);
+    dp->separator(BOX_ROW + 1, BOX_COL, BOX_WIDTH);
 
-    attron(COLOR_PAIR(COLOR_GOLD) | A_BOLD);
-    mvprintw(BOX_ROW + 2, BOX_COL + 2, "Peserta: %s", part->name.value);
-    attroff(COLOR_PAIR(COLOR_GOLD) | A_BOLD);
+    snprintf(buf, sizeof buf, "Peserta: %s", part->name.value);
+    dp->draw_colored(BOX_ROW + 2, BOX_COL + 2, COLOR_GOLD, 1, buf);
 
     int kick_pct = (part->kick_count * 100) / TOTAL_KICKS;
-    attron(COLOR_PAIR(COLOR_MENU));
-    mvprintw(BOX_ROW + 3, BOX_COL + 2, "Tendangan %d/%d: ", part->kick_count, TOTAL_KICKS);
-    attroff(COLOR_PAIR(COLOR_MENU));
-    tui_progress_bar(BOX_ROW + 3, BOX_COL + 18, 20, kick_pct, COLOR_SUCCESS);
+    snprintf(buf, sizeof buf, "Tendangan %d/%d: ", part->kick_count, TOTAL_KICKS);
+    dp->draw_colored(BOX_ROW + 3, BOX_COL + 2, COLOR_MENU, 0, buf);
+    dp->progress_bar(BOX_ROW + 3, BOX_COL + 18, 20, kick_pct, COLOR_SUCCESS);
 
-    attron(COLOR_PAIR(COLOR_WARNING) | A_BOLD);
-    mvprintw(BOX_ROW + 4, BOX_COL + 2, "Skor sementara: %d poin", part->total_score);
-    attroff(COLOR_PAIR(COLOR_WARNING) | A_BOLD);
+    snprintf(buf, sizeof buf, "Skor sementara: %d poin", part->total_score);
+    dp->draw_colored(BOX_ROW + 4, BOX_COL + 2, COLOR_WARNING, 1, buf);
 
-    tui_separator(BOX_ROW + 5, BOX_COL, BOX_WIDTH);
-
-    attron(COLOR_PAIR(COLOR_MENU));
-    mvprintw(BOX_ROW + 6, BOX_COL + 2, "Riwayat tendangan:");
-    attroff(COLOR_PAIR(COLOR_MENU));
+    dp->separator(BOX_ROW + 5, BOX_COL, BOX_WIDTH);
+    dp->draw_colored(BOX_ROW + 6, BOX_COL + 2, COLOR_MENU, 0, "Riwayat tendangan:");
 
     int k;
     for (k = 0; k < TOTAL_KICKS; k++) {
@@ -81,57 +72,49 @@ static void draw_scoring_screen(ParticipantEntity *part, const char *msg, int ms
             if (zone >= 4) color = COLOR_SUCCESS;
             else if (zone >= 2) color = COLOR_WARNING;
             else if (zone == 0) color = COLOR_ERROR;
-
-            attron(COLOR_PAIR(color) | A_BOLD);
-            mvprintw(cy, cx, "Z%d ", zone);
-            attroff(COLOR_PAIR(color) | A_BOLD);
+            snprintf(buf, sizeof buf, "Z%d ", zone);
+            dp->draw_colored(cy, cx, color, 1, buf);
         } else if (k == part->kick_count) {
-            attron(COLOR_PAIR(COLOR_INFO) | A_BOLD);
-            mvprintw(cy, cx, " -> ");
-            attroff(COLOR_PAIR(COLOR_INFO) | A_BOLD);
+            dp->draw_colored(cy, cx, COLOR_INFO, 1, " -> ");
         } else {
-            attron(COLOR_PAIR(COLOR_DIM));
-            mvprintw(cy, cx, " . ");
-            attroff(COLOR_PAIR(COLOR_DIM));
+            dp->draw_colored(cy, cx, COLOR_DIM, 0, " . ");
         }
     }
 
-    tui_separator(BOX_ROW + 9, BOX_COL, BOX_WIDTH);
+    dp->separator(BOX_ROW + 9, BOX_COL, BOX_WIDTH);
+    dp->draw_colored(BOX_ROW + 10, BOX_COL + 2, COLOR_DIM, 0,
+                     "Zona: 0=Miss 1=Mudah 2=Sedang 3=Sulit 4=SkSlt 5=Top");
 
-    attron(COLOR_PAIR(COLOR_DIM));
-    mvprintw(BOX_ROW + 10, BOX_COL + 2, "Zona: 0=Miss 1=Mudah 2=Sedang 3=Sulit 4=SkSlt 5=Top");
-    attroff(COLOR_PAIR(COLOR_DIM));
-
-    attron(COLOR_PAIR(COLOR_INFO) | A_BOLD);
-    mvprintw(BOX_ROW + 11, BOX_COL + 2, "Masukkan zona (0-%d, contoh: 5): ", MAX_ZONE);
-    attroff(COLOR_PAIR(COLOR_INFO) | A_BOLD);
+    snprintf(buf, sizeof buf, "Masukkan zona (0-%d, contoh: 5): ", MAX_ZONE);
+    dp->draw_colored(BOX_ROW + 11, BOX_COL + 2, COLOR_INFO, 1, buf);
 
     if (msg != NULL && msg[0] != '\0') {
         int msg_color = msg_is_error ? COLOR_ERROR : COLOR_SUCCESS;
-        attron(COLOR_PAIR(msg_color) | A_BOLD);
-        mvprintw(BOX_ROW + BOX_HEIGHT - 2, BOX_COL + 2, "%s", msg);
-        attroff(COLOR_PAIR(msg_color) | A_BOLD);
+        dp->draw_colored(BOX_ROW + BOX_HEIGHT - 2, BOX_COL + 2, msg_color, 1, msg);
     }
 
-    refresh();
+    dp->screen_refresh();
 }
 
-void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state) {
+void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state,
+                                  DisplayPort *dp) {
+    char buf[128];
     if (agg == NULL || state == NULL) return;
 
     if (state->state == STATE_INIT) {
-        tui_clear();
-        tui_print_centered_colored(10, "[GAGAL] Daftar peserta dulu (Menu 1).", COLOR_ERROR, 1);
-        refresh();
-        tui_getch();
+        dp->cls();
+        dp->print_centered_colored(10, "[GAGAL] Daftar peserta dulu (Menu 1).", COLOR_ERROR, 1);
+        dp->screen_refresh();
+        dp->readkey();
         return;
     }
 
     if (state->state == STATE_COMPLETED) {
-        tui_clear();
-        tui_print_centered_colored(10, "[INFO] Semua peserta sudah selesai melakukan tendangan.", COLOR_SUCCESS, 1);
-        refresh();
-        tui_getch();
+        dp->cls();
+        dp->print_centered_colored(10, "[INFO] Semua peserta sudah selesai melakukan tendangan.",
+                                   COLOR_SUCCESS, 1);
+        dp->screen_refresh();
+        dp->readkey();
         return;
     }
 
@@ -139,64 +122,57 @@ void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state
     for (p = 0; p < state->participant_count; p++) {
         ParticipantEntity *part = &state->participants[p];
         while (part->kick_count < TOTAL_KICKS) {
-            draw_scoring_screen(part, NULL, 0);
+            draw_scoring_screen(dp, part, NULL, 0);
 
             ZoneVO z;
             char raw[32] = "";
-            if (read_zone(BOX_ROW + 11, BOX_COL + 30, &z, raw, sizeof raw) != SC_OK || z.value < MIN_ZONE || z.value > MAX_ZONE) {
-                /* Tampilkan error di baris feedback saja, tanpa clear layar. */
-                char err_msg[96];
-                snprintf(err_msg, sizeof err_msg,
+            if (read_zone(&z, raw, sizeof raw) != SC_OK ||
+                z.value < MIN_ZONE || z.value > MAX_ZONE) {
+                snprintf(buf, sizeof buf,
                          "[GAGAL] Zona harus %d-%d. Input: '%s'.", MIN_ZONE, MAX_ZONE, raw);
-                attron(COLOR_PAIR(COLOR_ERROR) | A_BOLD);
-                mvprintw(BOX_ROW + BOX_HEIGHT - 2, BOX_COL + 2, "%s", err_msg);
-                attroff(COLOR_PAIR(COLOR_ERROR) | A_BOLD);
-                refresh();
-                tui_getch();
+                dp->draw_colored(BOX_ROW + BOX_HEIGHT - 2, BOX_COL + 2, COLOR_ERROR, 1, buf);
+                dp->screen_refresh();
+                dp->readkey();
                 continue;
             }
 
             ScoringError e = agent_scoring_record(agg, state, p, z);
             if (e == SC_OK) {
-                char ok_msg[64];
-                snprintf(ok_msg, sizeof ok_msg, "[OK] Zona %d -> %d poin", z.value, z.value);
-                draw_scoring_screen(part, ok_msg, 0);
+                snprintf(buf, sizeof buf, "[OK] Zona %d -> %d poin", z.value, z.value);
+                draw_scoring_screen(dp, part, buf, 0);
             } else if (e == SC_INVALID_ZONE) {
-                char err_msg[96];
-                snprintf(err_msg, sizeof err_msg, "[GAGAL] Zona harus %d-%d. Anda memasukkan '%s'.", MIN_ZONE, MAX_ZONE, raw);
-                draw_scoring_screen(part, err_msg, 1);
+                snprintf(buf, sizeof buf, "[GAGAL] Zona harus %d-%d. Anda memasukkan '%s'.",
+                         MIN_ZONE, MAX_ZONE, raw);
+                draw_scoring_screen(dp, part, buf, 1);
             } else {
-                draw_scoring_screen(part, "[GAGAL] Kesalahan pencatatan!", 1);
+                draw_scoring_screen(dp, part, "[GAGAL] Kesalahan pencatatan!", 1);
             }
-            refresh();
-            tui_getch();
+            dp->screen_refresh();
+            dp->readkey();
         }
 
-        tui_clear();
-        tui_print_centered_colored(4, "[SELESAI]", COLOR_SUCCESS, 1);
+        dp->cls();
+        dp->print_centered_colored(4, "[SELESAI]", COLOR_SUCCESS, 1);
+        dp->box(6, BOX_COL, BOX_WIDTH, 6);
 
-        tui_box(6, BOX_COL, BOX_WIDTH, 6);
+        snprintf(buf, sizeof buf, "Peserta: %s", part->name.value);
+        dp->draw_colored(8, BOX_COL + 4, COLOR_GOLD, 1, buf);
 
-        attron(COLOR_PAIR(COLOR_GOLD) | A_BOLD);
-        mvprintw(8, BOX_COL + 4, "Peserta: %s", part->name.value);
-        attroff(COLOR_PAIR(COLOR_GOLD) | A_BOLD);
+        snprintf(buf, sizeof buf, "Total Skor: %d poin", part->total_score);
+        dp->draw_colored(9, BOX_COL + 4, COLOR_SUCCESS, 1, buf);
 
-        attron(COLOR_PAIR(COLOR_SUCCESS) | A_BOLD);
-        mvprintw(9, BOX_COL + 4, "Total Skor: %d poin", part->total_score);
-        attroff(COLOR_PAIR(COLOR_SUCCESS) | A_BOLD);
-
-        tui_footer("[ENTER] Lanjut");
-        refresh();
-        tui_getch();
+        dp->footer("[ENTER] Lanjut");
+        dp->screen_refresh();
+        dp->readkey();
     }
 
-    tui_clear();
+    dp->cls();
     if (state->state == STATE_COMPLETED) {
-        tui_print_centered_colored(4, "* * * * * * * * * * * * * * * *", COLOR_GOLD, 1);
-        tui_print_centered_colored(5, "SEMUA TENDANGAN SELESAI!", COLOR_SUCCESS, 1);
-        tui_print_centered_colored(6, "* * * * * * * * * * * * * * * *", COLOR_GOLD, 1);
+        dp->print_centered_colored(4, "* * * * * * * * * * * * * * * *", COLOR_GOLD, 1);
+        dp->print_centered_colored(5, "SEMUA TENDANGAN SELESAI!", COLOR_SUCCESS, 1);
+        dp->print_centered_colored(6, "* * * * * * * * * * * * * * * *", COLOR_GOLD, 1);
     }
-    tui_footer("[ENTER] Kembali ke menu");
-    refresh();
-    tui_getch();
+    dp->footer("[ENTER] Kembali ke menu");
+    dp->screen_refresh();
+    dp->readkey();
 }

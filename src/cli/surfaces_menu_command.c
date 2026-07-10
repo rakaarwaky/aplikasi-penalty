@@ -25,7 +25,7 @@ static const char *menu_labels[MENU_ITEMS] = {
 /* Gambar ulang layar menu; tambahkan label status sesuai kondisi lomba. */
 static void draw_menu(DisplayPort *dp, int selected, CompetitionStateKind state) {
     char buf[128];
-    dp->clear();
+    dp->cls();
 
     /* Dekorasi header */
     dp->print_centered_colored(0, "+----------------------------------------------------------+", COLOR_BORDER, 0);
@@ -136,7 +136,7 @@ static void draw_menu(DisplayPort *dp, int selected, CompetitionStateKind state)
 /* C1: Layar bantuan "Cara Bermain" — tampilkan aturan & navigasi. */
 static void show_help_screen(DisplayPort *dp) {
     char buf[128];
-    dp->clear();
+    dp->cls();
 
     dp->print_centered_colored(0, "+----------------------------------------------------------+", COLOR_BORDER, 0);
     dp->print_centered_colored(1, "  PANDUAN PENGGUNAAN   ", COLOR_TITLE, 1);
@@ -185,7 +185,7 @@ static void show_help_screen(DisplayPort *dp) {
     dp->screen_refresh();
 
     (void)buf; /* suppress unused warning */
-    dp->getch();
+    dp->readkey();
 }
 
 /**
@@ -203,7 +203,7 @@ int cli_surfaces_menu_run(RegistrationAggregate *reg,
 
     while (running) {
         draw_menu(dp, selected, state->state);
-        int key = dp->getch();
+        int key = dp->readkey();
 
         switch (key) {
             case TUI_KEY_UP:

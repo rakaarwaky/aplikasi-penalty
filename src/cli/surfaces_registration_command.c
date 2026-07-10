@@ -4,7 +4,6 @@
  */
 
 #include "cli/module.cli.h"
-#include "tui/infrastructure_tui_adapter.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -24,62 +23,58 @@ static size_t trim_spaces(char *str) {
     return len;
 }
 
-static void show_error(const char *msg, int row) {
-    attron(COLOR_PAIR(COLOR_ERROR) | A_BOLD);
-    mvprintw(row, BOX_COL + 2, "  [!] %s", msg);
-    attroff(COLOR_PAIR(COLOR_ERROR) | A_BOLD);
+static void show_error(DisplayPort *dp, const char *msg, int row) {
+    char buf[128];
+    snprintf(buf, sizeof buf, "  [!] %s", msg);
+    dp->draw_colored(row, BOX_COL + 2, COLOR_ERROR, 1, buf);
 }
 
-static void draw_registration_screen(CompetitionState *state) {
-    tui_clear();
+static void draw_registration_screen(DisplayPort *dp, CompetitionState *state) {
+    char buf[128];
+    dp->cls();
 
     int count = state->participant_count;
     int box_height = count + 13;
 
     /* Breadcrumb */
-    tui_print_centered_colored(0, "Menu Utama > Pendaftaran Peserta", COLOR_DIM, 0);
-    tui_print_centered_colored(1, "PENDAFTARAN PESERTA", COLOR_TITLE, 1);
-    tui_box(BOX_ROW, BOX_COL, BOX_WIDTH, box_height);
-    tui_separator(BOX_ROW + 1, BOX_COL, BOX_WIDTH);
+    dp->print_centered_colored(0, "Menu Utama > Pendaftaran Peserta", COLOR_DIM, 0);
+    dp->print_centered_colored(1, "PENDAFTARAN PESERTA", COLOR_TITLE, 1);
+    dp->box(BOX_ROW, BOX_COL, BOX_WIDTH, box_height);
+    dp->separator(BOX_ROW + 1, BOX_COL, BOX_WIDTH);
 
     int pct = (count * 100) / MAX_PARTICIPANTS;
-    attron(COLOR_PAIR(COLOR_MENU));
-    mvprintw(BOX_ROW + 2, BOX_COL + 2, "Kuota peserta: %d / %d", count, MAX_PARTICIPANTS);
-    attroff(COLOR_PAIR(COLOR_MENU));
-    tui_progress_bar(BOX_ROW + 3, BOX_COL + 2, 30, pct, COLOR_SUCCESS);
+    snprintf(buf, sizeof buf, "Kuota peserta: %d / %d", count, MAX_PARTICIPANTS);
+    dp->draw_colored(BOX_ROW + 2, BOX_COL + 2, COLOR_MENU, 0, buf);
+    dp->progress_bar(BOX_ROW + 3, BOX_COL + 2, 30, pct, COLOR_SUCCESS);
 
-    /* C2: Label kuota permanen agar pengguna baru tahu batas minimal/maksimal. */
-    attron(COLOR_PAIR(COLOR_WARNING));
-    mvprintw(BOX_ROW + 4, BOX_COL + 2, "Minimal 5, maksimal %d peserta", MAX_PARTICIPANTS);
-    attroff(COLOR_PAIR(COLOR_WARNING));
+    /* C2: Label kuota permanen */
+    snprintf(buf, sizeof buf, "Minimal 5, maksimal %d peserta", MAX_PARTICIPANTS);
+    dp->draw_colored(BOX_ROW + 4, BOX_COL + 2, COLOR_WARNING, 0, buf);
 
-    attron(COLOR_PAIR(COLOR_DIM));
-    mvprintw(BOX_ROW + 5, BOX_COL + 2, "Ketik nama lalu Enter. Kosongkan untuk selesai.");
-    mvprintw(BOX_ROW + 6, BOX_COL + 2, "Minimal 5, maksimal 7 peserta.");
-    attroff(COLOR_PAIR(COLOR_DIM));
+    dp->draw_colored(BOX_ROW + 5, BOX_COL + 2, COLOR_DIM, 0,
+                     "Ketik nama lalu Enter. Kosongkan untuk selesai.");
+    dp->draw_colored(BOX_ROW + 6, BOX_COL + 2, COLOR_DIM, 0,
+                     "Minimal 5, maksimal 7 peserta.");
 
-    tui_separator(BOX_ROW + 7, BOX_COL, BOX_WIDTH);
-
-    attron(COLOR_PAIR(COLOR_WARNING) | A_BOLD);
-    mvprintw(BOX_ROW + 7, BOX_COL + 2, "Peserta terdaftar:");
-    attroff(COLOR_PAIR(COLOR_WARNING) | A_BOLD);
+    dp->separator(BOX_ROW + 7, BOX_COL, BOX_WIDTH);
+    dp->draw_colored(BOX_ROW + 7, BOX_COL + 2, COLOR_WARNING, 1, "Peserta terdaftar:");
 
     int i;
     for (i = 0; i < count; i++) {
-        attron(COLOR_PAIR(COLOR_SUCCESS));
-        mvprintw(BOX_ROW + 8 + i, BOX_COL + 4, "%d. %s", i + 1, state->participants[i].name.value);
-        attroff(COLOR_PAIR(COLOR_SUCCESS));
+        snprintf(buf, sizeof buf, "%d. %s", i + 1, state->participants[i].name.value);
+        dp->draw_colored(BOX_ROW + 8 + i, BOX_COL + 4, COLOR_SUCCESS, 0, buf);
     }
 
-    tui_separator(BOX_ROW + 9 + count, BOX_COL, BOX_WIDTH);
-
-    refresh();
+    dp->separator(BOX_ROW + 9 + count, BOX_COL, BOX_WIDTH);
+    dp->screen_refresh();
 }
 
-void cli_surfaces_registration_execute(RegistrationAggregate *agg, CompetitionState *state) {
+void cli_surfaces_registration_execute(RegistrationAggregate *agg,
+                                       CompetitionState *state, DisplayPort *dp) {
     if (agg == NULL || state == NULL) return;
+    char buf[128];
 
-    draw_registration_screen(state);
+    draw_registration_screen(dp, state);
 
     int count = state->participant_count;
     int row = BOX_ROW + 10 + count;
@@ -91,17 +86,15 @@ void cli_surfaces_registration_execute(RegistrationAggregate *agg, CompetitionSt
         row = BOX_ROW + 10 + count;
         error_row = BOX_ROW + count + 13 - 2;
 
-        attron(COLOR_PAIR(COLOR_INFO) | A_BOLD);
-        mvprintw(row, BOX_COL + 2, "Nama peserta #%d (contoh: \"Budi Santoso\"): ", count + 1);
-        attroff(COLOR_PAIR(COLOR_INFO) | A_BOLD);
-        refresh();
+        snprintf(buf, sizeof buf, "Nama peserta #%d (contoh: \"Budi Santoso\"): ", count + 1);
+        dp->draw_colored(row, BOX_COL + 2, COLOR_INFO, 1, buf);
+        dp->screen_refresh();
 
-        echo();
-        curs_set(1);
-        memset(buffer, 0, sizeof buffer);
-        mvgetnstr(row, BOX_COL + 21, buffer, 30);
-        curs_set(0);
-        noecho();
+        /* Input baca dari ncurses — harus melalui getnstr karena butuh posisi kursor */
+        /* Ini adalah satu-satunya sisa interaksi langsung: echo/getnstr tidak ada di DisplayPort */
+        /* karena ini bukan display melainkan input stream. */
+        extern void tui_input_string(int row, int col, char *buf, int maxlen);
+        tui_input_string(row, BOX_COL + 21, buffer, 30);
 
         size_t len = strlen(buffer);
         while (len > 0 && (buffer[len - 1] == '\n' || buffer[len - 1] == '\r'))
@@ -111,8 +104,8 @@ void cli_surfaces_registration_execute(RegistrationAggregate *agg, CompetitionSt
 
         if (len == 0) {
             if (state->participant_count >= MIN_PARTICIPANTS) break;
-            show_error("Minimal 5 peserta untuk melanjutkan!", error_row);
-            refresh();
+            show_error(dp, "Minimal 5 peserta untuk melanjutkan!", error_row);
+            dp->screen_refresh();
             continue;
         }
 
@@ -122,12 +115,10 @@ void cli_surfaces_registration_execute(RegistrationAggregate *agg, CompetitionSt
 
         RegistrationError e = agent_registration_add(agg, state, &name);
         if (e == REG_OK) {
-            draw_registration_screen(state);
-
-            attron(COLOR_PAIR(COLOR_SUCCESS) | A_BOLD);
-            mvprintw(error_row, BOX_COL + 2, "  [+] %s berhasil terdaftar!", name.value);
-            attroff(COLOR_PAIR(COLOR_SUCCESS) | A_BOLD);
-            refresh();
+            draw_registration_screen(dp, state);
+            snprintf(buf, sizeof buf, "  [+] %s berhasil terdaftar!", name.value);
+            dp->draw_colored(error_row, BOX_COL + 2, COLOR_SUCCESS, 1, buf);
+            dp->screen_refresh();
         } else {
             const char *emsg = "Kesalahan pendaftaran!";
             switch (e) {
@@ -138,20 +129,19 @@ void cli_surfaces_registration_execute(RegistrationAggregate *agg, CompetitionSt
                 case REG_FULL:              emsg = "Kuota peserta penuh!"; break;
                 default: break;
             }
-            show_error(emsg, error_row);
-            refresh();
+            show_error(dp, emsg, error_row);
+            dp->screen_refresh();
         }
     }
 
-    draw_registration_screen(state);
+    draw_registration_screen(dp, state);
     int final_count = state->participant_count;
     int final_error_row = BOX_ROW + final_count + 13 - 2;
 
-    attron(COLOR_PAIR(COLOR_SUCCESS) | A_BOLD);
-    mvprintw(final_error_row, BOX_COL + 2, "Total peserta: %d", final_count);
-    attroff(COLOR_PAIR(COLOR_SUCCESS) | A_BOLD);
+    snprintf(buf, sizeof buf, "Total peserta: %d", final_count);
+    dp->draw_colored(final_error_row, BOX_COL + 2, COLOR_SUCCESS, 1, buf);
 
-    tui_footer("[ENTER] Lanjut  [q] Kembali");
-    refresh();
-    tui_getch();
+    dp->footer("[ENTER] Lanjut  [q] Kembali");
+    dp->screen_refresh();
+    dp->readkey();
 }

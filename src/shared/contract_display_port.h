@@ -20,7 +20,7 @@
 typedef struct {
 
     /* ── Lifecycle & Refresh ── */
-    void (*clear)(void);              /**< Bersihkan seluruh layar. */
+    void (*cls)(void);              /**< Bersihkan seluruh layar. */
     void (*screen_refresh)(void);     /**< Kirim buffer ke terminal (refresh). */
 
     /* ── Primitif Draw (pengganti attron+mvprintw+attroff) ── */
@@ -61,8 +61,8 @@ typedef struct {
     const char *(*medal)(int rank);   /**< Label medali "🥇/🥈/🥉" atau spasi. */
 
     /* ── Input ── */
-    int (*getch)(void);               /**< Baca satu tombol; kembalikan kode. */
-    int (*confirm)(const char *prompt); /**< Dialog ya/tidak; 1 = ya. */
+    int  (*readkey)(void);            /**< Baca satu tombol; kembalikan kode. */
+    int  (*confirm)(const char *prompt); /**< Dialog ya/tidak; 1 = ya. */
 
 } DisplayPort;
 

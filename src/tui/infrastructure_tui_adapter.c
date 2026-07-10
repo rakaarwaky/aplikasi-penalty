@@ -307,6 +307,25 @@ void tui_splash(int delay_ms) {
     /* Splash otomatis lanjut ke menu (tanpa menunggu Enter). */
 }
 
+/* ── Input String (dipanggil surfaces untuk baca teks dari pengguna) ── */
+
+/**
+ * Baca string dari pengguna di posisi layar tertentu.
+ * row=-1, col=-1 = gunakan posisi kursor saat ini.
+ */
+void tui_input_string(int row, int col, char *buf, int maxlen) {
+    if (buf == NULL || maxlen <= 0) return;
+    echo();
+    curs_set(1);
+    memset(buf, 0, (size_t)maxlen + 1);
+    if (row >= 0 && col >= 0)
+        mvgetnstr(row, col, buf, maxlen);
+    else
+        getnstr(buf, maxlen);
+    curs_set(0);
+    noecho();
+}
+
 /* ── Primitif Draw (implementasi untuk DisplayPort) ── */
 
 /* Tulis teks polos di posisi tertentu. */
@@ -354,7 +373,7 @@ static void tui_screen_refresh(void) {
 DisplayPort tui_display_port_create(void) {
     DisplayPort dp;
 
-    dp.clear                = tui_clear;
+    dp.cls                = tui_clear;
     dp.screen_refresh       = tui_screen_refresh;
     dp.draw_at              = tui_draw_at;
     dp.draw_colored         = tui_draw_colored;
@@ -371,7 +390,7 @@ DisplayPort tui_display_port_create(void) {
     dp.footer               = tui_footer;
     dp.progress_bar         = tui_progress_bar;
     dp.medal                = tui_medal;
-    dp.getch                = tui_getch;
+    dp.readkey              = tui_getch;
     dp.confirm              = tui_confirm;
 
     return dp;

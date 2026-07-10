@@ -4,7 +4,6 @@
  */
 
 #include "cli/module.cli.h"
-#include "tui/infrastructure_tui_adapter.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -19,49 +18,40 @@
  * Layar pencarian: baca nama, cari di data, tampilkan detail peserta
  * atau pesan "tidak ditemukan". Tolak bila belum ada peserta terdaftar.
  */
-void cli_surfaces_search_execute(SearchAggregate *agg, CompetitionState *state) {
+void cli_surfaces_search_execute(SearchAggregate *agg, CompetitionState *state,
+                                 DisplayPort *dp) {
+    char buf[128];
     if (agg == NULL || state == NULL) return;
     if (state->state == STATE_INIT) {
-        tui_clear();
-        tui_print_centered_colored(10, "[GAGAL] Daftar peserta dulu (Menu 1).", COLOR_ERROR, 1);
-        refresh();
-        tui_getch();
+        dp->cls();
+        dp->print_centered_colored(10, "[GAGAL] Daftar peserta dulu (Menu 1).", COLOR_ERROR, 1);
+        dp->screen_refresh();
+        dp->readkey();
         return;
     }
 
-    tui_clear();
+    dp->cls();
 
     /* Breadcrumb */
-    tui_print_centered_colored(0, "Menu Utama > Cari Peserta", COLOR_DIM, 0);
-
-    /* Judul */
-    tui_print_centered_colored(1, "CARI PESERTA", COLOR_TITLE, 1);
+    dp->print_centered_colored(0, "Menu Utama > Cari Peserta", COLOR_DIM, 0);
+    dp->print_centered_colored(1, "CARI PESERTA", COLOR_TITLE, 1);
 
     /* Bingkai */
-    tui_box(BOX_ROW, BOX_COL, BOX_WIDTH, BOX_HEIGHT);
-
-    /* Separator */
-    tui_separator(BOX_ROW + 1, BOX_COL, BOX_WIDTH);
+    dp->box(BOX_ROW, BOX_COL, BOX_WIDTH, BOX_HEIGHT);
+    dp->separator(BOX_ROW + 1, BOX_COL, BOX_WIDTH);
 
     /* Instruksi */
-    attron(COLOR_PAIR(COLOR_MENU));
-    mvprintw(BOX_ROW + 2, BOX_COL + 2, "Masukkan nama peserta yang dicari:");
-    attroff(COLOR_PAIR(COLOR_MENU));
+    dp->draw_colored(BOX_ROW + 2, BOX_COL + 2, COLOR_MENU, 0,
+                     "Masukkan nama peserta yang dicari:");
 
-    /* Input field */
-    attron(COLOR_PAIR(COLOR_INFO));
-    mvprintw(BOX_ROW + 4, BOX_COL + 2, "Nama: ");
-    attroff(COLOR_PAIR(COLOR_INFO));
-    refresh();
+    /* Input field label */
+    dp->draw_colored(BOX_ROW + 4, BOX_COL + 2, COLOR_INFO, 0, "Nama: ");
+    dp->screen_refresh();
 
     /* Baca nama */
     char buffer[64];
-    echo();
-    curs_set(1);
-    memset(buffer, 0, sizeof buffer);
-    mvgetnstr(BOX_ROW + 4, BOX_COL + 8, buffer, 30);
-    curs_set(0);
-    noecho();
+    extern void tui_input_string(int row, int col, char *buf, int maxlen);
+    tui_input_string(BOX_ROW + 4, BOX_COL + 8, buffer, 30);
 
     /* Buang newline */
     size_t len = strlen(buffer);
@@ -70,10 +60,10 @@ void cli_surfaces_search_execute(SearchAggregate *agg, CompetitionState *state) 
 
     /* Nama kosong */
     if (len == 0) {
-        tui_clear();
-        tui_print_centered_colored(10, "[GAGAL] Nama pencarian kosong!", COLOR_ERROR, 1);
-        refresh();
-        tui_getch();
+        dp->cls();
+        dp->print_centered_colored(10, "[GAGAL] Nama pencarian kosong!", COLOR_ERROR, 1);
+        dp->screen_refresh();
+        dp->readkey();
         return;
     }
 
@@ -86,37 +76,30 @@ void cli_surfaces_search_execute(SearchAggregate *agg, CompetitionState *state) 
     SearchError e = agent_search_find(agg, state, &name, &r);
 
     /* Tampilkan hasil */
-    tui_clear();
+    dp->cls();
 
     if (e == SR_OK) {
-        tui_print_centered_colored(1, "HASIL PENCARIAN", COLOR_TITLE, 1);
-        tui_box(BOX_ROW, BOX_COL, BOX_WIDTH, BOX_HEIGHT);
-        tui_separator(BOX_ROW + 1, BOX_COL, BOX_WIDTH);
+        dp->print_centered_colored(1, "HASIL PENCARIAN", COLOR_TITLE, 1);
+        dp->box(BOX_ROW, BOX_COL, BOX_WIDTH, BOX_HEIGHT);
+        dp->separator(BOX_ROW + 1, BOX_COL, BOX_WIDTH);
 
         /* Status ditemukan */
-        attron(COLOR_PAIR(COLOR_SUCCESS) | A_BOLD);
-        mvprintw(BOX_ROW + 2, BOX_COL + 2, "[DITEMUKAN] Peserta ditemukan!");
-        attroff(COLOR_PAIR(COLOR_SUCCESS) | A_BOLD);
+        dp->draw_colored(BOX_ROW + 2, BOX_COL + 2, COLOR_SUCCESS, 1,
+                         "[DITEMUKAN] Peserta ditemukan!");
 
-        /* Separator */
-        tui_separator(BOX_ROW + 3, BOX_COL, BOX_WIDTH);
+        dp->separator(BOX_ROW + 3, BOX_COL, BOX_WIDTH);
 
         /* Detail peserta */
-        attron(COLOR_PAIR(COLOR_GOLD) | A_BOLD);
-        mvprintw(BOX_ROW + 4, BOX_COL + 4, "Nama        : %s", r.name);
-        attroff(COLOR_PAIR(COLOR_GOLD) | A_BOLD);
+        snprintf(buf, sizeof buf, "Nama        : %s", r.name);
+        dp->draw_colored(BOX_ROW + 4, BOX_COL + 4, COLOR_GOLD, 1, buf);
 
-        attron(COLOR_PAIR(COLOR_SUCCESS) | A_BOLD);
-        mvprintw(BOX_ROW + 5, BOX_COL + 4, "Total Skor  : %d poin", r.total_score);
-        attroff(COLOR_PAIR(COLOR_SUCCESS) | A_BOLD);
+        snprintf(buf, sizeof buf, "Total Skor  : %d poin", r.total_score);
+        dp->draw_colored(BOX_ROW + 5, BOX_COL + 4, COLOR_SUCCESS, 1, buf);
 
-        /* Separator */
-        tui_separator(BOX_ROW + 6, BOX_COL, BOX_WIDTH);
+        dp->separator(BOX_ROW + 6, BOX_COL, BOX_WIDTH);
 
-        /* Riwayat tendangan dengan visual */
-        attron(COLOR_PAIR(COLOR_MENU));
-        mvprintw(BOX_ROW + 7, BOX_COL + 2, "Riwayat Tendangan:");
-        attroff(COLOR_PAIR(COLOR_MENU));
+        /* Riwayat tendangan */
+        dp->draw_colored(BOX_ROW + 7, BOX_COL + 2, COLOR_MENU, 0, "Riwayat Tendangan:");
 
         int k;
         for (k = 0; k < TOTAL_KICKS; k++) {
@@ -124,65 +107,51 @@ void cli_surfaces_search_execute(SearchAggregate *agg, CompetitionState *state) 
             int cy = BOX_ROW + 8;
 
             if (r.kicks[k] == -1) {
-                attron(COLOR_PAIR(COLOR_DIM));
-                mvprintw(cy, cx, " - ");
-                attroff(COLOR_PAIR(COLOR_DIM));
+                dp->draw_colored(cy, cx, COLOR_DIM, 0, " - ");
             } else {
                 int zone = r.kicks[k];
                 int color = COLOR_DIM;
                 if (zone >= 4) color = COLOR_SUCCESS;
                 else if (zone >= 2) color = COLOR_WARNING;
                 else if (zone == 0) color = COLOR_ERROR;
-
-                attron(COLOR_PAIR(color) | A_BOLD);
-                mvprintw(cy, cx, "Z%d ", zone);
-                attroff(COLOR_PAIR(color) | A_BOLD);
+                snprintf(buf, sizeof buf, "Z%d ", zone);
+                dp->draw_colored(cy, cx, color, 1, buf);
             }
         }
 
-        /* Separator */
-        tui_separator(BOX_ROW + 10, BOX_COL, BOX_WIDTH);
+        dp->separator(BOX_ROW + 10, BOX_COL, BOX_WIDTH);
 
         /* Frekuensi zona */
-        attron(COLOR_PAIR(COLOR_MENU));
-        mvprintw(BOX_ROW + 11, BOX_COL + 2, "Frekuensi Zona:");
-        attroff(COLOR_PAIR(COLOR_MENU));
+        dp->draw_colored(BOX_ROW + 11, BOX_COL + 2, COLOR_MENU, 0, "Frekuensi Zona:");
 
         int z;
         for (z = 0; z <= MAX_ZONE; z++) {
             int cx = BOX_COL + 4 + z * 7;
             int cy = BOX_ROW + 12;
-            attron(COLOR_PAIR(COLOR_MENU));
-            mvprintw(cy, cx, "Z%d:%d", z, r.zone_freq[z]);
-            attroff(COLOR_PAIR(COLOR_MENU));
+            snprintf(buf, sizeof buf, "Z%d:%d", z, r.zone_freq[z]);
+            dp->draw_colored(cy, cx, COLOR_MENU, 0, buf);
         }
     } else {
-        tui_print_centered_colored(1, "HASIL PENCARIAN", COLOR_TITLE, 1);
-        tui_box(BOX_ROW, BOX_COL, BOX_WIDTH, BOX_HEIGHT);
-        tui_separator(BOX_ROW + 1, BOX_COL, BOX_WIDTH);
+        dp->print_centered_colored(1, "HASIL PENCARIAN", COLOR_TITLE, 1);
+        dp->box(BOX_ROW, BOX_COL, BOX_WIDTH, BOX_HEIGHT);
+        dp->separator(BOX_ROW + 1, BOX_COL, BOX_WIDTH);
 
-        attron(COLOR_PAIR(COLOR_ERROR) | A_BOLD);
-        mvprintw(BOX_ROW + 4, BOX_COL + 4, "[TIDAK DITEMUKAN]");
-        attroff(COLOR_PAIR(COLOR_ERROR) | A_BOLD);
+        dp->draw_colored(BOX_ROW + 4, BOX_COL + 4, COLOR_ERROR, 1, "[TIDAK DITEMUKAN]");
 
-        attron(COLOR_PAIR(COLOR_MENU));
-        mvprintw(BOX_ROW + 6, BOX_COL + 4, "Peserta '%s' tidak ditemukan.", buffer);
-        attroff(COLOR_PAIR(COLOR_MENU));
+        snprintf(buf, sizeof buf, "Peserta '%s' tidak ditemukan.", buffer);
+        dp->draw_colored(BOX_ROW + 6, BOX_COL + 4, COLOR_MENU, 0, buf);
 
         /* Fuzzy search: cari nama yang mirip */
-        attron(COLOR_PAIR(COLOR_INFO));
-        mvprintw(BOX_ROW + 8, BOX_COL + 4, "Mungkin maksud Anda:");
-        attroff(COLOR_PAIR(COLOR_INFO));
+        dp->draw_colored(BOX_ROW + 8, BOX_COL + 4, COLOR_INFO, 0, "Mungkin maksud Anda:");
 
         int suggestions = 0;
         int si;
         for (si = 0; si < state->participant_count && suggestions < 3; si++) {
             const char *pname = state->participants[si].name.value;
-            /* Cek apakah salah satu huruf ada di input */
             int match = 0;
             size_t pi;
             for (pi = 0; pname[pi] != '\0' && !match; pi++) {
-                char lower_p = tolower((unsigned char)pname[pi]);
+                char lower_p = (char)tolower((unsigned char)pname[pi]);
                 size_t bi;
                 for (bi = 0; buffer[bi] != '\0' && !match; bi++) {
                     if (tolower((unsigned char)buffer[bi]) == lower_p)
@@ -190,20 +159,19 @@ void cli_surfaces_search_execute(SearchAggregate *agg, CompetitionState *state) 
                 }
             }
             if (match) {
-                attron(COLOR_PAIR(COLOR_SUCCESS));
-                mvprintw(BOX_ROW + 9 + suggestions, BOX_COL + 6, "- %s", pname);
-                attroff(COLOR_PAIR(COLOR_SUCCESS));
+                snprintf(buf, sizeof buf, "- %s", pname);
+                dp->draw_colored(BOX_ROW + 9 + suggestions, BOX_COL + 6,
+                                 COLOR_SUCCESS, 0, buf);
                 suggestions++;
             }
         }
         if (suggestions == 0) {
-            attron(COLOR_PAIR(COLOR_DIM));
-            mvprintw(BOX_ROW + 9, BOX_COL + 6, "(tidak ada saran serupa)");
-            attroff(COLOR_PAIR(COLOR_DIM));
+            dp->draw_colored(BOX_ROW + 9, BOX_COL + 6, COLOR_DIM, 0,
+                             "(tidak ada saran serupa)");
         }
     }
 
-    tui_footer("[ENTER] Kembali ke menu");
-    refresh();
-    tui_getch();
+    dp->footer("[ENTER] Kembali ke menu");
+    dp->screen_refresh();
+    dp->readkey();
 }
