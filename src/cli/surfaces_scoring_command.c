@@ -1,6 +1,6 @@
 /**
  * @file surfaces_scoring_command.c
- * @brief Layar input tendangan: baca zona tiap peserta & catat skornya.
+ * @brief Smart surface: input loop tendangan & pencatatan skor.
  */
 
 #include "cli/module.cli.h"
@@ -15,10 +15,8 @@
 #define BOX_ROW 3
 #define BOX_COL 2
 
-/* Baca zona dari input pengguna; kembalikan SC_OK atau SC_INVALID_ZONE. */
 static ScoringError read_zone(DisplayPort *dp, ZoneVO *out, char *raw_out, size_t raw_size) {
     char buf[32];
-    /* Posisi -1 berarti gunakan kursor saat ini */
     dp->input_string(-1, -1, buf, 10);
 
     if (raw_out != NULL && raw_size > 0)
@@ -33,72 +31,6 @@ static ScoringError read_zone(DisplayPort *dp, ZoneVO *out, char *raw_out, size_
     if (sscanf(buf, "%d", &z) != 1) return SC_INVALID_ZONE;
     out->value = z;
     return SC_OK;
-}
-
-static void draw_scoring_screen(DisplayPort *dp, ParticipantEntity *part,
-                                const char *msg, int msg_is_error) {
-    char buf[128];
-    /* A3: Hanya clear bila bukan pesan error, agar tidak flicker saat validasi zona. */
-    if (!msg_is_error) dp->cls();
-
-    /* Breadcrumb — warna redup */
-    dp->print_centered_colored(0, "Menu Utama > Input Tendangan", COLOR_DIM, 0);
-
-    /* Header konsisten dengan UTF-8 escape sequences */
-    dp->print_centered_colored(1, UTF_DOUBLE_H_32, COLOR_DIM, 0);
-    dp->print_centered_colored(2, "       INPUT TENDANGAN DAN SKOR       ", COLOR_TITLE, 1);
-    dp->print_centered_colored(3, UTF_DOUBLE_H_32, COLOR_DIM, 0);
-
-    dp->box(BOX_ROW, BOX_COL, BOX_WIDTH, BOX_HEIGHT);
-    dp->separator(BOX_ROW + 1, BOX_COL, BOX_WIDTH);
-
-    snprintf(buf, sizeof buf, "Peserta: %s", part->name.value);
-    dp->draw_colored(BOX_ROW + 2, BOX_COL + 2, COLOR_GOLD, 1, buf);
-
-    int kick_pct = (part->kick_count.value * 100) / TOTAL_KICKS;
-    snprintf(buf, sizeof buf, "Tendangan %d/%d: ", part->kick_count.value, TOTAL_KICKS);
-    dp->draw_colored(BOX_ROW + 3, BOX_COL + 2, COLOR_MENU, 0, buf);
-    dp->progress_bar(BOX_ROW + 3, BOX_COL + 18, 20, kick_pct, COLOR_SUCCESS);
-
-    snprintf(buf, sizeof buf, "Skor sementara: %d poin", part->total_score.value);
-    dp->draw_colored(BOX_ROW + 4, BOX_COL + 2, COLOR_WARNING, 1, buf);
-
-    dp->separator(BOX_ROW + 5, BOX_COL, BOX_WIDTH);
-    dp->draw_colored(BOX_ROW + 6, BOX_COL + 2, COLOR_MENU, 0, "Riwayat tendangan:");
-
-    int k;
-    for (k = 0; k < TOTAL_KICKS; k++) {
-        int cx = BOX_COL + 4 + k * 4;
-        int cy = BOX_ROW + 7;
-
-        if (k < part->kick_count.value) {
-            int zone = part->kicks[k].zone;
-            int color = COLOR_DIM;
-            if (zone >= 4) color = COLOR_SUCCESS;
-            else if (zone >= 2) color = COLOR_WARNING;
-            else if (zone == 0) color = COLOR_ERROR;
-            snprintf(buf, sizeof buf, "Z%d ", zone);
-            dp->draw_colored(cy, cx, color, 1, buf);
-        } else if (k == part->kick_count.value) {
-            dp->draw_colored(cy, cx, COLOR_INFO, 1, " -> ");
-        } else {
-            dp->draw_colored(cy, cx, COLOR_DIM, 0, " . ");
-        }
-    }
-
-    dp->separator(BOX_ROW + 9, BOX_COL, BOX_WIDTH);
-    dp->draw_colored(BOX_ROW + 10, BOX_COL + 2, COLOR_DIM, 0,
-                     "Zona: 0=Miss 1=Mudah 2=Sedang 3=Sulit 4=SgtSulit 5=Top");
-
-    snprintf(buf, sizeof buf, "Masukkan zona (0-%d, contoh: 5): ", MAX_ZONE);
-    dp->draw_colored(BOX_ROW + 11, BOX_COL + 2, COLOR_INFO, 1, buf);
-
-    if (msg != NULL && msg[0] != '\0') {
-        int msg_color = msg_is_error ? COLOR_ERROR : COLOR_SUCCESS;
-        dp->draw_colored(BOX_ROW + BOX_HEIGHT - 2, BOX_COL + 2, msg_color, 1, msg);
-    }
-
-    dp->screen_refresh();
 }
 
 void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state,
@@ -128,22 +60,19 @@ void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state
     for (p = 0; p < state->participant_count && !cancelled; p++) {
         ParticipantEntity *part = &state->participants[p];
         while (part->kick_count.value < TOTAL_KICKS) {
-            draw_scoring_screen(dp, part, NULL, 0);
+            scoring_page_draw(dp, part, NULL, 0);
 
             ZoneVO z = { -1 };
             char raw[32] = "";
             read_zone(dp, &z, raw, sizeof raw);
 
-            /* ESC = batal kembali ke menu */
             if (raw[0] == '\0' && part->kick_count.value == 0 && p == 0) {
-                /* Kosong di awal = user mau kembali */
                 if (!dp->confirm("Kembali ke menu? Progres yang belum tersimpan akan hilang."))
                     continue;
                 cancelled = 1;
                 break;
             }
 
-            /* Validasi mentah via sanitizer agent sebelum domain agent */
             if (sn != NULL && raw[0] != '\0' &&
                 agent_sanitize_validate_int(sn, raw, MIN_ZONE, MAX_ZONE) != SANITIZE_OK) {
                 snprintf(buf, sizeof buf,
@@ -166,13 +95,13 @@ void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state
             ScoringError e = agent_scoring_record(agg, state, p, z);
             if (e == SC_OK) {
                 snprintf(buf, sizeof buf, "[OK] Zona %d -> %d poin", z.value, z.value);
-                draw_scoring_screen(dp, part, buf, 0);
+                scoring_page_draw(dp, part, buf, 0);
             } else if (e == SC_INVALID_ZONE) {
                 snprintf(buf, sizeof buf, "[GAGAL] Zona harus %d-%d. Anda memasukkan '%s'.",
                          MIN_ZONE, MAX_ZONE, raw);
-                draw_scoring_screen(dp, part, buf, 1);
+                scoring_page_draw(dp, part, buf, 1);
             } else {
-                draw_scoring_screen(dp, part, "[GAGAL] Kesalahan pencatatan!", 1);
+                scoring_page_draw(dp, part, "[GAGAL] Kesalahan pencatatan!", 1);
             }
             dp->screen_refresh();
             dp->readkey();

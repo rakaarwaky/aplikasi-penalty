@@ -144,11 +144,17 @@ win:
 	$(WIN_CC) $(CFLAGS) $(INCLUDES) \
 		$(SRC_DIR)/root_cli_main_entry.c \
 		$(SRC_DIR)/cli/surfaces_menu_command.c \
+		$(SRC_DIR)/cli/surfaces_menu_page.c \
 		$(SRC_DIR)/cli/surfaces_registration_command.c \
+		$(SRC_DIR)/cli/surfaces_registration_page.c \
 		$(SRC_DIR)/cli/surfaces_scoring_command.c \
+		$(SRC_DIR)/cli/surfaces_scoring_page.c \
 		$(SRC_DIR)/cli/surfaces_ranking_command.c \
+		$(SRC_DIR)/cli/surfaces_ranking_page.c \
 		$(SRC_DIR)/cli/surfaces_search_command.c \
+		$(SRC_DIR)/cli/surfaces_search_page.c \
 		$(SRC_DIR)/cli/surfaces_recap_command.c \
+		$(SRC_DIR)/cli/surfaces_recap_page.c \
 		$(SRC_DIR)/tui/infrastructure_tui_adapter.c \
 		$(SRC_DIR)/registration/capabilities_registration_validator.c \
 		$(SRC_DIR)/registration/capabilities_registration_appender.c \

@@ -1,17 +1,16 @@
 /**
  * @file surfaces_registration_command.c
- * @brief Layar pendaftaran: baca nama peserta & simpan ke data lomba.
+ * @brief Smart surface: input loop pendaftaran peserta.
  */
 
 #include "cli/module.cli.h"
+#include "cli/surfaces_registration_page.h"
 #include "sanitizer/module.sanitizer.h"
 
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
 
-#define BOX_WIDTH 56
-#define BOX_ROW 3
 #define BOX_COL 2
 
 static size_t trim_spaces(char *str) {
@@ -30,76 +29,28 @@ static void show_error(DisplayPort *dp, const char *msg, int row) {
     dp->draw_colored(row, BOX_COL + 2, COLOR_ERROR, 1, buf);
 }
 
-static void draw_registration_screen(DisplayPort *dp, CompetitionState *state) {
-    char buf[128];
-    dp->cls();
-
-    int count = state->participant_count;
-    int box_height = count + 13;
-    int max_h = dp->get_lines() - 4;
-    if (box_height > max_h) box_height = max_h;
-
-    /* Breadcrumb — warna redup agar tidak mendominasi */
-    dp->print_centered_colored(0, "Menu Utama > Pendaftaran Peserta", COLOR_DIM, 0);
-
-    /* Header konsisten dengan UTF-8 escape sequences */
-    dp->print_centered_colored(1, UTF_DOUBLE_H_32, COLOR_DIM, 0);
-    dp->print_centered_colored(2, "       PENDAFTARAN PESERTA        ", COLOR_TITLE, 1);
-    dp->print_centered_colored(3, UTF_DOUBLE_H_32, COLOR_DIM, 0);
-
-    dp->box(BOX_ROW, BOX_COL, BOX_WIDTH, box_height);
-
-    /* Progress bar — clean, tanpa label berlebih */
-    int pct = (count * 100) / MAX_PARTICIPANTS;
-    snprintf(buf, sizeof buf, "Kuota: %d/%d Terisi", count, MAX_PARTICIPANTS);
-    dp->draw_colored(BOX_ROW + 2, BOX_COL + 2, COLOR_INFO, 0, buf);
-    dp->progress_bar(BOX_ROW + 3, BOX_COL + 2, 30, pct, COLOR_SUCCESS);
-
-    /* Garis pemisah tipis (Gestalt: Continuity) */
-    dp->separator(BOX_ROW + 4, BOX_COL, BOX_WIDTH);
-
-    /* Instruksi minimalis — kurangi Beban Kognitif */
-    dp->draw_colored(BOX_ROW + 5, BOX_COL + 2, COLOR_DIM, 0,
-                     "Ketik nama, Enter. Kosongkan untuk selesai.");
-
-    dp->separator(BOX_ROW + 6, BOX_COL, BOX_WIDTH);
-
-    /* Daftar Peserta */
-    dp->draw_colored(BOX_ROW + 7, BOX_COL + 2, COLOR_MENU, 1, "Peserta Terdaftar:");
-
-    int i;
-    for (i = 0; i < count; i++) {
-        snprintf(buf, sizeof buf, "%2d. %s", i + 1, state->participants[i].name.value);
-        dp->draw_colored(BOX_ROW + 8 + i, BOX_COL + 4, COLOR_GOLD, 0, buf);
-    }
-
-    dp->separator(BOX_ROW + 9 + count, BOX_COL, BOX_WIDTH);
-    dp->screen_refresh();
-}
-
 void cli_surfaces_registration_execute(RegistrationAggregate *agg,
                                        CompetitionState *state, DisplayPort *dp,
                                        SanitizeAggregate *sn) {
     if (agg == NULL || state == NULL) return;
     char buf[128];
 
-    draw_registration_screen(dp, state);
+    registration_page_draw(dp, state);
 
     int count = state->participant_count;
-    int row = BOX_ROW + 10 + count;
-    int error_row = BOX_ROW + count + 13 - 2;
+    int row = registration_page_input_row(count);
+    int error_row = registration_page_error_row(count);
     char buffer[64];
 
     while (state->participant_count < MAX_PARTICIPANTS) {
         count = state->participant_count;
-        row = BOX_ROW + 10 + count;
-        error_row = BOX_ROW + count + 13 - 2;
+        row = registration_page_input_row(count);
+        error_row = registration_page_error_row(count);
 
         snprintf(buf, sizeof buf, "Nama peserta #%d (contoh: \"Budi Santoso\"): ", count + 1);
         dp->draw_colored(row, BOX_COL + 2, COLOR_INFO, 1, buf);
         dp->screen_refresh();
 
-        /* Input baca melalui DisplayPort */
         dp->input_string(row, BOX_COL + 21, buffer, 30);
 
         size_t len = strlen(buffer);
@@ -109,7 +60,6 @@ void cli_surfaces_registration_execute(RegistrationAggregate *agg,
         len = strlen(buffer);
 
         if (len == 0) {
-            /* Kosong = selesai bila sudah cukup, atau kembali bila belum ada peserta */
             if (state->participant_count >= MIN_PARTICIPANTS) break;
             if (state->participant_count == 0) {
                 if (dp->confirm("Kembali ke menu utama?"))
@@ -120,7 +70,6 @@ void cli_surfaces_registration_execute(RegistrationAggregate *agg,
             continue;
         }
 
-        /* Validasi mentah via sanitizer agent sebelum domain agent */
         if (sn != NULL && agent_sanitize_validate_string(sn, buffer, MAX_NAME_LENGTH) != SANITIZE_OK) {
             show_error(dp, "Input nama tidak valid!", error_row);
             dp->screen_refresh();
@@ -133,7 +82,7 @@ void cli_surfaces_registration_execute(RegistrationAggregate *agg,
 
         RegistrationError e = agent_registration_add(agg, state, &name);
         if (e == REG_OK) {
-            draw_registration_screen(dp, state);
+            registration_page_draw(dp, state);
             snprintf(buf, sizeof buf, "  [+] %s berhasil terdaftar!", name.value);
             dp->draw_colored(error_row, BOX_COL + 2, COLOR_SUCCESS, 1, buf);
             dp->screen_refresh();
@@ -152,9 +101,9 @@ void cli_surfaces_registration_execute(RegistrationAggregate *agg,
         }
     }
 
-    draw_registration_screen(dp, state);
+    registration_page_draw(dp, state);
     int final_count = state->participant_count;
-    int final_error_row = BOX_ROW + final_count + 13 - 2;
+    int final_error_row = registration_page_error_row(final_count);
 
     snprintf(buf, sizeof buf, "Total peserta: %d", final_count);
     dp->draw_colored(final_error_row, BOX_COL + 2, COLOR_SUCCESS, 1, buf);
