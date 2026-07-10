@@ -6,6 +6,5 @@ RecapAggregate root_recap_build(void) {
 
     RecapAggregate a;
     a.protocol = &protocol;
-    a.port = create_recap_port();
     return a;
 }
