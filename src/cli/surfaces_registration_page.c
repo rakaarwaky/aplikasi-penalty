@@ -58,6 +58,7 @@ void registration_page_draw(DisplayPort *dp, CompetitionState *state) {
     }
 
     dp->separator(box_row + 9 + count, box_col, gw);
+    dp->footer("[ENTER] Kosongkan & Enter untuk selesai  \xe2\x94\x82  [q] Kembali");
     dp->screen_refresh();
 }
 

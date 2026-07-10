@@ -16,7 +16,7 @@ static StorageError storage_save_impl(const char *filename, const CompetitionSta
 
     FILE *file = fopen(filename, "wb");
     if (file == NULL) {
-        return ST_ERROR_PERMISSION; /* tidak bisa buka file */
+        return ST_ERROR_PERMISSION; /* tidak bisa buka file (izin/direktori) */
     }
 
     size_t written = fwrite(state, sizeof(CompetitionState), 1, file);
@@ -38,11 +38,13 @@ static StorageError storage_load_impl(const char *filename, CompetitionState *st
         return ST_ERROR_FILE_NOT_FOUND;
     }
 
+    /* Baca satu record struct; pisahkan error I/O dari "file terlalu pendek". */
     size_t read_count = fread(state, sizeof(CompetitionState), 1, file);
+    int io_err = ferror(file);
     fclose(file);
 
-    if (read_count != 1) {
-        return ST_ERROR_CORRUPT; /* file rusak/terpotong */
+    if (read_count != 1 || io_err != 0) {
+        return ST_ERROR_CORRUPT; /* file rusak / terpotong / gagal baca */
     }
 
     return ST_OK;

@@ -27,8 +27,8 @@ static void resolve_status(int item, CompetitionStateKind state,
     const char *selesai = "[Selesai]";
     switch (item) {
         case 1:
-            if (state == STATE_INIT) { *out_status = aktif; *out_color = COLOR_SUCCESS; }
-            else { *out_status = selesai; *out_color = COLOR_WARNING; }
+            if (state == STATE_COMPLETED) { *out_status = kunci; *out_color = COLOR_DIM; }
+            else { *out_status = aktif; *out_color = COLOR_SUCCESS; }
             break;
         case 2:
             if (state == STATE_INIT) { *out_status = kunci; *out_color = COLOR_DIM; }

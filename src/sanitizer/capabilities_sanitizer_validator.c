@@ -37,7 +37,7 @@ static SanitizeError validate_int_impl(const char *input, int min_val, int max_v
         return SANITIZE_ERROR_INVALID_CHARS; /* bukan angka */
     }
     if (val < min_val || val > max_val) {
-        return SANITIZE_ERROR_TOO_LONG; /* di luar rentang */
+        return SANITIZE_ERROR_OUT_OF_RANGE; /* di luar rentang */
     }
     return SANITIZE_OK;
 }

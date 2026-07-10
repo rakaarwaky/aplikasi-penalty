@@ -12,15 +12,26 @@
 
 #define BOX_HEIGHT 14
 
-static ScoringError read_zone(DisplayPort *dp, ZoneVO *out, char *raw_out, size_t raw_size) {
+static ScoringError read_zone(DisplayPort *dp, int row, int col,
+                              ZoneVO *out, char *raw_out, size_t raw_size) {
     char buf[32];
-    dp->input_string(-1, -1, buf, 10);
+    dp->input_string(row, col, buf, 10);
 
+    /* Buang spasi/tab di awal & akhir agar " 5" atau "5 " tidak dibilang invalid. */
+    char *p = buf;
+    while (*p == ' ' || *p == '\t') p++;
+    if (p != buf) memmove(buf, p, strlen(p) + 1);
+    size_t L = strlen(buf);
+    while (L > 0 && (buf[L - 1] == ' ' || buf[L - 1] == '\t' ||
+                     buf[L - 1] == '\n' || buf[L - 1] == '\r'))
+        buf[--L] = '\0';
+
+    /* Salin versi yang sudah dibersihkan untuk dipakai pesan error/sanitizer. */
     if (raw_out != NULL && raw_size > 0)
         snprintf(raw_out, raw_size, "%s", buf);
 
     int i = 0;
-    while (buf[i] != '\0' && buf[i] != '\n') {
+    while (buf[i] != '\0') {
         if (!isdigit((unsigned char)buf[i]) && buf[i] != '-') return SC_INVALID_ZONE;
         i++;
     }
@@ -28,6 +39,12 @@ static ScoringError read_zone(DisplayPort *dp, ZoneVO *out, char *raw_out, size_
     if (sscanf(buf, "%d", &z) != 1) return SC_INVALID_ZONE;
     out->value = z;
     return SC_OK;
+}
+
+static void draw_double_line(DisplayPort *dp, int row, int col, int width) {
+    int i;
+    for (i = 0; i < width; i++)
+        dp->draw_at(row, col + i, "\xe2\x95\x90");
 }
 
 void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state,
@@ -113,7 +130,9 @@ void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state
         if (cancelled) break;
 
         dp->cls();
-        dp->print_centered_colored(4, "[SELESAI]", COLOR_SUCCESS, 1);
+        draw_double_line(dp, 2, 2, cols - 4);
+        dp->print_centered_colored(3, "[SELESAI]", COLOR_SUCCESS, 1);
+        draw_double_line(dp, 4, 2, cols - 4);
         dp->box(6, box_col, gw, 6);
 
         snprintf(buf, sizeof buf, "Peserta: %s", part->name.value);
@@ -129,9 +148,9 @@ void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state
 
     dp->cls();
     if (state->state == STATE_COMPLETED) {
-        dp->print_centered_colored(4, UTF_DOUBLE_H_16, COLOR_DIM, 0);
-        dp->print_centered_colored(5, "SEMUA TENDANGAN SELESAI!", COLOR_SUCCESS, 1);
-        dp->print_centered_colored(6, UTF_DOUBLE_H_16, COLOR_DIM, 0);
+        draw_double_line(dp, 2, 2, cols - 4);
+        dp->print_centered_colored(3, "SEMUA TENDANGAN SELESAI!", COLOR_SUCCESS, 1);
+        draw_double_line(dp, 4, 2, cols - 4);
     }
     dp->footer("[ENTER] Kembali ke menu");
     dp->screen_refresh();
