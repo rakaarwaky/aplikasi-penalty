@@ -15,7 +15,7 @@
  *
  * Untuk debug, set env PENALTI_LOG=DEBUG (atau INFO/WARN/ERROR/FATAL).
  */
-static LogLevel current_level = LOG_WARN;
+static LogLevel current_level = LOG_ERROR;
 
 static const char *level_names[] = {
     "DEBUG", "INFO", "WARN", "ERROR", "FATAL"
@@ -24,7 +24,7 @@ static const char *level_names[] = {
 /* Inisialisasi level dari env PENALTI_LOG (dipanggil sekali). */
 static LogLevel resolve_initial_level(void) {
     const char *env = getenv("PENALTI_LOG");
-    if (env == NULL) return LOG_WARN;
+    if (env == NULL) return LOG_ERROR;
     if (strcmp(env, "DEBUG") == 0) return LOG_DEBUG;
     if (strcmp(env, "INFO")  == 0) return LOG_INFO;
     if (strcmp(env, "WARN")  == 0) return LOG_WARN;
