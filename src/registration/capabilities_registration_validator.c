@@ -40,8 +40,11 @@ RegistrationError capabilities_registration_validate_name(const CompetitionState
     /* 1. Nama NULL atau string kosong. */
     if (name == NULL || name->value[0] == '\0') return REG_NAME_EMPTY;
 
-    /* 2. Panjang melebihi batas maksimum nama. */
-    size_t len = strlen(name->value);
+    /* 2. Panjang melebihi batas maksimum nama (tanpa strlen untuk hindari UB). */
+    size_t len = 0;
+    while (len <= (size_t)MAX_NAME_LENGTH && name->value[len] != '\0') {
+        len++;
+    }
     if (len > (size_t)MAX_NAME_LENGTH) return REG_NAME_TOO_LONG;
 
     /* 3 & 4. Scan karakter: hanya huruf/spasi sah; butuh >=1 huruf. */
