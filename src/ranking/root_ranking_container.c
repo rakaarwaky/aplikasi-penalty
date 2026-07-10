@@ -6,6 +6,5 @@ RankingAggregate root_ranking_build(void) {
 
     RankingAggregate a;
     a.protocol = &protocol;
-    a.port = create_ranking_port();
     return a;
 }

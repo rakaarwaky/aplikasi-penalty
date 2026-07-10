@@ -1,6 +1,6 @@
 /* AES_BYPASS: module declaration (barrel) — 1 header per feature folder.
-   Menyatukan deklarasi publik search: contract, capabilities, infrastructure,
-   agent, root. */
+   Domain search: contract, capabilities, agent, root.
+   Tanpa I/O: presentasi & input ada di cli/surfaces_search_command.c. */
 #ifndef MODULE_SEARCH_H
 #define MODULE_SEARCH_H
 
@@ -17,41 +17,26 @@ typedef struct {
 } SearchProtocol;
 
 /* ============================================================
-   CONTRACT — PORT
-   ============================================================ */
-typedef struct {
-    void (*display_header)(void);
-    void (*display_prompt)(void);
-    SearchError (*read_name)(char *buffer, int size);
-    void (*display_result)(const SearchResultVO *r);
-    void (*display_not_found)(const char *name);
-    void (*display_wait)(void);
-} SearchPort;
-
-/* ============================================================
    CONTRACT — AGGREGATE
    ============================================================ */
 typedef struct {
     SearchProtocol *protocol;
-    SearchPort *port;
 } SearchAggregate;
 
 /* ============================================================
-   CAPABILITIES
+   CAPABILITIES — pure logic
    ============================================================ */
 SearchError capabilities_search_find(const CompetitionState *state,
                                      const ParticipantNameVO *name,
                                      SearchResultVO *out);
 
 /* ============================================================
-   INFRASTRUCTURE — port factory
+   AGENT — koordinasi; tanpa I/O
    ============================================================ */
-SearchPort *create_search_port(void);
-
-/* ============================================================
-   AGENT — orchestrator
-   ============================================================ */
-SearchError agent_search_run(SearchAggregate *agg, CompetitionState *state);
+SearchError agent_search_find(SearchAggregate *agg,
+                              const CompetitionState *state,
+                              const ParticipantNameVO *name,
+                              SearchResultVO *out);
 
 /* ============================================================
    ROOT — container builder (wiring only)
