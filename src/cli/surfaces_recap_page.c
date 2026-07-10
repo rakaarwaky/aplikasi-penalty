@@ -7,30 +7,40 @@
 
 #include <stdio.h>
 
+static void draw_double_line(DisplayPort *dp, int row, int col, int width) {
+    int i;
+    for (i = 0; i < width; i++)
+        dp->draw_at(row, col + i, "\xe2\x95\x90");
+}
+
 void recap_page_draw(DisplayPort *dp, RankingEntryVO *ranking,
                      SearchResultVO *details, CompetitionState *state,
                      int total_score, int avg_score, int highest_score) {
     char buf[256];
-
     dp->cls();
 
-    dp->print_centered_colored(0, "Menu Utama > Rekapitulasi Lengkap", COLOR_DIM, 0);
-    dp->print_centered_colored(1, UTF_DOUBLE_H_40, COLOR_DIM, 0);
-    dp->print_centered_colored(2, "           REKAPITULASI LENGKAP           ", COLOR_TITLE, 1);
-    dp->print_centered_colored(3, UTF_DOUBLE_H_40, COLOR_DIM, 0);
+    int cols = dp->get_cols();
 
-    int box_col = 1;
-    int box_width = 66;
+    int gw = cols - 4;
+    if (gw > 72) gw = 72;
+    if (gw < 48) gw = 48;
+    int box_col = (cols - gw) / 2;
     int box_row = 4;
+
     int box_height = state->participant_count + 8;
 
-    dp->box(box_row, box_col, box_width, box_height);
+    dp->print_centered_colored(0, "Menu Utama > Rekapitulasi Lengkap", COLOR_DIM, 0);
+    draw_double_line(dp, 1, 2, cols - 4);
+    dp->print_centered_colored(2, "           REKAPITULASI LENGKAP           ", COLOR_TITLE, 1);
+    draw_double_line(dp, 3, 2, cols - 4);
 
-    dp->separator(box_row + 1, box_col, box_width);
+    dp->box(box_row, box_col, gw, box_height);
+
+    dp->separator(box_row + 1, box_col, gw);
     snprintf(buf, sizeof buf, " %-4s %-22s %-6s %s",
              "No", "Nama", "Skor", "Zona(0 1 2 3 4 5)");
     dp->draw_colored(box_row + 2, box_col + 2, COLOR_INFO, 1, buf);
-    dp->separator(box_row + 3, box_col, box_width);
+    dp->separator(box_row + 3, box_col, gw);
 
     int i;
     for (i = 0; i < state->participant_count; i++) {
@@ -59,10 +69,10 @@ void recap_page_draw(DisplayPort *dp, RankingEntryVO *ranking,
         }
 
         if (i < state->participant_count - 1)
-            dp->separator(row + 1, box_col, box_width);
+            dp->separator(row + 1, box_col, gw);
     }
 
-    dp->separator(box_row + 4 + state->participant_count, box_col, box_width);
+    dp->separator(box_row + 4 + state->participant_count, box_col, gw);
 
     snprintf(buf, sizeof buf,
              "Peserta: %d | Total Skor: %d | Rata-rata: %d | Tertinggi: %d",

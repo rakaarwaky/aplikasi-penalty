@@ -10,8 +10,6 @@
 #include <string.h>
 #include <ctype.h>
 
-#define BOX_COL 2
-
 static size_t trim_spaces(char *str) {
     if (str == NULL) return 0;
     char *start = str;
@@ -22,10 +20,18 @@ static size_t trim_spaces(char *str) {
     return len;
 }
 
-static void show_error(DisplayPort *dp, const char *msg, int row) {
+static int get_box_col(DisplayPort *dp) {
+    int cols = dp->get_cols();
+    int gw = cols - 4;
+    if (gw > 64) gw = 64;
+    if (gw < 40) gw = 40;
+    return (cols - gw) / 2;
+}
+
+static void show_error(DisplayPort *dp, const char *msg, int row, int box_col) {
     char buf[128];
     snprintf(buf, sizeof buf, "  [!] %s", msg);
-    dp->draw_colored(row, BOX_COL + 2, COLOR_ERROR, 1, buf);
+    dp->draw_colored(row, box_col + 2, COLOR_ERROR, 1, buf);
 }
 
 void cli_surfaces_registration_execute(RegistrationAggregate *agg,
@@ -36,6 +42,7 @@ void cli_surfaces_registration_execute(RegistrationAggregate *agg,
 
     registration_page_draw(dp, state);
 
+    int box_col = get_box_col(dp);
     int count = state->participant_count;
     int row = registration_page_input_row(count);
     int error_row = registration_page_error_row(count);
@@ -47,10 +54,10 @@ void cli_surfaces_registration_execute(RegistrationAggregate *agg,
         error_row = registration_page_error_row(count);
 
         snprintf(buf, sizeof buf, "Nama peserta #%d (contoh: \"Budi Santoso\"): ", count + 1);
-        dp->draw_colored(row, BOX_COL + 2, COLOR_INFO, 1, buf);
+        dp->draw_colored(row, box_col + 2, COLOR_INFO, 1, buf);
         dp->screen_refresh();
 
-        dp->input_string(row, BOX_COL + 21, buffer, 30);
+        dp->input_string(row, box_col + 21, buffer, 30);
 
         size_t len = strlen(buffer);
         while (len > 0 && (buffer[len - 1] == '\n' || buffer[len - 1] == '\r'))
@@ -64,13 +71,13 @@ void cli_surfaces_registration_execute(RegistrationAggregate *agg,
                 if (dp->confirm("Kembali ke menu utama?"))
                     return;
             }
-            show_error(dp, "Minimal 5 peserta untuk melanjutkan!", error_row);
+            show_error(dp, "Minimal 5 peserta untuk melanjutkan!", error_row, box_col);
             dp->screen_refresh();
             continue;
         }
 
         if (sn != NULL && agent_sanitize_validate_string(sn, buffer, MAX_NAME_LENGTH) != SANITIZE_OK) {
-            show_error(dp, "Input nama tidak valid!", error_row);
+            show_error(dp, "Input nama tidak valid!", error_row, box_col);
             dp->screen_refresh();
             continue;
         }
@@ -83,7 +90,7 @@ void cli_surfaces_registration_execute(RegistrationAggregate *agg,
         if (e == REG_OK) {
             registration_page_draw(dp, state);
             snprintf(buf, sizeof buf, "  [+] %s berhasil terdaftar!", name.value);
-            dp->draw_colored(error_row, BOX_COL + 2, COLOR_SUCCESS, 1, buf);
+            dp->draw_colored(error_row, box_col + 2, COLOR_SUCCESS, 1, buf);
             dp->screen_refresh();
         } else {
             const char *emsg = "Kesalahan pendaftaran!";
@@ -95,7 +102,7 @@ void cli_surfaces_registration_execute(RegistrationAggregate *agg,
                 case REG_FULL:              emsg = "Kuota peserta penuh!"; break;
                 default: break;
             }
-            show_error(dp, emsg, error_row);
+            show_error(dp, emsg, error_row, box_col);
             dp->screen_refresh();
         }
     }
@@ -105,7 +112,7 @@ void cli_surfaces_registration_execute(RegistrationAggregate *agg,
     int final_error_row = registration_page_error_row(final_count);
 
     snprintf(buf, sizeof buf, "Total peserta: %d", final_count);
-    dp->draw_colored(final_error_row, BOX_COL + 2, COLOR_SUCCESS, 1, buf);
+    dp->draw_colored(final_error_row, box_col + 2, COLOR_SUCCESS, 1, buf);
 
     dp->footer("[ENTER] Lanjut  \xe2\x94\x82  [q] Kembali");
     dp->screen_refresh();

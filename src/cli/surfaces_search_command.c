@@ -9,9 +9,6 @@
 #include <string.h>
 #include <ctype.h>
 
-#define BOX_ROW 3
-#define BOX_COL 2
-
 void cli_surfaces_search_execute(SearchAggregate *agg, CompetitionState *state,
                                  DisplayPort *dp) {
     if (agg == NULL || state == NULL) return;
@@ -25,8 +22,14 @@ void cli_surfaces_search_execute(SearchAggregate *agg, CompetitionState *state,
 
     search_page_draw_input(dp);
 
+    int cols = dp->get_cols();
+    int gw = cols - 4;
+    if (gw > 64) gw = 64;
+    if (gw < 40) gw = 40;
+    int box_col = (cols - gw) / 2;
+
     char buffer[64];
-    dp->input_string(BOX_ROW + 4, BOX_COL + 8, buffer, 30);
+    dp->input_string(4 + 4, box_col + 8, buffer, 30);
 
     size_t len = strlen(buffer);
     while (len > 0 && (buffer[len - 1] == '\n' || buffer[len - 1] == '\r'))

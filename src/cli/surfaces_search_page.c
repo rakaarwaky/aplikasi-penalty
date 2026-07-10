@@ -9,54 +9,75 @@
 #include <string.h>
 #include <ctype.h>
 
-#define BOX_WIDTH 58
 #define BOX_HEIGHT 16
-#define BOX_ROW 3
-#define BOX_COL 2
+
+static void draw_double_line(DisplayPort *dp, int row, int col, int width) {
+    int i;
+    for (i = 0; i < width; i++)
+        dp->draw_at(row, col + i, "\xe2\x95\x90");
+}
 
 void search_page_draw_input(DisplayPort *dp) {
     dp->cls();
 
+    int cols = dp->get_cols();
+    int gw = cols - 4;
+    if (gw > 64) gw = 64;
+    if (gw < 40) gw = 40;
+    int box_col = (cols - gw) / 2;
+    int box_row = 4;
+
     dp->print_centered_colored(0, "Menu Utama > Cari Peserta", COLOR_DIM, 0);
-    dp->print_centered_colored(1, UTF_DOUBLE_H_32, COLOR_DIM, 0);
+    draw_double_line(dp, 1, 2, cols - 4);
     dp->print_centered_colored(2, "          CARI PESERTA          ", COLOR_TITLE, 1);
-    dp->print_centered_colored(3, UTF_DOUBLE_H_32, COLOR_DIM, 0);
+    draw_double_line(dp, 3, 2, cols - 4);
 
-    dp->box(BOX_ROW, BOX_COL, BOX_WIDTH, BOX_HEIGHT);
-    dp->separator(BOX_ROW + 1, BOX_COL, BOX_WIDTH);
+    dp->box(box_row, box_col, gw, BOX_HEIGHT);
+    dp->separator(box_row + 1, box_col, gw);
 
-    dp->draw_colored(BOX_ROW + 2, BOX_COL + 2, COLOR_MENU, 0,
+    dp->draw_colored(box_row + 2, box_col + 2, COLOR_MENU, 0,
                      "Masukkan nama peserta yang dicari:");
-    dp->draw_colored(BOX_ROW + 4, BOX_COL + 2, COLOR_INFO, 0, "Nama: ");
+    dp->draw_colored(box_row + 4, box_col + 2, COLOR_INFO, 0, "Nama: ");
     dp->screen_refresh();
 }
 
 void search_page_draw_found(DisplayPort *dp, SearchResultVO *r) {
     char buf[128];
-
     dp->cls();
-    dp->print_centered_colored(1, "HASIL PENCARIAN", COLOR_TITLE, 1);
-    dp->box(BOX_ROW, BOX_COL, BOX_WIDTH, BOX_HEIGHT);
-    dp->separator(BOX_ROW + 1, BOX_COL, BOX_WIDTH);
 
-    dp->draw_colored(BOX_ROW + 2, BOX_COL + 2, COLOR_SUCCESS, 1,
+    int cols = dp->get_cols();
+    int gw = cols - 4;
+    if (gw > 64) gw = 64;
+    if (gw < 40) gw = 40;
+    int box_col = (cols - gw) / 2;
+    int box_row = 4;
+
+    dp->print_centered_colored(0, "Menu Utama > Cari Peserta", COLOR_DIM, 0);
+    draw_double_line(dp, 1, 2, cols - 4);
+    dp->print_centered_colored(2, "          HASIL PENCARIAN          ", COLOR_TITLE, 1);
+    draw_double_line(dp, 3, 2, cols - 4);
+
+    dp->box(box_row, box_col, gw, BOX_HEIGHT);
+    dp->separator(box_row + 1, box_col, gw);
+
+    dp->draw_colored(box_row + 2, box_col + 2, COLOR_SUCCESS, 1,
                      "[DITEMUKAN] Peserta ditemukan!");
-    dp->separator(BOX_ROW + 3, BOX_COL, BOX_WIDTH);
+    dp->separator(box_row + 3, box_col, gw);
 
     snprintf(buf, sizeof buf, "Nama        : %s", r->name);
-    dp->draw_colored(BOX_ROW + 4, BOX_COL + 4, COLOR_GOLD, 1, buf);
+    dp->draw_colored(box_row + 4, box_col + 4, COLOR_GOLD, 1, buf);
 
     snprintf(buf, sizeof buf, "Total Skor  : %d poin", r->total_score);
-    dp->draw_colored(BOX_ROW + 5, BOX_COL + 4, COLOR_SUCCESS, 1, buf);
+    dp->draw_colored(box_row + 5, box_col + 4, COLOR_SUCCESS, 1, buf);
 
-    dp->separator(BOX_ROW + 6, BOX_COL, BOX_WIDTH);
+    dp->separator(box_row + 6, box_col, gw);
 
-    dp->draw_colored(BOX_ROW + 7, BOX_COL + 2, COLOR_MENU, 0, "Riwayat Tendangan:");
+    dp->draw_colored(box_row + 7, box_col + 2, COLOR_MENU, 0, "Riwayat Tendangan:");
 
     int k;
     for (k = 0; k < TOTAL_KICKS; k++) {
-        int cx = BOX_COL + 4 + k * 5;
-        int cy = BOX_ROW + 8;
+        int cx = box_col + 4 + k * 5;
+        int cy = box_row + 8;
 
         if (r->kicks[k] == -1) {
             dp->draw_colored(cy, cx, COLOR_DIM, 0, " - ");
@@ -71,14 +92,14 @@ void search_page_draw_found(DisplayPort *dp, SearchResultVO *r) {
         }
     }
 
-    dp->separator(BOX_ROW + 10, BOX_COL, BOX_WIDTH);
+    dp->separator(box_row + 10, box_col, gw);
 
-    dp->draw_colored(BOX_ROW + 11, BOX_COL + 2, COLOR_MENU, 0, "Frekuensi Zona:");
+    dp->draw_colored(box_row + 11, box_col + 2, COLOR_MENU, 0, "Frekuensi Zona:");
 
     int z;
     for (z = 0; z <= MAX_ZONE; z++) {
-        int cx = BOX_COL + 4 + z * 7;
-        int cy = BOX_ROW + 12;
+        int cx = box_col + 4 + z * 7;
+        int cy = box_row + 12;
         snprintf(buf, sizeof buf, "Z%d:%d", z, r->zone_freq[z]);
         dp->draw_colored(cy, cx, COLOR_MENU, 0, buf);
     }
@@ -91,16 +112,27 @@ void search_page_draw_found(DisplayPort *dp, SearchResultVO *r) {
 void search_page_draw_not_found(DisplayPort *dp, const char *query,
                                 CompetitionState *state) {
     char buf[128];
-
     dp->cls();
-    dp->print_centered_colored(1, "HASIL PENCARIAN", COLOR_TITLE, 1);
-    dp->box(BOX_ROW, BOX_COL, BOX_WIDTH, BOX_HEIGHT);
-    dp->separator(BOX_ROW + 1, BOX_COL, BOX_WIDTH);
 
-    dp->draw_colored(BOX_ROW + 4, BOX_COL + 4, COLOR_ERROR, 1, "[TIDAK DITEMUKAN]");
+    int cols = dp->get_cols();
+    int gw = cols - 4;
+    if (gw > 64) gw = 64;
+    if (gw < 40) gw = 40;
+    int box_col = (cols - gw) / 2;
+    int box_row = 4;
+
+    dp->print_centered_colored(0, "Menu Utama > Cari Peserta", COLOR_DIM, 0);
+    draw_double_line(dp, 1, 2, cols - 4);
+    dp->print_centered_colored(2, "          HASIL PENCARIAN          ", COLOR_TITLE, 1);
+    draw_double_line(dp, 3, 2, cols - 4);
+
+    dp->box(box_row, box_col, gw, BOX_HEIGHT);
+    dp->separator(box_row + 1, box_col, gw);
+
+    dp->draw_colored(box_row + 4, box_col + 4, COLOR_ERROR, 1, "[TIDAK DITEMUKAN]");
 
     snprintf(buf, sizeof buf, "Peserta '%s' tidak ditemukan.", query);
-    dp->draw_colored(BOX_ROW + 6, BOX_COL + 4, COLOR_MENU, 0, buf);
+    dp->draw_colored(box_row + 6, box_col + 4, COLOR_MENU, 0, buf);
 
     int suggestions = 0;
     int si;
@@ -121,13 +153,13 @@ void search_page_draw_not_found(DisplayPort *dp, const char *query,
         }
         if (qlen > 0 && matched * 2 >= qlen) {
             snprintf(buf, sizeof buf, "- %s", pname);
-            dp->draw_colored(BOX_ROW + 9 + suggestions, BOX_COL + 6,
+            dp->draw_colored(box_row + 9 + suggestions, box_col + 6,
                              COLOR_SUCCESS, 0, buf);
             suggestions++;
         }
     }
     if (suggestions == 0) {
-        dp->draw_colored(BOX_ROW + 9, BOX_COL + 6, COLOR_DIM, 0,
+        dp->draw_colored(box_row + 9, box_col + 6, COLOR_DIM, 0,
                          "(tidak ada saran serupa)");
     }
 

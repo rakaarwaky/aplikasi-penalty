@@ -10,10 +10,7 @@
 #include <string.h>
 #include <ctype.h>
 
-#define BOX_WIDTH 58
 #define BOX_HEIGHT 14
-#define BOX_ROW 3
-#define BOX_COL 2
 
 static ScoringError read_zone(DisplayPort *dp, ZoneVO *out, char *raw_out, size_t raw_size) {
     char buf[32];
@@ -37,6 +34,12 @@ void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state
                                   DisplayPort *dp, SanitizeAggregate *sn) {
     char buf[128];
     if (agg == NULL || state == NULL) return;
+
+    int cols = dp->get_cols();
+    int gw = cols - 4;
+    if (gw > 64) gw = 64;
+    if (gw < 40) gw = 40;
+    int box_col = (cols - gw) / 2;
 
     if (state->state == STATE_INIT) {
         dp->cls();
@@ -77,7 +80,7 @@ void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state
                 agent_sanitize_validate_int(sn, raw, MIN_ZONE, MAX_ZONE) != SANITIZE_OK) {
                 snprintf(buf, sizeof buf,
                          "[GAGAL] Input zona tidak valid: '%s'.", raw);
-                dp->draw_colored(BOX_ROW + BOX_HEIGHT - 2, BOX_COL + 2, COLOR_ERROR, 1, buf);
+                dp->draw_colored(4 + BOX_HEIGHT - 2, box_col + 2, COLOR_ERROR, 1, buf);
                 dp->screen_refresh();
                 dp->readkey();
                 continue;
@@ -86,7 +89,7 @@ void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state
             if (z.value < MIN_ZONE || z.value > MAX_ZONE) {
                 snprintf(buf, sizeof buf,
                          "[GAGAL] Zona harus %d-%d. Input: '%s'.", MIN_ZONE, MAX_ZONE, raw);
-                dp->draw_colored(BOX_ROW + BOX_HEIGHT - 2, BOX_COL + 2, COLOR_ERROR, 1, buf);
+                dp->draw_colored(4 + BOX_HEIGHT - 2, box_col + 2, COLOR_ERROR, 1, buf);
                 dp->screen_refresh();
                 dp->readkey();
                 continue;
@@ -111,13 +114,13 @@ void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state
 
         dp->cls();
         dp->print_centered_colored(4, "[SELESAI]", COLOR_SUCCESS, 1);
-        dp->box(6, BOX_COL, BOX_WIDTH, 6);
+        dp->box(6, box_col, gw, 6);
 
         snprintf(buf, sizeof buf, "Peserta: %s", part->name.value);
-        dp->draw_colored(8, BOX_COL + 4, COLOR_GOLD, 1, buf);
+        dp->draw_colored(8, box_col + 4, COLOR_GOLD, 1, buf);
 
         snprintf(buf, sizeof buf, "Total Skor: %d poin", part->total_score.value);
-        dp->draw_colored(9, BOX_COL + 4, COLOR_SUCCESS, 1, buf);
+        dp->draw_colored(9, box_col + 4, COLOR_SUCCESS, 1, buf);
 
         dp->footer("[ENTER] Lanjut");
         dp->screen_refresh();
