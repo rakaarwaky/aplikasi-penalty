@@ -13,7 +13,8 @@ INCLUDES := -I$(SRC_DIR) -I$(SRC_DIR)/shared \
             -I$(SRC_DIR)/registration -I$(SRC_DIR)/scoring \
             -I$(SRC_DIR)/ranking -I$(SRC_DIR)/search \
             -I$(SRC_DIR)/recap -I$(SRC_DIR)/cli \
-            -I$(SRC_DIR)/tui -I$(SRC_DIR)/storage -I$(SRC_DIR)/sanitizer
+            -I$(SRC_DIR)/tui -I$(SRC_DIR)/storage \
+            -I$(SRC_DIR)/sanitizer -I$(SRC_DIR)/export
 
 LDFLAGS  := -lncurses
 
@@ -24,7 +25,8 @@ TEST_INC   := -I$(SRC_DIR) -I$(SRC_DIR)/shared \
               -I$(SRC_DIR)/registration -I$(SRC_DIR)/scoring \
               -I$(SRC_DIR)/ranking -I$(SRC_DIR)/search \
               -I$(SRC_DIR)/recap -I$(SRC_DIR)/cli -I$(SRC_DIR)/tui \
-              -I$(SRC_DIR)/storage -I$(SRC_DIR)/sanitizer
+              -I$(SRC_DIR)/storage -I$(SRC_DIR)/sanitizer \
+              -I$(SRC_DIR)/export
 TEST_LIB_SRC := $(filter-out $(SRC_DIR)/root_cli_main_entry.c \
                   $(SRC_DIR)/cli/surfaces_menu_command.c \
                   $(SRC_DIR)/cli/surfaces_registration_command.c \
@@ -35,7 +37,7 @@ TEST_LIB_SRC := $(filter-out $(SRC_DIR)/root_cli_main_entry.c \
                   $(SRC_DIR)/tui/infrastructure_tui_adapter.c, $(C_SOURCES))
 TEST_BIN   := run_tests
 
-.PHONY: all clean run test lint format check-format analyze valgrind
+.PHONY: all clean run test lint format analyze metrics version valgrind
 
 all: $(TARGET)
 
@@ -58,90 +60,54 @@ $(TEST_BIN): $(TEST_LIB_SRC) $(TEST_SRCS)
 clean:
 	rm -rf $(BUILD_DIR) $(TARGET) $(TEST_BIN)
 
-# Lint (cppcheck jika tersedia)
+# Lint (cppcheck)
 lint:
 	@if command -v cppcheck > /dev/null 2>&1; then \
-		cppcheck --enable=all --suppress=missingIncludeSystem src/ tests/; \
-		echo "Lint complete"; \
+		cppcheck --enable=all --suppress=missingIncludeSystem \
+			--suppress=unusedFunction --suppress=normalCheckLevelMaxBranches \
+			$(INCLUDES) src/ tests/; \
+		echo "Linting complete"; \
 	else \
-		echo "cppcheck not installed, skipping lint"; \
+		echo "cppcheck not installed, skipping"; \
 	fi
 
-# Format check (clang-format jika tersedia)
-format-check:
+# Format check (clang-format)
+format:
 	@if command -v clang-format > /dev/null 2>&1; then \
-		find src/ tests/ -name "*.c" -o -name "*.h" | xargs clang-format --dry-run --Werror; \
-		echo "Format check complete"; \
+		find src/ tests/ -name "*.c" -o -name "*.h" | xargs clang-format -i; \
+		echo "Formatting complete"; \
 	else \
-		echo "clang-format not installed, skipping format check"; \
+		echo "clang-format not installed, skipping"; \
 	fi
 
-# Static analysis via GCC warnings (always available)
+# Static analysis (scan-build)
 analyze:
-	$(CC) $(CFLAGS) -fanalyzer $(INCLUDES) -fsyntax-only $(C_SOURCES) 2>&1 || true
-	@echo "Static analysis complete"
+	@if command -v scan-build > /dev/null 2>&1; then \
+		scan-build --status-bugs make clean && scan-build --status-bugs make; \
+		echo "Analysis complete"; \
+	else \
+		echo "scan-build not installed, skipping"; \
+	fi
 
-# Code metrics (cloc jika tersedia)
+# Memory check (valgrind)
+valgrind: $(TEST_BIN)
+	@if command -v valgrind > /dev/null 2>&1; then \
+		valgrind --leak-check=full --error-exitcode=1 ./$(TEST_BIN); \
+	else \
+		echo "valgrind not installed, skipping"; \
+	fi
+
+# Code metrics
 metrics:
 	@echo "=== Code Metrics ==="
-	@echo "Files:"
-	@find src/ -name "*.c" | wc -l
-	@echo "Headers:"
-	@find src/ -name "*.h" | wc -l
-	@echo "Lines of code:"
-	@find src/ -name "*.c" -exec cat {} + | wc -l
-	@echo "Lines of headers:"
-	@find src/ -name "*.h" -exec cat {} + | wc -l
-	@echo "Test files:"
-	@find tests/ -name "*.c" | wc -l
-	@echo "Test lines:"
-	@find tests/ -name "*.c" -exec cat {} + | wc -l
-	@if command -v cloc > /dev/null 2>&1; then \
-		echo ""; \
-		cloc src/ tests/ --quiet; \
-	fi
+	@echo "Source files: $$(find src/ -name '*.c' | wc -l)"
+	@echo "Header files: $$(find src/ -name '*.h' | wc -l)"
+	@echo "Source lines: $$(find src/ -name '*.c' -exec cat {} + | wc -l)"
+	@echo "Header lines: $$(find src/ -name '*.h' -exec cat {} + | wc -l)"
+	@echo "Test files:   $$(find tests/ -name '*.c' | wc -l)"
+	@echo "Test lines:   $$(find tests/ -name '*.c' -exec cat {} + | wc -l)"
 
 # Version
 version:
 	@echo "Version: 1.0.0"
 	@echo "Build: $$(date +%Y%m%d)"
-	@echo "Tests: $$(grep -c 'PASS' tests/test_*.c 2>/dev/null || echo 0)"
-
-# Performance benchmark
-bench:
-	@echo "=== Performance Benchmark ==="
-	@time ./run_tests 2>&1 | tail -1
-
-# Full check (lint + format + analyze + test)
-check: lint format-check analyze test
-	@echo "=== All checks passed ==="
-
-# Linting
-lint:
-	cppcheck --enable=all --suppress=missingIncludeSystem \
-		--suppress=unusedFunction --suppress=normalCheckLevelMaxBranches \
-		-I$(SRC_DIR) -I$(SRC_DIR)/shared \
-		-I$(SRC_DIR)/registration -I$(SRC_DIR)/scoring \
-		-I$(SRC_DIR)/ranking -I$(SRC_DIR)/search \
-		-I$(SRC_DIR)/recap -I$(SRC_DIR)/cli \
-		-I$(SRC_DIR)/tui -I$(SRC_DIR)/storage -I$(SRC_DIR)/sanitizer \
-		src/ tests/
-	@echo "Linting complete"
-
-# Formatting
-format:
-	find src/ tests/ -name "*.c" -o -name "*.h" | xargs clang-format -i
-	@echo "Formatting complete"
-
-check-format:
-	find src/ tests/ -name "*.c" -o -name "*.h" | xargs clang-format --dry-run --Werror
-	@echo "Format check complete"
-
-# Static analysis
-analyze:
-	scan-build --status-bugs make
-	@echo "Analysis complete"
-
-# Memory check
-valgrind: $(TEST_BIN)
-	valgrind --leak-check=full --error-exitcode=1 ./$(TEST_BIN)

@@ -16,7 +16,7 @@ static void test_name_too_long(void) {
     CompetitionState state = {0};
     state.state = STATE_INIT;
     ParticipantNameVO name = {{0}};
-    memset(name.value, 'A', 31);
+    memset(name.value, 'A', MAX_NAME_LENGTH + 1);
     assert(capabilities_registration_validate_name(&state, &name) == REG_NAME_TOO_LONG);
     printf("  [PASS] test_name_too_long\n");
 }
