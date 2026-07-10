@@ -190,7 +190,8 @@ int cli_surfaces_menu_run(RegistrationAggregate *reg,
                           ScoringAggregate *sc, RankingAggregate *rk,
                           SearchAggregate *sr, RecapAggregate *rc,
                           CompetitionState *state,
-                          DisplayPort *dp) {
+                          DisplayPort *dp,
+                          SanitizeAggregate *sn) {
     int selected = 1;
     int running = 1;
 
