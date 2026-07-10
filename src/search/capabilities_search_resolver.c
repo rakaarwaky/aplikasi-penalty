@@ -43,9 +43,9 @@ SearchError capabilities_search_find(const CompetitionState *state,
             out->participant_id = i;
             strncpy(out->name, state->participants[i].name.value, MAX_NAME_LENGTH);
             out->name[MAX_NAME_LENGTH] = '\0';
-            out->total_score = state->participants[i].total_score;
-            for (int k = 0; k < TOTAL_KICKS; k++) out->kicks[k] = state->participants[i].kicks[k];
-            for (int z = 0; z <= MAX_ZONE; z++) out->zone_freq[z] = state->participants[i].zone_freq[z];
+            out->total_score = state->participants[i].total_score.value;
+            for (int k = 0; k < TOTAL_KICKS; k++) out->kicks[k] = state->participants[i].kicks[k].zone;
+            for (int z = 0; z <= MAX_ZONE; z++) out->zone_freq[z] = state->participants[i].zone_freq.freq[z];
             return SR_OK;
         }
     }

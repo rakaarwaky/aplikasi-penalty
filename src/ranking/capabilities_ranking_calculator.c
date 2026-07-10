@@ -40,9 +40,9 @@ RankingError capabilities_ranking_compute(const CompetitionState *state,
     /* Salin data peserta ke hasil. */
     for (int i = 0; i < state->participant_count; i++) {
         out[i].participant_id = i;
-        out[i].total_score = state->participants[i].total_score;
+        out[i].total_score = state->participants[i].total_score.value;
         for (int z = 0; z <= MAX_ZONE; z++)
-            out[i].zone_freq[z] = state->participants[i].zone_freq[z];
+            out[i].zone_freq[z] = state->participants[i].zone_freq.freq[z];
         out[i].rank = 0;
     }
 

@@ -1,16 +1,11 @@
 /**
  * @file root_display_container.c
- * @brief Rakit DisplayPort dari implementasi TUI konkret (ncurses).
+ * @brief Wiring: buat DisplayPort dari infrastructure TUI adapter.
  */
 
+#include "shared/contract_display_port.h"
 #include "tui/infrastructure_tui_adapter.h"
 
-/**
- * Bangun DisplayPort: sambungkan seluruh fungsi gambar layar
- * agar siap dipakai oleh surfaces melalui contract.
- *
- * @return DisplayPort yang sudah terisi.
- */
 DisplayPort root_display_build(void) {
     return tui_display_port_create();
 }

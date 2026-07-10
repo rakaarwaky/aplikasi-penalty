@@ -56,10 +56,10 @@ static void test_record_kick(void) {
     ZoneVO z = {3};
     ScoringError e = capabilities_scoring_record_kick(&state, 0, z);
     assert(e == SC_OK);
-    assert(state.participants[0].kick_count == 1);
-    assert(state.participants[0].total_score == 3);
-    assert(state.participants[0].kicks[0] == 3);
-    assert(state.participants[0].zone_freq[3] == 1);
+    assert(state.participants[0].kick_count.value == 1);
+    assert(state.participants[0].total_score.value == 3);
+    assert(state.participants[0].kicks[0].zone == 3);
+    assert(state.participants[0].zone_freq.freq[3] == 1);
     printf("  [PASS] test_record_kick\n");
 }
 
@@ -73,8 +73,8 @@ static void test_record_kick_zero_zone(void) {
     ZoneVO z = {0};
     ScoringError e = capabilities_scoring_record_kick(&state, 0, z);
     assert(e == SC_OK);
-    assert(state.participants[0].total_score == 0);
-    assert(state.participants[0].zone_freq[0] == 1);
+    assert(state.participants[0].total_score.value == 0);
+    assert(state.participants[0].zone_freq.freq[0] == 1);
     printf("  [PASS] test_record_kick_zero_zone\n");
 }
 
@@ -88,8 +88,8 @@ static void test_record_kick_five_zone(void) {
     ZoneVO z = {5};
     ScoringError e = capabilities_scoring_record_kick(&state, 0, z);
     assert(e == SC_OK);
-    assert(state.participants[0].total_score == 5);
-    assert(state.participants[0].zone_freq[5] == 1);
+    assert(state.participants[0].total_score.value == 5);
+    assert(state.participants[0].zone_freq.freq[5] == 1);
     printf("  [PASS] test_record_kick_five_zone\n");
 }
 
@@ -107,11 +107,11 @@ static void test_record_multiple_kicks(void) {
         ZoneVO z = {zones[i]};
         capabilities_scoring_record_kick(&state, 0, z);
     }
-    assert(state.participants[0].kick_count == TOTAL_KICKS);
-    assert(state.participants[0].total_score == expected_total);
-    assert(state.participants[0].zone_freq[5] == 2);
-    assert(state.participants[0].zone_freq[3] == 1);
-    assert(state.participants[0].zone_freq[0] == 1);
+    assert(state.participants[0].kick_count.value == TOTAL_KICKS);
+    assert(state.participants[0].total_score.value == expected_total);
+    assert(state.participants[0].zone_freq.freq[5] == 2);
+    assert(state.participants[0].zone_freq.freq[3] == 1);
+    assert(state.participants[0].zone_freq.freq[0] == 1);
     printf("  [PASS] test_record_multiple_kicks\n");
 }
 
@@ -205,12 +205,12 @@ static void test_zone_freq_tracking(void) {
         ZoneVO z = {zones[i]};
         capabilities_scoring_record_kick(&state, 0, z);
     }
-    assert(state.participants[0].zone_freq[0] == 3);
-    assert(state.participants[0].zone_freq[5] == 3);
-    assert(state.participants[0].zone_freq[3] == 1);
-    assert(state.participants[0].zone_freq[1] == 0);
-    assert(state.participants[0].zone_freq[2] == 0);
-    assert(state.participants[0].zone_freq[4] == 0);
+    assert(state.participants[0].zone_freq.freq[0] == 3);
+    assert(state.participants[0].zone_freq.freq[5] == 3);
+    assert(state.participants[0].zone_freq.freq[3] == 1);
+    assert(state.participants[0].zone_freq.freq[1] == 0);
+    assert(state.participants[0].zone_freq.freq[2] == 0);
+    assert(state.participants[0].zone_freq.freq[4] == 0);
     printf("  [PASS] test_zone_freq_tracking\n");
 }
 
@@ -226,7 +226,7 @@ static void test_agent_scoring_record(void) {
     ZoneVO z = {4};
     ScoringError e = agent_scoring_record(&agg, &state, 0, z);
     assert(e == SC_OK);
-    assert(state.participants[0].total_score == 4);
+    assert(state.participants[0].total_score.value == 4);
     printf("  [PASS] test_agent_scoring_record\n");
 }
 

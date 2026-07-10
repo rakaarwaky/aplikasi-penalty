@@ -123,8 +123,8 @@ static void test_append_participant(void) {
     assert(e == REG_OK);
     assert(state.participant_count == 1);
     assert(strcmp(state.participants[0].name.value, "Raka") == 0);
-    assert(state.participants[0].total_score == 0);
-    assert(state.participants[0].kick_count == 0);
+    assert(state.participants[0].total_score.value == 0);
+    assert(state.participants[0].kick_count.value == 0);
     printf("  [PASS] test_append_participant\n");
 }
 
@@ -136,13 +136,13 @@ static void test_append_initializes_fields(void) {
     capabilities_registration_append(&state, &name);
 
     ParticipantEntity *p = &state.participants[0];
-    assert(p->id == 0);
-    assert(p->total_score == 0);
-    assert(p->kick_count == 0);
+    assert(p->id.value == 0);
+    assert(p->total_score.value == 0);
+    assert(p->kick_count.value == 0);
     int z;
-    for (z = 0; z <= MAX_ZONE; z++) assert(p->zone_freq[z] == 0);
+    for (z = 0; z <= MAX_ZONE; z++) assert(p->zone_freq.freq[z] == 0);
     int k;
-    for (k = 0; k < TOTAL_KICKS; k++) assert(p->kicks[k] == -1);
+    for (k = 0; k < TOTAL_KICKS; k++) assert(p->kicks[k].zone == -1);
     printf("  [PASS] test_append_initializes_fields\n");
 }
 
@@ -157,7 +157,7 @@ static void test_append_multiple(void) {
     }
     assert(state.participant_count == 3);
     assert(strcmp(state.participants[2].name.value, "Player2") == 0);
-    assert(state.participants[2].id == 2);
+    assert(state.participants[2].id.value == 2);
     printf("  [PASS] test_append_multiple\n");
 }
 

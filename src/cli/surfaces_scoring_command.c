@@ -50,12 +50,12 @@ static void draw_scoring_screen(DisplayPort *dp, ParticipantEntity *part,
     snprintf(buf, sizeof buf, "Peserta: %s", part->name.value);
     dp->draw_colored(BOX_ROW + 2, BOX_COL + 2, COLOR_GOLD, 1, buf);
 
-    int kick_pct = (part->kick_count * 100) / TOTAL_KICKS;
-    snprintf(buf, sizeof buf, "Tendangan %d/%d: ", part->kick_count, TOTAL_KICKS);
+    int kick_pct = (part->kick_count.value * 100) / TOTAL_KICKS;
+    snprintf(buf, sizeof buf, "Tendangan %d/%d: ", part->kick_count.value, TOTAL_KICKS);
     dp->draw_colored(BOX_ROW + 3, BOX_COL + 2, COLOR_MENU, 0, buf);
     dp->progress_bar(BOX_ROW + 3, BOX_COL + 18, 20, kick_pct, COLOR_SUCCESS);
 
-    snprintf(buf, sizeof buf, "Skor sementara: %d poin", part->total_score);
+    snprintf(buf, sizeof buf, "Skor sementara: %d poin", part->total_score.value);
     dp->draw_colored(BOX_ROW + 4, BOX_COL + 2, COLOR_WARNING, 1, buf);
 
     dp->separator(BOX_ROW + 5, BOX_COL, BOX_WIDTH);
@@ -66,15 +66,15 @@ static void draw_scoring_screen(DisplayPort *dp, ParticipantEntity *part,
         int cx = BOX_COL + 4 + k * 4;
         int cy = BOX_ROW + 7;
 
-        if (k < part->kick_count) {
-            int zone = part->kicks[k];
+        if (k < part->kick_count.value) {
+            int zone = part->kicks[k].zone;
             int color = COLOR_DIM;
             if (zone >= 4) color = COLOR_SUCCESS;
             else if (zone >= 2) color = COLOR_WARNING;
             else if (zone == 0) color = COLOR_ERROR;
             snprintf(buf, sizeof buf, "Z%d ", zone);
             dp->draw_colored(cy, cx, color, 1, buf);
-        } else if (k == part->kick_count) {
+        } else if (k == part->kick_count.value) {
             dp->draw_colored(cy, cx, COLOR_INFO, 1, " -> ");
         } else {
             dp->draw_colored(cy, cx, COLOR_DIM, 0, " . ");
@@ -121,7 +121,7 @@ void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state
     int p;
     for (p = 0; p < state->participant_count; p++) {
         ParticipantEntity *part = &state->participants[p];
-        while (part->kick_count < TOTAL_KICKS) {
+        while (part->kick_count.value < TOTAL_KICKS) {
             draw_scoring_screen(dp, part, NULL, 0);
 
             ZoneVO z;
@@ -158,7 +158,7 @@ void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state
         snprintf(buf, sizeof buf, "Peserta: %s", part->name.value);
         dp->draw_colored(8, BOX_COL + 4, COLOR_GOLD, 1, buf);
 
-        snprintf(buf, sizeof buf, "Total Skor: %d poin", part->total_score);
+        snprintf(buf, sizeof buf, "Total Skor: %d poin", part->total_score.value);
         dp->draw_colored(9, BOX_COL + 4, COLOR_SUCCESS, 1, buf);
 
         dp->footer("[ENTER] Lanjut");

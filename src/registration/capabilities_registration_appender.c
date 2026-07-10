@@ -27,14 +27,17 @@ RegistrationError capabilities_registration_append(CompetitionState *state,
     int slot = state->participant_count;
 
     /* Isi data awal peserta baru. */
-    state->participants[slot].id = slot;
+    state->participants[slot].id.value = slot;
     memcpy(state->participants[slot].name.value,
            name->value, MAX_NAME_LENGTH);
     state->participants[slot].name.value[MAX_NAME_LENGTH] = '\0'; /* jamin string berakhir null */
-    state->participants[slot].total_score = 0;
-    state->participants[slot].kick_count = 0;
-    for (int z = 0; z <= MAX_ZONE; z++) state->participants[slot].zone_freq[z] = 0; /* reset frekuensi zona */
-    for (int k = 0; k < TOTAL_KICKS; k++) state->participants[slot].kicks[k] = -1; /* -1 = tendangan belum dilakukan */
+    state->participants[slot].total_score.value = 0;
+    state->participants[slot].kick_count.value = 0;
+    for (int z = 0; z <= MAX_ZONE; z++) state->participants[slot].zone_freq.freq[z] = 0; /* reset frekuensi zona */
+    for (int k = 0; k < TOTAL_KICKS; k++) {
+        state->participants[slot].kicks[k].zone = -1;   /* -1 = tendangan belum dilakukan */
+        state->participants[slot].kicks[k].points = 0;
+    }
 
     /* Catat jumlah peserta yang bertambah. */
     state->participant_count++;

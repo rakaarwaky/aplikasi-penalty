@@ -23,20 +23,21 @@ ScoringError capabilities_scoring_record_kick(CompetitionState *state, int id, Z
     ParticipantEntity *p = &state->participants[id];
 
     /* Peserta sudah melakukan semua tendangannya. */
-    if (p->kick_count >= TOTAL_KICKS) return SC_ALREADY_DONE;
+    if (p->kick_count.value >= TOTAL_KICKS) return SC_ALREADY_DONE;
 
     /* Simpan hasil tendangan ke slot berikutnya. */
-    int k = p->kick_count;
-    p->kicks[k] = zone.value;
-    p->total_score += zone.value;       /* skor = jumlah semua zona */
-    p->zone_freq[zone.value]++;        /* hitung frekuensi zona ini */
-    p->kick_count++;
+    int k = p->kick_count.value;
+    p->kicks[k].zone = zone.value;
+    p->kicks[k].points = zone.value;
+    p->total_score.value += zone.value;       /* skor = jumlah semua zona */
+    p->zone_freq.freq[zone.value]++;          /* hitung frekuensi zona ini */
+    p->kick_count.value++;
 
     /* Bila semua peserta sudah selesai, tandai lomba selesai. */
     if (state->state == STATE_REGISTERED) {
         int all = 1;
         for (int i = 0; i < state->participant_count; i++)
-            if (state->participants[i].kick_count < TOTAL_KICKS) { all = 0; break; }
+            if (state->participants[i].kick_count.value < TOTAL_KICKS) { all = 0; break; }
         if (all) state->state = STATE_COMPLETED;
     }
     return SC_OK;

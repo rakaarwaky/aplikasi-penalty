@@ -163,7 +163,7 @@ static void test_storage_roundtrip(void) {
     assert(loaded.state == STATE_COMPLETED);
 
     for (int i = 0; i < loaded.participant_count; i++) {
-        assert(loaded.participants[i].kick_count == TOTAL_KICKS);
+        assert(loaded.participants[i].kick_count.value == TOTAL_KICKS);
     }
 
     remove("test_roundtrip.dat");
