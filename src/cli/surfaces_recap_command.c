@@ -85,11 +85,23 @@ void cli_surfaces_recap_execute(RecapAggregate *agg, CompetitionState *state) {
     /* Separator footer */
     tui_separator(box_row + 4 + state->participant_count, box_col, box_width);
 
-    /* Ringkasan */
-    attron(COLOR_PAIR(COLOR_MENU));
+    /* Hitung statistik */
+    int total_score_all = 0;
+    int highest_score = 0;
+    int i_stat;
+    for (i_stat = 0; i_stat < state->participant_count; i_stat++) {
+        total_score_all += ranking[i_stat].total_score;
+        if (ranking[i_stat].total_score > highest_score)
+            highest_score = ranking[i_stat].total_score;
+    }
+    int avg_score = (state->participant_count > 0) ? total_score_all / state->participant_count : 0;
+
+    /* Ringkasan statistik */
+    attron(COLOR_PAIR(COLOR_INFO));
     mvprintw(box_row + 5 + state->participant_count, box_col + 2,
-             "Total peserta: %d", state->participant_count);
-    attroff(COLOR_PAIR(COLOR_MENU));
+             "Peserta: %d | Total Skor: %d | Rata-rata: %d | Tertinggi: %d",
+             state->participant_count, total_score_all, avg_score, highest_score);
+    attroff(COLOR_PAIR(COLOR_INFO));
 
     /* Tampilkan juara */
     if (state->participant_count > 0) {

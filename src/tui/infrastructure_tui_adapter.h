@@ -39,14 +39,13 @@ void tui_separator_thick(int row, int col, int width);
 #define COLOR_SUCCESS   4
 #define COLOR_ERROR     5
 #define COLOR_BORDER    6
-#define COLOR_WARN      7
-#define COLOR_DIM       8
-#define COLOR_GOLD      9
-#define COLOR_SILVER    10
-#define COLOR_BRONZE    11
-#define COLOR_WARNING   12
-#define COLOR_INFO      13
-#define COLOR_HEADER    14
+#define COLOR_DIM       7
+#define COLOR_GOLD      8
+#define COLOR_SILVER    9
+#define COLOR_BRONZE    10
+#define COLOR_WARNING   11
+#define COLOR_INFO      12
+#define COLOR_HEADER    13
 
 /* Lebar default progress bar (total karakter termasuk bingkai []). */
 #define TUI_BAR_WIDTH 26

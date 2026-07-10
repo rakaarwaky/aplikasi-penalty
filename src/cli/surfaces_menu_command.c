@@ -127,8 +127,7 @@ int cli_surfaces_menu_run(RegistrationAggregate *reg,
     int selected = 1;
     int running = 1;
 
-    /* Tampilkan splash screen sekali saat pertama kali. */
-    tui_splash(3);
+    /* Splash sudah ditampilkan di main(); langsung masuk loop menu. */
 
     while (running) {
         draw_menu(selected, state->state);

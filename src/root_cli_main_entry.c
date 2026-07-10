@@ -36,6 +36,7 @@ int main(void) {
     /* Hidupkan layar ncurses lalu tampilkan splash screen. */
     tui_init();
     tui_splash(50);
+    flushinp();  /* buang sisa Enter agar tidak bocor ke menu utama */
     cli_surfaces_menu_run(&reg, &sc, &rk, &sr, &rc, &state);
     tui_end();
 

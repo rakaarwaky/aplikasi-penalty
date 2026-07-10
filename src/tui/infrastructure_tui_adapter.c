@@ -27,8 +27,7 @@ void tui_init(void) {
         init_pair(COLOR_HIGHLIGHT, COLOR_BLACK,   COLOR_CYAN);
         init_pair(COLOR_SUCCESS,   COLOR_GREEN,   COLOR_BLACK);
         init_pair(COLOR_ERROR,     COLOR_RED,     COLOR_BLACK);
-        init_pair(COLOR_BORDER,   COLOR_CYAN,    COLOR_BLACK);
-        init_pair(COLOR_WARN,     COLOR_YELLOW,  COLOR_BLACK);
+        init_pair(COLOR_BORDER,    COLOR_CYAN,    COLOR_BLACK);
         init_pair(COLOR_DIM,       COLOR_WHITE,   COLOR_BLACK);
         init_pair(COLOR_GOLD,      COLOR_YELLOW,  COLOR_BLACK);
         init_pair(COLOR_SILVER,    COLOR_WHITE,   COLOR_BLACK);
@@ -219,8 +218,15 @@ void tui_print_centered_colored(int row, const char *text, int color_pair, int b
 void tui_footer(const char *help) {
     if (help == NULL) return;
     int row = LINES - 2;
+    /* Gambar separator dengan COLOR_DIM (bukan COLOR_BORDER). */
     attron(COLOR_PAIR(COLOR_DIM));
-    tui_separator(row - 1, 2, COLS - 4);
+    int sep_row = row - 1;
+    int sep_col = 2;
+    int sep_w = COLS - 4;
+    int j;
+    mvaddch(sep_row, sep_col, ACS_LTEE);
+    for (j = 1; j < sep_w - 1; j++) mvaddch(sep_row, sep_col + j, ACS_HLINE);
+    mvaddch(sep_row, sep_col + sep_w - 1, ACS_RTEE);
     tui_print_centered(row, help);
     attroff(COLOR_PAIR(COLOR_DIM));
 }
