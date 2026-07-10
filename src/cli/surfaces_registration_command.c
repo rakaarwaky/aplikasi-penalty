@@ -36,35 +36,40 @@ static void draw_registration_screen(DisplayPort *dp, CompetitionState *state) {
 
     int count = state->participant_count;
     int box_height = count + 13;
-    int max_h = dp->get_lines() - 4; /* sisakan ruang untuk header + footer */
+    int max_h = dp->get_lines() - 4;
     if (box_height > max_h) box_height = max_h;
 
-    /* Breadcrumb */
+    /* Breadcrumb — warna redup agar tidak mendominasi */
     dp->print_centered_colored(0, "Menu Utama > Pendaftaran Peserta", COLOR_DIM, 0);
-    dp->print_centered_colored(1, "PENDAFTARAN PESERTA", COLOR_TITLE, 1);
-    dp->box(BOX_ROW, BOX_COL, BOX_WIDTH, box_height);
-    dp->separator(BOX_ROW + 1, BOX_COL, BOX_WIDTH);
 
+    /* Header konsisten dengan Unicode solid */
+    dp->print_centered_colored(1, "══════════════════════════════════", COLOR_DIM, 0);
+    dp->print_centered_colored(2, "       PENDAFTARAN PESERTA        ", COLOR_TITLE, 1);
+    dp->print_centered_colored(3, "══════════════════════════════════", COLOR_DIM, 0);
+
+    dp->box(BOX_ROW, BOX_COL, BOX_WIDTH, box_height);
+
+    /* Progress bar — clean, tanpa label berlebih */
     int pct = (count * 100) / MAX_PARTICIPANTS;
-    snprintf(buf, sizeof buf, "Kuota peserta: %d / %d", count, MAX_PARTICIPANTS);
-    dp->draw_colored(BOX_ROW + 2, BOX_COL + 2, COLOR_MENU, 0, buf);
+    snprintf(buf, sizeof buf, "Kuota: %d/%d Terisi", count, MAX_PARTICIPANTS);
+    dp->draw_colored(BOX_ROW + 2, BOX_COL + 2, COLOR_INFO, 0, buf);
     dp->progress_bar(BOX_ROW + 3, BOX_COL + 2, 30, pct, COLOR_SUCCESS);
 
-    /* C2: Label kuota permanen */
-    snprintf(buf, sizeof buf, "Minimal 5, maksimal %d peserta", MAX_PARTICIPANTS);
-    dp->draw_colored(BOX_ROW + 4, BOX_COL + 2, COLOR_WARNING, 0, buf);
+    /* Garis pemisah tipis (Gestalt: Continuity) */
+    dp->separator(BOX_ROW + 4, BOX_COL, BOX_WIDTH);
 
+    /* Instruksi minimalis — kurangi Beban Kognitif */
     dp->draw_colored(BOX_ROW + 5, BOX_COL + 2, COLOR_DIM, 0,
-                     "Ketik nama lalu Enter. Kosongkan untuk selesai.");
-    dp->draw_colored(BOX_ROW + 6, BOX_COL + 2, COLOR_DIM, 0,
-                     "Minimal 5, maksimal 7 peserta.");
+                     "Ketik nama, Enter. Kosongkan untuk selesai.");
 
-    dp->separator(BOX_ROW + 7, BOX_COL, BOX_WIDTH);
-    dp->draw_colored(BOX_ROW + 7, BOX_COL + 2, COLOR_WARNING, 1, "Peserta terdaftar:");
+    dp->separator(BOX_ROW + 6, BOX_COL, BOX_WIDTH);
+
+    /* Daftar Peserta */
+    dp->draw_colored(BOX_ROW + 7, BOX_COL + 2, COLOR_MENU, 1, "Peserta Terdaftar:");
 
     int i;
     for (i = 0; i < count; i++) {
-        snprintf(buf, sizeof buf, "%d. %s", i + 1, state->participants[i].name.value);
+        snprintf(buf, sizeof buf, "%2d. %s", i + 1, state->participants[i].name.value);
         dp->draw_colored(BOX_ROW + 8 + i, BOX_COL + 4, COLOR_SUCCESS, 0, buf);
     }
 

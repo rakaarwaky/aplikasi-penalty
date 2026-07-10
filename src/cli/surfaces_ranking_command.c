@@ -36,30 +36,27 @@ void cli_surfaces_ranking_execute(RankingAggregate *agg, CompetitionState *state
 
     dp->cls();
 
-    /* Breadcrumb */
+    /* Breadcrumb — warna redup */
     dp->print_centered_colored(0, "Menu Utama > Ranking Peserta", COLOR_DIM, 0);
 
-    /* Judul dengan dekorasi (Unicode ═) */
-    dp->print_centered_colored(1, "\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90", COLOR_DIM, 0);
-    dp->print_centered_colored(2, "RANKING PESERTA", COLOR_TITLE, 1);
-    dp->print_centered_colored(3, "\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90", COLOR_DIM, 0);
+    /* Header dengan Unicode solid — konsisten */
+    dp->print_centered_colored(1, "══════════════════════════════════════════", COLOR_DIM, 0);
+    dp->print_centered_colored(2, "             RANKING PESERTA              ", COLOR_TITLE, 1);
+    dp->print_centered_colored(3, "══════════════════════════════════════════", COLOR_DIM, 0);
 
     /* Bingkai — cap height agar tidak overflow terminal */
-    int box_height = state->participant_count + 8 + 2; /* +2 untuk baris bar chart */
-    int max_h = dp->get_lines() - 4; /* sisakan ruang untuk header + footer */
+    int box_height = state->participant_count + 8 + 2;
+    int max_h = dp->get_lines() - 4;
     if (box_height > max_h) box_height = max_h;
     dp->box(4, 2, 64, box_height);
 
-    /* Separator header */
-    dp->separator(5, 2, 64);
+    /* Header kolom: teks tebal berjarak presisi, tanpa blok warna */
+    snprintf(buf, sizeof buf, " %-4s │ %-6s │ %-20s │ %-5s │ %s",
+             "No", "Medali", "Nama Peserta", "Skor", "Zona (5|4|3|2|1|0)");
+    dp->draw_colored(5, 4, COLOR_INFO, 1, buf);
 
-    /* Header kolom dengan warna */
-    snprintf(buf, sizeof buf, " %-5s %-6s %-22s %-6s %s",
-             "No", "Medali", "Nama", "Skor", "Zona(5|4|3|2|1|0)");
-    dp->draw_colored(6, 4, COLOR_INFO, 1, buf);
-
-    /* Separator setelah header */
-    dp->separator(7, 2, 64);
+    /* Garis bawah tabel (Table Rule) tipis */
+    dp->separator(6, 2, 64);
 
     /* Hitung skor maksimum untuk normalisasi bar chart (B1). */
     int max_score = 1;
@@ -94,7 +91,7 @@ void cli_surfaces_ranking_execute(RankingAggregate *agg, CompetitionState *state
         if (r->rank > 3 && i % 2 == 0)
             row_color = COLOR_DIM;
 
-        snprintf(buf, sizeof buf, " %-5d %-6s %-22s %-6d ",
+        snprintf(buf, sizeof buf, " %-4d │ %-6s │ %-20s │ %-5d │ ",
                  r->rank, medal, name, r->total_score);
         dp->draw_colored(row, 4, row_color, (r->rank <= 3), buf);
 

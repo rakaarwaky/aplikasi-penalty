@@ -9,6 +9,7 @@
 #include "recap/module.recap.h"
 #include "sanitizer/module.sanitizer.h"
 #include "cli/module.cli.h"
+#include "tui/infrastructure_tui_adapter.h"
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
@@ -110,6 +111,7 @@ static void test_scoring_invalid_zone(void) {
     /* peserta 0: zona invalid lalu valid */
     fake_tui_push_str("99");   /* invalid -> error */
     fake_tui_push_str("3");
+    int k;
     for (k = 1; k < TOTAL_KICKS; k++) fake_tui_push_str("3");
     /* peserta 1: semua valid */
     for (k = 0; k < TOTAL_KICKS; k++) fake_tui_push_str("2");
@@ -129,7 +131,7 @@ static void test_ranking_search_recap_surfaces(void) {
         for (k = 0; k < TOTAL_KICKS; k++)
             capabilities_scoring_record_kick(&state, p, (ZoneVO){p % 6});
 
-    RankingAggregate rk = root_ranking_build(root_ranking_build().protocol);
+    RankingAggregate rk = root_ranking_build();
     SearchAggregate sr = root_search_build();
     RecapAggregate rc = root_recap_build(root_ranking_build().protocol);
     DisplayPort dp = make_dp();

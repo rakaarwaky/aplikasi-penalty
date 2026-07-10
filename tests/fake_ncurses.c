@@ -4,18 +4,22 @@
  * Tujuannya: agar infrastructure_tui_adapter.c dan surfaces_*_command.c
  * bisa di-compile & dijalankan di test (CI lokal) tanpa butuh terminal nyata.
  *
+ * - Tidak #include <ncurses.h> (hindari konflik makro clear/refresh/getch).
+ * - Tipe ncurses di-forward-declare secara minimal.
  * - Semua fungsi ncurses jadi no-op (return 0 / NULL).
  * - Antrian input global menyediakan data untuk getnstr/getch/confirm,
  *   sehingga alur interaktif surfaces bisa disimulasikan dari test.
  *
- * CATATAN: file ini HANYA di-link ke binary test (bukan ke app), dan
- * test build TIDAK menggunakan -lncurses. ncurses.h tetap di-include oleh
- * adapter agar tipe (WINDOW, chtype, makro) tersedia; fungsi di sini
- * meng-override implementasi sistem lewat linker.
+ * File ini HANYA di-link ke binary test (bukan ke app), dan test build
+ * TIDAK menggunakan -lncurses (di-override via linker).
  */
-#include <ncurses.h>
 #include <string.h>
 #include <stdlib.h>
+
+/* Forward declaration tipe ncurses yang dipakai adapter. */
+typedef struct _win_st WINDOW;
+typedef unsigned long chtype;
+typedef unsigned int  attr_t;
 
 /* ── Antrian input (dikendalikan dari test) ── */
 static int   *g_keys = NULL;
@@ -107,3 +111,5 @@ int mvgetnstr(int y, int x, char *buf, int n) {
     (void)y; (void)x;
     return getnstr(buf, n);
 }
+
+int confirm(const char *prompt) { (void)prompt; return 1; }

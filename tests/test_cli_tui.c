@@ -13,6 +13,11 @@
 #include "cli/module.cli.h"
 #include "tui/infrastructure_tui_adapter.h"   /* root_display_build */
 
+/* API fake ncurses (tests/fake_ncurses.c) */
+extern void fake_tui_push_key(int k);
+extern void fake_tui_push_str(const char *s);
+extern void fake_tui_reset_input(void);
+
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
