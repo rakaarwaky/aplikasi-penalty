@@ -27,19 +27,19 @@ void tui_init(void) {
          * Kita gunakan pasangan warna 15 sebagai default background hitam. */
         init_pair(15, COLOR_WHITE, COLOR_BLACK);
         bkgd(COLOR_PAIR(15));
-        init_pair(COLOR_TITLE,     COLOR_CYAN,    COLOR_BLACK);
+        init_pair(COLOR_TITLE,     COLOR_WHITE,   COLOR_BLACK);
         init_pair(COLOR_MENU,      COLOR_WHITE,   COLOR_BLACK);
-        init_pair(COLOR_HIGHLIGHT, COLOR_BLACK,   COLOR_CYAN);
+        init_pair(COLOR_HIGHLIGHT, COLOR_BLACK,   COLOR_WHITE);
         init_pair(COLOR_SUCCESS,   COLOR_GREEN,   COLOR_BLACK);
         init_pair(COLOR_ERROR,     COLOR_RED,     COLOR_BLACK);
-        init_pair(COLOR_BORDER,    COLOR_CYAN,    COLOR_BLACK);
+        init_pair(COLOR_BORDER,    COLOR_WHITE,   COLOR_BLACK);
         init_pair(COLOR_DIM,       COLOR_WHITE,   COLOR_BLACK);
-        init_pair(COLOR_GOLD,      COLOR_YELLOW,  COLOR_BLACK);
+        init_pair(COLOR_GOLD,      COLOR_WHITE,   COLOR_BLACK);
         init_pair(COLOR_SILVER,    COLOR_WHITE,   COLOR_BLACK);
-        init_pair(COLOR_BRONZE,    COLOR_YELLOW,  COLOR_BLACK);
+        init_pair(COLOR_BRONZE,    COLOR_WHITE,   COLOR_BLACK);
         init_pair(COLOR_WARNING,   COLOR_YELLOW,  COLOR_BLACK);
-        init_pair(COLOR_INFO,      COLOR_BLUE,    COLOR_BLACK);
-        init_pair(COLOR_HEADER,    COLOR_CYAN,    COLOR_BLACK);
+        init_pair(COLOR_INFO,      COLOR_WHITE,   COLOR_BLACK);
+        init_pair(COLOR_HEADER,    COLOR_WHITE,   COLOR_BLACK);
     }
 }
 
