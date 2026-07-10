@@ -38,6 +38,10 @@ typedef struct {
     int  (*readkey)(void);
     int  (*confirm)(const char *prompt);
 
+    /* Terminal info */
+    int  (*get_lines)(void);
+    int  (*get_cols)(void);
+
 } DisplayPort;
 
 #endif /* SHARED_CONTRACT_DISPLAY_PORT_H */

@@ -11,6 +11,7 @@ extern void run_integration_tests(void);
 extern void run_export_tests(void);
 extern void run_logger_tests(void);
 extern void run_coverage_gap_tests(void);
+extern void run_invariant_tests(void);
 
 int main(void) {
     printf("========================================\n");
@@ -28,6 +29,7 @@ int main(void) {
     run_export_tests();
     run_logger_tests();
     run_coverage_gap_tests();
+    run_invariant_tests();
 
     printf("========================================\n");
     printf("  ALL TESTS PASSED!\n");

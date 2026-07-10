@@ -181,7 +181,29 @@ int cli_surfaces_menu_run(RegistrationAggregate *reg,
     int selected = 1;
     int running = 1;
 
+    /* Minimum terminal size */
+    const int MIN_LINES = 18;
+    const int MIN_COLS  = 64;
+
     while (running) {
+        /* Cek ukuran terminal — tampilkan pesan bila terlalu kecil */
+        int lines = dp->get_lines();
+        int cols  = dp->get_cols();
+        if (lines < MIN_LINES || cols < MIN_COLS) {
+            dp->cls();
+            dp->print_centered_colored(4, "TERMINAL TERLALU KECIL!", COLOR_ERROR, 1);
+            char msg[64];
+            snprintf(msg, sizeof msg, "Minimum: %dx%d  Saat ini: %dx%d",
+                     MIN_COLS, MIN_LINES, cols, lines);
+            dp->print_centered_colored(6, msg, COLOR_WARNING, 0);
+            dp->print_centered_colored(8, "Perbesar jendela terminal, lalu tekan apa saja.",
+                                       COLOR_INFO, 0);
+            dp->screen_refresh();
+            int key = dp->readkey();
+            if (key == 'q' || key == 'Q' || key == TUI_KEY_ESC) running = 0;
+            continue;  /* ulang cek ukuran */
+        }
+
         draw_menu(dp, selected, state->state);
         int key = dp->readkey();
 
@@ -193,6 +215,10 @@ int cli_surfaces_menu_run(RegistrationAggregate *reg,
             case TUI_KEY_DOWN:
                 selected++;
                 if (selected >= MENU_ITEMS) selected = 0;
+                break;
+
+            /* Resize: cukup loop ulang (draw_menu akan pakai LINES/COLS baru) */
+            case TUI_KEY_RESIZE:
                 break;
 
             /* C3: Shortcut angka langsung aktifkan menu (1-5). */

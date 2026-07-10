@@ -28,6 +28,7 @@
 #define TUI_KEY_DOWN    258
 #define TUI_KEY_ENTER   10
 #define TUI_KEY_ESC     27
+#define TUI_KEY_RESIZE  410
 
 /* ── Batas UI ── */
 #define TUI_BAR_WIDTH   26
