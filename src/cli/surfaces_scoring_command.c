@@ -192,9 +192,9 @@ void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state
 
     dp->cls();
     if (state->state == STATE_COMPLETED) {
-        dp->print_centered_colored(4, "* * * * * * * * * * * * * * * *", COLOR_GOLD, 1);
+        dp->print_centered_colored(4, "\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90", COLOR_DIM, 0);
         dp->print_centered_colored(5, "SEMUA TENDANGAN SELESAI!", COLOR_SUCCESS, 1);
-        dp->print_centered_colored(6, "* * * * * * * * * * * * * * * *", COLOR_GOLD, 1);
+        dp->print_centered_colored(6, "\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90", COLOR_DIM, 0);
     }
     dp->footer("[ENTER] Kembali ke menu");
     dp->screen_refresh();

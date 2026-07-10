@@ -28,11 +28,11 @@ TEST_INC   := -I$(SRC_DIR) -I$(SRC_DIR)/shared \
               -I$(SRC_DIR)/storage -I$(SRC_DIR)/sanitizer \
               -I$(SRC_DIR)/export
 TEST_LIB_SRC := $(filter-out $(SRC_DIR)/root_cli_main_entry.c, $(C_SOURCES))
-/* fake ncurses (headless) untuk coverage CLI/TUI tanpa terminal */
+# fake ncurses (headless) untuk coverage CLI/TUI tanpa terminal
 TEST_FAKE_SRC := tests/fake_ncurses.c
 TEST_BIN   := run_tests
 
-/* Test build TIDAK link -lncurses (pakai stub di TEST_FAKE_SRC). */
+# Test build TIDAK link -lncurses (pakai stub di TEST_FAKE_SRC).
 TEST_LDFLAGS :=
 
 PREFIX ?= /usr/local

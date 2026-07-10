@@ -154,7 +154,7 @@ void cli_surfaces_registration_execute(RegistrationAggregate *agg,
     snprintf(buf, sizeof buf, "Total peserta: %d", final_count);
     dp->draw_colored(final_error_row, BOX_COL + 2, COLOR_SUCCESS, 1, buf);
 
-    dp->footer("[ENTER] Lanjut  [q] Kembali");
+    dp->footer("[ENTER] Lanjut  \xe2\x94\x82  [q] Kembali");
     dp->screen_refresh();
     dp->readkey();
 }
