@@ -190,19 +190,25 @@ graph TD
 
 ## 6. Variabel (field di dalam struct)
 
-| Struct | Variabel (field) di dalamnya |
+| Variabel | Tipe |
 |---|---|
-| `CompetitionState` | `ParticipantEntity participants[MAX_PARTICIPANTS]`; `int participant_count`; `CompetitionStateKind state` |
-| `ParticipantEntity` | `ParticipantIdVO id`; `ParticipantNameVO name`; `KickVO kicks[TOTAL_KICKS]`; `TotalScoreVO total_score`; `ZoneFreqVO zone_freq`; `KickCountVO kick_count` |
-| `ParticipantIdVO` | `int value` |
-| `ParticipantNameVO` | `char value[MAX_NAME_LENGTH + 1]` |
-| `KickVO` | `int zone`; `int points` |
-| `ZoneVO` | `int value` |
-| `TotalScoreVO` | `int value` |
-| `ZoneFreqVO` | `int freq[MAX_ZONE + 1]` |
-| `KickCountVO` | `int value` |
-| `RankingEntryVO` | `int participant_id`; `int total_score`; `int zone_freq[MAX_ZONE + 1]`; `int rank` |
-| `SearchResultVO` | `int found`; `int participant_id`; `char name[MAX_NAME_LENGTH + 1]`; `int total_score`; `int kicks[TOTAL_KICKS]`; `int zone_freq[MAX_ZONE + 1]` |
+| `participants` | `ParticipantEntity[MAX_PARTICIPANTS]` |
+| `participant_count` | `int` |
+| `state` | `CompetitionStateKind` |
+| `id` | `ParticipantIdVO` |
+| `name` | `ParticipantNameVO` |
+| `kicks` | `KickVO[TOTAL_KICKS]` |
+| `total_score` | `TotalScoreVO` |
+| `zone_freq` | `ZoneFreqVO` |
+| `kick_count` | `KickCountVO` |
+| `value` | `int` |
+| `value` | `char[MAX_NAME_LENGTH + 1]` |
+| `zone` | `int` |
+| `points` | `int` |
+| `freq` | `int[MAX_ZONE + 1]` |
+| `participant_id` | `int` |
+| `rank` | `int` |
+| `found` | `int` |
 
 ---
 
