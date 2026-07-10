@@ -22,6 +22,9 @@ void tui_init(void) {
 
     if (has_colors()) {
         start_color();
+        /* Paksa seluruh layar背景 hitam agar konsisten di semua terminal. */
+        init_pair(0, COLOR_WHITE, COLOR_BLACK);
+        bkgd(COLOR_PAIR(0));
         init_pair(COLOR_TITLE,     COLOR_CYAN,    COLOR_BLACK);
         init_pair(COLOR_MENU,      COLOR_WHITE,   COLOR_BLACK);
         init_pair(COLOR_HIGHLIGHT, COLOR_BLACK,   COLOR_CYAN);
