@@ -3,9 +3,11 @@ CC      ?= gcc
 CFLAGS  ?= -std=c99 -Wall -Wextra -Wpedantic -O2 -g
 TARGET  := penalty_shootout
 
-SRC_DIR := src
+SRC_DIR   := src
+BUILD_DIR := build
+
 C_SOURCES := $(shell find $(SRC_DIR) -name '*.c')
-C_OBJECTS := $(C_SOURCES:.c=.o)
+C_OBJECTS := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(C_SOURCES))
 
 INCLUDES := -I$(SRC_DIR) -I$(SRC_DIR)/shared \
             -I$(SRC_DIR)/registration -I$(SRC_DIR)/scoring \
@@ -19,11 +21,12 @@ all: $(TARGET)
 $(TARGET): $(C_OBJECTS)
 	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $(C_OBJECTS)
 
-%.o: %.c
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
 
 run: $(TARGET)
 	./$(TARGET)
 
 clean:
-	rm -f $(C_OBJECTS) $(TARGET)
+	rm -rf $(BUILD_DIR) $(TARGET)
