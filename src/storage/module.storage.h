@@ -26,6 +26,10 @@ StorageError agent_storage_load(const StorageAggregate *agg,
                                 const char *filename,
                                 CompetitionState *state);
 
+/* Hapus file data tersimpan di disk. */
+StorageError agent_storage_delete(const StorageAggregate *agg,
+                                  const char *filename);
+
 /* Siapkan struct penyimpanan. */
 StorageAggregate root_storage_build(void);
 

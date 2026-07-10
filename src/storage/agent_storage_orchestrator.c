@@ -54,3 +54,22 @@ StorageError agent_storage_load(const StorageAggregate *agg,
         LOG_ERROR("storage_load: gagal");
     return result;
 }
+
+StorageError agent_storage_delete(const StorageAggregate *agg,
+                                  const char *filename) {
+    LOG_INFO("storage_delete: memulai penghapusan");
+    if (agg == NULL || agg->protocol == NULL) {
+        LOG_ERROR("storage_delete: aggregate/protocol NULL");
+        return ST_ERROR_FILE_NOT_FOUND;
+    }
+    if (agg->protocol->delete_file == NULL) {
+        LOG_ERROR("storage_delete: fungsi delete_file NULL");
+        return ST_ERROR_FILE_NOT_FOUND;
+    }
+    StorageError result = agg->protocol->delete_file(filename);
+    if (result == ST_OK)
+        LOG_INFO("storage_delete: berhasil");
+    else
+        LOG_ERROR("storage_delete: gagal");
+    return result;
+}
