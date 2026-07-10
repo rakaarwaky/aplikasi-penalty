@@ -28,8 +28,10 @@ static int get_box_col(DisplayPort *dp) {
     return (cols - gw) / 2;
 }
 
-static void show_error(DisplayPort *dp, const char *msg, int row, int box_col) {
+static void show_error(DisplayPort *dp, const char *msg, int row, int box_col, int gw) {
     char buf[128];
+    int pad;
+    for (pad = 0; pad < gw - 4; pad++) dp->draw_at(row, box_col + 2 + pad, " ");
     snprintf(buf, sizeof buf, "  [!] %s", msg);
     dp->draw_colored(row, box_col + 2, COLOR_ERROR, 1, buf);
 }
