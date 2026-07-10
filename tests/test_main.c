@@ -5,6 +5,7 @@ extern void run_scoring_tests(void);
 extern void run_ranking_tests(void);
 extern void run_search_tests(void);
 extern void run_recap_tests(void);
+extern void run_infrastructure_tests(void);
 
 int main(void) {
     printf("========================================\n");
@@ -16,6 +17,7 @@ int main(void) {
     run_ranking_tests();
     run_search_tests();
     run_recap_tests();
+    run_infrastructure_tests();
 
     printf("========================================\n");
     printf("  ALL TESTS PASSED!\n");
