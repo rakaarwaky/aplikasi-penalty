@@ -16,11 +16,17 @@ Fitur utama: pendaftaran peserta, pencatatan tendangan, kalkulasi skor, penentua
 
 ## 2. Arsitektur
 
-Proyek menggunakan **AES v3.0** (Agentic Engineering System) yang diadaptasi ke C, dengan pendekatan *feature-based vertical slicing* dan 7 lapisan terstruktur:
+Proyek menggunakan **AES v3.0** (Agentic Engineering System) yang diadaptasi ke C, dengan pendekatan *feature-based vertical slicing* dan 7 lapisan terstruktur.
 
+**Arah dependency (bottom-up):**
 ```
-taxonomy → contract → capabilities / infrastructure → agent → surface → root
+taxonomy → contract → capabilities / infrastructure → agent → surface → root (wiring only)
 ```
+
+> **Catatan:** Urutan di atas adalah **arah dependency**, bukan urutan eksekusi atau hierarki kontrol.
+> - `root_*_entry.c` adalah titik masuk eksekusi yang berada di puncak kode (dipanggil pertama oleh OS).
+> - `root_*_container.c` ada di setiap folder fitur sebagai tempat perakitan (wiring) layer — bukan lapisan domain.
+> - Layer `root` **tidak berisi** business logic apa pun; ia hanya merakit dan menghubungkan semua layer di atasnya.
 
 Struktur direktori `src/`:
 
@@ -72,7 +78,7 @@ Sebelum menulis atau memodifikasi kode, lakukan langkah berikut:
 ## 5. Konvensi Tambahan
 
 - **State:** Disimpan dalam `CompetitionState` yang dialokasikan di `root_cli_main_entry.c` dan di-pass via pointer ke setiap fungsi. Tidak ada variabel global.
-- **Error handling:** Gunakan enum error dari taxonomy. Capabilities mengembalikan error code; infrastructure yang menampilkan pesan ke user.
+- **Error handling:** Gunakan enum error dari taxonomy. Alur propagasi error: Capabilities mengembalikan error code → Agent meneruskan ke Surface → **Surface (layer `_command`) yang menampilkan pesan ke user**. Infrastructure tidak boleh melakukan output ke terminal; infrastructure hanya menangani I/O ke sistem (file, dll.) melalui port.
 - **Header guard:** Semua file `.h` wajib menggunakan pola `#ifndef FEATURE_LAYER_CONCEPT_H`.
 - **Build:** GCC dengan Makefile.
 

@@ -81,12 +81,12 @@ Aplikasi console berbasis bahasa C untuk mengelola pelaksanaan lomba tendangan p
 
 Aplikasi memiliki Menu Utama dengan opsi berikut:
 
+0. Keluar
 1. Pendaftaran Peserta
 2. Input Tendangan dan Skor
 3. Tampilkan Ranking
 4. Cari Peserta
 5. Rekapitulasi Lengkap
-6. Keluar
 
 **Flow Navigasi:**
 Setelah setiap submenu selesai dieksekusi, sistem akan menampilkan pesan tekan Enter untuk melanjutkan dan mengembalikan user ke Menu Utama.
