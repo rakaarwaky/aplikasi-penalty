@@ -59,5 +59,5 @@ RankingError capabilities_ranking_compute(const CompetitionState *state,
                 out[i].rank = i + 1;
         }
     }
-    return RK_NOT_READY;
+    return RK_OK;
 }

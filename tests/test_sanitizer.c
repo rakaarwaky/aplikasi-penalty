@@ -43,6 +43,14 @@ static void test_validate_int_out_of_range(void) {
     printf("  [PASS] test_validate_int_out_of_range\n");
 }
 
+/* Batas bawah PERSIS (min=0, input "0") harus sah.
+   Tanpa test ini, mutasi "val < min" -> "val <= min" lolos (survivor). */
+static void test_validate_int_boundary_min(void) {
+    assert(sanitizer_validate_int("0", 0, 10) == SANITIZE_OK);
+    assert(sanitizer_validate_int("-1", 0, 10) == SANITIZE_ERROR_TOO_LONG);
+    printf("  [PASS] test_validate_int_boundary_min\n");
+}
+
 void run_sanitizer_tests(void) {
     printf("=== Sanitizer Tests ===\n");
     test_validate_string_ok();
@@ -53,5 +61,6 @@ void run_sanitizer_tests(void) {
     test_validate_int_null();
     test_validate_int_invalid();
     test_validate_int_out_of_range();
+    test_validate_int_boundary_min();
     printf("All sanitizer tests passed!\n");
 }

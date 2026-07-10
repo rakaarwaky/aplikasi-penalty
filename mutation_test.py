@@ -3,28 +3,24 @@
 mutation_test.py — Mutation testing gate untuk aplikasi-penalty.
 
 Cara kerja:
-  Untuk tiap mutan: backup file sumber -> patch (1 token) -> rebuild test
-  binary secara incremental -> jalankan ./run_tests. Jika test GAGAL, mutan
-  dianggap "killed" (gate menangkap bug). Jika test tetap hijau, mutan
-  "survived" (gate butuh test tambahan). Lalu restore file & binary normal.
+  Untuk tiap mutan: backup file -> patch (1 token) -> rebuild test binary
+  secara incremental -> jalankan ./run_tests. Jika test GAGAL, mutan
+  "killed" (gate menangkap bug). Jika test hijau, "survived". Lalu restore.
 
 Metrik:  mutation score = killed / total  (semakin tinggi, gate makin kuat)
-
-UKURAN KECEPATAN: rebuild incremental per mutan (~2-4s), tanpa `make clean`.
 """
-import subprocess, os, sys, shutil, time
+import subprocess, os, sys, shutil
 
 ROOT = "/home/raka/Study/PengantarCoding/aplikasi-penalty"
 os.chdir(ROOT)
-
 SRC = "src"
+TEST_BIN = "run_tests"
 
-# (file_relatif, old_substring, new_substring, deskripsi)
 MUTANTS = [
     # --- boundary / relational flip ---
     ("scoring/capabilities_scoring_zone_validator.c",
      "zone.value < MIN_ZONE", "zone.value <= MIN_ZONE",
-     "zona: terima batas bawah (0 jadi valid sebagai invalid leak)"),
+     "zona: terima batas bawah (0 jadi invalid)"),
     ("scoring/capabilities_scoring_zone_validator.c",
      "zone.value > MAX_ZONE", "zone.value >= MAX_ZONE",
      "zona: tolak batas atas (5 jadi invalid)"),
@@ -42,28 +38,27 @@ MUTANTS = [
      "p->kick_count.value >= TOTAL_KICKS",
      "p->kick_count.value > TOTAL_KICKS",
      "scoring: izinkan 1 tendangan lewat batas"),
-    # --- relational logic flip ---
     ("registration/capabilities_registration_validator.c",
      "else if (c != ' ') return REG_NAME_INVALID_CHAR;",
      "else if (c == ' ') return REG_NAME_INVALID_CHAR;",
      "nama: karakter spasi dianggap invalid (logika terbalik)"),
     ("sanitizer/capabilities_sanitizer_validator.c",
-     "if (*endptr == input) return SANITIZE_ERROR_INVALID_CHARS;",
-     "if (*endptr != input) return SANITIZE_ERROR_INVALID_CHARS;",
-     "sanitizer: empty string tidak lagi ditolak"),
+     "if (*endptr != '\\0' || endptr == input) {",
+     "if (*endptr == '\\0' || endptr == input) {",
+     "sanitizer: empty/non-numeric tidak lagi ditolak"),
     ("storage/infrastructure_storage_adapter.c",
-     "if (file == NULL) return ST_ERROR_PERMISSION;",
-     "if (file != NULL) return ST_ERROR_PERMISSION;",
+     "if (file == NULL) {",
+     "if (file != NULL) {",
      "storage save: file gagal dibuka malah dianggap OK"),
     ("export/infrastructure_export_adapter.c",
-     "if (file == NULL) return EXP_ERROR_PERMISSION;",
-     "if (file != NULL) return EXP_ERROR_PERMISSION;",
+     "if (file == NULL) {",
+     "if (file != NULL) {",
      "export: file gagal dibuka malah dianggap OK"),
     ("recap/capabilities_recap_formatter.c",
      "if (state == NULL || details == NULL) return RC_NOT_READY;",
      "if (state == NULL || details != NULL) return RC_NOT_READY;",
      "recap: details NULL tidak lagi ditolak"),
-    # --- return-code swap (salah return) ---
+    # --- return-code swap ---
     ("ranking/capabilities_ranking_calculator.c",
      "if (x->total_score != y->total_score) return y->total_score - x->total_score;",
      "if (x->total_score != y->total_score) return x->total_score - y->total_score;",
@@ -79,62 +74,72 @@ MUTANTS = [
      "return SANITIZE_OK;", "return SANITIZE_ERROR_TOO_LONG;",
      "sanitizer: input valid dikembalikan error"),
     ("storage/infrastructure_storage_adapter.c",
-     "if (written != 1 || fclose(file) != 0) return ST_ERROR_CORRUPT;",
-     "if (written != 1 || fclose(file) == 0) return ST_ERROR_CORRUPT;",
+     "if (written != 1 || fclose(file) != 0) {",
+     "if (written != 1 || fclose(file) == 0) {",
      "storage: fclose error diabaikan (false-success)"),
 ]
 
-def run_cmd(cmd):
+def run(cmd):
     return subprocess.run(cmd, shell=True, capture_output=True, text=True)
 
-def build_and_test():
-    # incremental build (MAKE akan recompile file yang berubah saja)
-    b = run_cmd("make test >/dev/null 2>&1")
-    if b.returncode != 0:
-        return ("BUILD_FAIL", b.returncode)
-    r = run_cmd("./run_tests >/dev/null 2>&1")
-    return ("PASS" if r.returncode == 0 else "FAIL", r.returncode)
+def build_only():
+    r = run(f"make {TEST_BIN} >/dev/null 2>&1")
+    return r.returncode
+
+def run_only():
+    r = run(f"./{TEST_BIN} >/dev/null 2>&1")
+    return r.returncode
 
 def main():
     print("=== MUTATION TESTING GATE ===")
-    # pastikan baseline hijau
     print("[baseline] build + test normal...", end=" ")
-    status, _ = build_and_test()
-    if status != "PASS":
-        print(f"GAGAL baseline ({status}) — perbaiki dulu sebelum mutation test")
+    if build_only() != 0 or run_only() != 0:
+        print("GAGAL — perbaiki dulu sebelum mutation test")
         sys.exit(1)
     print("hijau.\n")
 
-    killed, survived, buildfail = [], [], []
+    killed, survived, buildfail, skipped = [], [], [], []
     for i, (rel, old, new, desc) in enumerate(MUTANTS, 1):
         path = os.path.join(SRC, rel)
         bak = path + ".mutbak"
+        restored = False
+        if not os.path.exists(path):
+            print(f"[{i}/{len(MUTANTS)}] SKIP (file tak ada): {desc}")
+            skipped.append(desc)
+            continue
         shutil.copy(path, bak)
         try:
             s = open(path).read()
             if old not in s:
                 print(f"[{i}/{len(MUTANTS)}] SKIP (pola tak ditemukan): {desc}")
+                skipped.append(desc)
                 os.remove(bak)
                 continue
-            s = s.replace(old, new, 1)
-            open(path, "w").write(s)
-            status, _ = build_and_test()
+            open(path, "w").write(s.replace(old, new, 1))
+            os.utime(path, None)  # paksa make rebuild
+            br = build_only()
+            if br != 0:
+                status = "BUILD_FAIL"
+            else:
+                status = "PASS" if run_only() == 0 else "FAIL"
         finally:
-            shutil.move(bak, path)  # restore segera
-            # rebuild binary normal agar mutan berikutnya mulai dari state bersih
-            run_cmd("make test >/dev/null 2>&1")
+            if os.path.exists(bak):
+                shutil.move(bak, path)
+                os.utime(path, None)
+                build_only()  # kembalikan binary normal
+                restored = True
+
         tag = {"PASS": "SURVIVED", "FAIL": "KILLED",
                "BUILD_FAIL": "BUILD_FAIL"}[status]
-        line = f"[{i}/{len(MUTANTS)}] {tag:10} | {desc}"
-        print(line)
+        print(f"[{i}/{len(MUTANTS)}] {tag:10} | {desc}")
         if status == "FAIL": killed.append(desc)
         elif status == "PASS": survived.append(desc)
         else: buildfail.append(desc)
 
-    total = len(MUTANTS)
+    total = len(MUTANTS) - len(skipped)
     score = len(killed) / total * 100 if total else 0
     print("\n=== HASIL ===")
-    print(f"Total mutan    : {total}")
+    print(f"Total mutan    : {total}  (skip {len(skipped)})")
     print(f"Killed (gate nangkep) : {len(killed)}")
     print(f"Survived (lolos)       : {len(survived)}")
     print(f"Build fail             : {len(buildfail)}")
@@ -142,8 +147,11 @@ def main():
     if survived:
         print("\nMutan yang SELAMAT (butuh test tambahan):")
         for d in survived: print(f"  - {d}")
+    if buildfail:
+        print("\nMutan BUILD FAIL (perlu cek):")
+        for d in buildfail: print(f"  - {d}")
     # pastikan repo kembali hijau
-    run_cmd("make test >/dev/null 2>&1")
+    build_only(); run_only()
     return 0 if score >= 80 else 1
 
 if __name__ == "__main__":

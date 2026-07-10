@@ -32,20 +32,20 @@ static void draw_menu(DisplayPort *dp, int selected, CompetitionStateKind state,
     char buf[128];
     dp->cls();
 
-    /* ── Header dekorasi (box ganda) ── */
+    /* ── Header: double-line border ── */
     dp->print_centered_colored(0, "==========================================================", COLOR_GOLD, 1);
-    dp->print_centered_colored(1, "   APLIKASI PERHITUNGAN PENALTI   ", COLOR_TITLE, 1);
+    dp->print_centered_colored(1, "    APLIKASI PERHITUNGAN PENALTY    ", COLOR_TITLE, 1);
     dp->print_centered_colored(2, "==========================================================", COLOR_GOLD, 1);
 
-    /* ── Bingkai utama ── */
-    int grid_width = BOX_WIDTH;
-    int grid_height = 13;
-    dp->box(BOX_START_ROW, BOX_START_COL, grid_width, grid_height);
-    dp->separator(BOX_START_ROW + 1, BOX_START_COL, grid_width);
+    /* ── Bingkai utama (1 baris kosong dari header = Gestalt Proximity) ── */
+    int gw = BOX_WIDTH;
+    int grid_height = 14;
+    dp->box(BOX_START_ROW, BOX_START_COL, gw, grid_height);
+    dp->separator(BOX_START_ROW + 1, BOX_START_COL, gw);
 
     /* ── Layout 2 kolom ── */
     int col1_x = BOX_START_COL + 3;                          /* Kolom kiri: menu    */
-    int col2_x = BOX_START_COL + grid_width - 16;            /* Kolom kanan: status */
+    int col2_x = BOX_START_COL + gw - 16;            /* Kolom kanan: status */
     int col2_width = 14;
 
     /* Header kolom */
@@ -53,7 +53,7 @@ static void draw_menu(DisplayPort *dp, int selected, CompetitionStateKind state,
     dp->draw_colored(BOX_START_ROW + 2, col1_x, COLOR_HEADER, 1, buf);
     snprintf(buf, sizeof buf, "%-*s", col2_width, "STATUS");
     dp->draw_colored(BOX_START_ROW + 2, col2_x, COLOR_HEADER, 1, buf);
-    dp->separator(BOX_START_ROW + 3, BOX_START_COL, grid_width);
+    dp->separator(BOX_START_ROW + 3, BOX_START_COL, gw);
 
     /* ── Baris menu 1-5 ── */
     int i;
@@ -61,9 +61,18 @@ static void draw_menu(DisplayPort *dp, int selected, CompetitionStateKind state,
         int row = BOX_START_ROW + 3 + i;
 
         /* Kolom 1: nomor + nama menu (dengan padding) */
-        int item_color = (i == selected) ? COLOR_HIGHLIGHT : COLOR_MENU;
+        int item_sel = (i == selected);
+        int item_color = item_sel ? COLOR_HIGHLIGHT : COLOR_MENU;
+
+        /* Highlight: gambar background full-width agar simetris (Grid System) */
+        if (item_sel) {
+            int j;
+            for (j = 1; j < gw - 1; j++)
+                dp->draw_at(row, BOX_START_COL + j, " ");
+        }
+
         snprintf(buf, sizeof buf, "  [%d]  %s", i, menu_labels[i]);
-        dp->draw_colored(row, col1_x, item_color, (i == selected), buf);
+        dp->draw_colored(row, col1_x, item_color, item_sel, buf);
 
         /* Kolom 2: status */
         const char *status = "";
@@ -73,17 +82,17 @@ static void draw_menu(DisplayPort *dp, int selected, CompetitionStateKind state,
             if (state == STATE_INIT)      { status = "[Aktif]";     status_color = COLOR_SUCCESS; }
             else                          { status = "[Selesai]";   status_color = COLOR_WARNING; }
         } else if (i == 2) {
-            if (state == STATE_INIT)      { status = "[Terkunci]";  status_color = COLOR_ERROR;   }
+            if (state == STATE_INIT)      { status = "[Terkunci]";  status_color = COLOR_DIM;     }
             else if (state == STATE_COMPLETED) { status = "[Selesai]"; status_color = COLOR_WARNING; }
             else                          { status = "[Aktif]";     status_color = COLOR_SUCCESS; }
         } else if (i == 3) {
-            if (state != STATE_COMPLETED) { status = "[Terkunci]";  status_color = COLOR_ERROR;   }
+            if (state != STATE_COMPLETED) { status = "[Terkunci]";  status_color = COLOR_DIM;     }
             else                          { status = "[Aktif]";     status_color = COLOR_SUCCESS; }
         } else if (i == 4) {
-            if (state == STATE_INIT)      { status = "[Terkunci]";  status_color = COLOR_ERROR;   }
+            if (state == STATE_INIT)      { status = "[Terkunci]";  status_color = COLOR_DIM;     }
             else                          { status = "[Aktif]";     status_color = COLOR_SUCCESS; }
         } else if (i == 5) {
-            if (state != STATE_COMPLETED) { status = "[Terkunci]";  status_color = COLOR_ERROR;   }
+            if (state != STATE_COMPLETED) { status = "[Terkunci]";  status_color = COLOR_DIM;     }
             else                          { status = "[Aktif]";     status_color = COLOR_SUCCESS; }
         }
 
@@ -92,7 +101,7 @@ static void draw_menu(DisplayPort *dp, int selected, CompetitionStateKind state,
     }
 
     /* Separator sebelum info */
-    dp->separator(BOX_START_ROW + 9, BOX_START_COL, grid_width);
+    dp->separator(BOX_START_ROW + 9, BOX_START_COL, gw);
 
     /* ── Info status + peserta ── */
     const char *state_text = "";
@@ -110,7 +119,7 @@ static void draw_menu(DisplayPort *dp, int selected, CompetitionStateKind state,
     /* Tombol keluar (kanan bawah) */
     int exit_color = (0 == selected) ? COLOR_HIGHLIGHT : COLOR_ERROR;
     snprintf(buf, sizeof buf, "  [0] Keluar  ");
-    dp->draw_colored(BOX_START_ROW + 10, BOX_START_COL + grid_width - 18, exit_color, 1, buf);
+    dp->draw_colored(BOX_START_ROW + 10, BOX_START_COL + gw - 18, exit_color, 1, buf);
 
     /* ── Footer navigasi (ASCII-safe) ── */
     dp->footer("[Up/Down] Navigasi   [ENTER] Pilih   [1-5] Shortcut   [h] Bantuan");
