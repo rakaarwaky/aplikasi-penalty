@@ -1,6 +1,6 @@
 
 Laporan Audit Kepatuhan Arsitektur AES v3.0
-Proyek: aplikasi-penalty (C99 Adaptation) Tanggal Audit: 2026-07-10 Basis:
+Proyek: aplikasi-penalti (C99 Adaptation) Tanggal Audit: 2026-07-10 Basis:
 RULES_AES.md
  ×
 ARCHITECTURE.md

@@ -1,22 +1,22 @@
-PENALTY SHOOTOUT — DISTRIBUSI LINUX
+PENALTI SHOOTOUT — DISTRIBUSI LINUX
 ===================================
 
 Isi folder ini:
-  - AplikasiPenaltyShootout-x86_64.AppImage  (LANGSUNG JALAN - tidak perlu install)
-  - aplikasi_perhitungan_penalty              (binary alternatif)
-  - AplikasiPerhitunganPenalty.desktop        (launcher alternatif)
+  - AplikasiPenaltiShootout-x86_64.AppImage  (LANGSUNG JALAN - tidak perlu install)
+  - aplikasi_perhitungan_penalti              (binary alternatif)
+  - AplikasiPerhitunganPenalti.desktop        (launcher alternatif)
   - README.txt                                (file ini)
 
 CARA PAKAI (PALING MUDAH):
-  1. Download file "AplikasiPenaltyShootout-x86_64.AppImage"
+  1. Download file "AplikasiPenaltiShootout-x86_64.AppImage"
   2. Klik kanan → Properties → centang "Allow executing file as program"
-     ATAU jalankan: chmod +x AplikasiPenaltyShootout-x86_64.AppImage
+     ATAU jalankan: chmod +x AplikasiPenaltiShootout-x86_64.AppImage
   3. Klik 2x file AppImage → permainan langsung jalan!
   4. Tidak perlu install, tidak perlu terminal, tidak perlu dependensi.
 
 CARA PAKAI (ALTERNATIF - launcher):
   1. Extract folder ini ke mana saja.
-  2. Klik kanan "AplikasiPerhitunganPenalty.desktop" → "Allow Launching"
+  2. Klik kanan "AplikasiPerhitunganPenalti.desktop" → "Allow Launching"
   3. Klik 2x → terminal terbuka → permainan jalan.
 
 SYARAT:

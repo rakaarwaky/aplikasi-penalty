@@ -1,7 +1,7 @@
-# Makefile untuk Aplikasi Perhitungan Penalty (C99, AES v3.0)
+# Makefile untuk Aplikasi Perhitungan Penalti (C99, AES v3.0)
 CC      ?= gcc
 CFLAGS  ?= -std=c99 -Wall -Wextra -Wpedantic -O2 -g
-TARGET  := aplikasi_perhitungan_penalty
+TARGET  := aplikasi_perhitungan_penalti
 
 SRC_DIR   := src
 BUILD_DIR := build
@@ -140,7 +140,7 @@ uninstall:
 
 # Windows cross-compile (MinGW)
 WIN_CC      := x86_64-w64-mingw32-gcc
-WIN_TARGET  := aplikasi_perhitungan_penalty.exe
+WIN_TARGET  := aplikasi_perhitungan_penalti.exe
 WIN_LDFLAGS := -lpdcurses -lmingw32
 
 win:

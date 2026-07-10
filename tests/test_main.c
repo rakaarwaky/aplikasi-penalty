@@ -15,7 +15,7 @@ extern void run_invariant_tests(void);
 
 int main(void) {
     printf("========================================\n");
-    printf("  UNIT TESTS — Aplikasi Perhitungan Penalty\n");
+    printf("  UNIT TESTS — Aplikasi Perhitungan Penalti\n");
     printf("========================================\n\n");
 
     run_registration_tests();

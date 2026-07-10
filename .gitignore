@@ -3,7 +3,7 @@ build/
 *.o
 
 # Binary
-aplikasi_perhitungan_penalty
+aplikasi_perhitungan_penalti
 run_tests
 
 # Test artifacts

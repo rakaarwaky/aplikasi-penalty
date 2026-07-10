@@ -34,7 +34,7 @@ static void draw_menu(DisplayPort *dp, int selected, CompetitionStateKind state,
 
     /* ── Header dekorasi (box ganda) ── */
     dp->print_centered_colored(0, "==========================================================", COLOR_GOLD, 1);
-    dp->print_centered_colored(1, "   APLIKASI PERHITUNGAN PENALTY   ", COLOR_TITLE, 1);
+    dp->print_centered_colored(1, "   APLIKASI PERHITUNGAN PENALTI   ", COLOR_TITLE, 1);
     dp->print_centered_colored(2, "==========================================================", COLOR_GOLD, 1);
 
     /* ── Bingkai utama ── */
@@ -123,9 +123,9 @@ static void show_help_screen(DisplayPort *dp) {
     char buf[128];
     dp->cls();
 
-    dp->print_centered_colored(0, "+----------------------------------------------------------+", COLOR_BORDER, 0);
-    dp->print_centered_colored(1, "  PANDUAN PENGGUNAAN   ", COLOR_TITLE, 1);
-    dp->print_centered_colored(2, "+----------------------------------------------------------+", COLOR_BORDER, 0);
+    dp->print_centered_colored(0, "==========================================================", COLOR_GOLD, 1);
+    dp->print_centered_colored(1, "  PANDUAN PENGGUNAAN  ", COLOR_TITLE, 1);
+    dp->print_centered_colored(2, "==========================================================", COLOR_GOLD, 1);
 
     int box_col = 2;
     int box_width = BOX_WIDTH;
@@ -208,7 +208,7 @@ int cli_surfaces_menu_run(RegistrationAggregate *reg,
             continue;  /* ulang cek ukuran */
         }
 
-        draw_menu(dp, selected, state->state);
+        draw_menu(dp, selected, state->state, state->participant_count);
         int key = dp->readkey();
 
         switch (key) {

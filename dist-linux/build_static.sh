@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build aplikasi_perhitungan_penalty dengan ncurses DIBUNGKUS (static) ke dalam binary.
+# Build aplikasi_perhitungan_penalti dengan ncurses DIBUNGKUS (static) ke dalam binary.
 # Hasilnya: user TIDAK perlu ncurses terpasang di mesinnya — hanya butuh glibc
 # (sudah ada di semua Linux). Bukan "-static" penuh (glibc static tak ada di Fedora).
 #
@@ -39,9 +39,9 @@ gcc -std=c99 -O2 \
   -I "$NCHDR" \
   -Wl,-Bstatic -L"$NCDIR" -lncursesw -ltinfow -Wl,-Bdynamic \
   -lpthread \
-  -o aplikasi_perhitungan_penalty
+  -o aplikasi_perhitungan_penalti
 
-echo "Build selesai: ./aplikasi_perhitungan_penalty"
-file aplikasi_perhitungan_penalty
+echo "Build selesai: ./aplikasi_perhitungan_penalti"
+file aplikasi_perhitungan_penalti
 echo "Dependensi (harus TIDAK ada ncurses/tinfo):"
-ldd aplikasi_perhitungan_penalty | grep -iE 'ncurses|tinfo' || echo "  -> ncurses dibungkus (OK)"
+ldd aplikasi_perhitungan_penalti | grep -iE 'ncurses|tinfo' || echo "  -> ncurses dibungkus (OK)"

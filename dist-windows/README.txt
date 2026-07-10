@@ -1,8 +1,8 @@
-PENALTY SHOOTOUT — DISTRIBUSI WINDOWS
+PENALTI SHOOTOUT — DISTRIBUSI WINDOWS
 ====================================
 
 Isi folder ini:
-  - aplikasi_perhitungan_penalty.exe   (binary aplikasi Windows, sudah jadi)
+  - aplikasi_perhitungan_penalti.exe   (binary aplikasi Windows, sudah jadi)
   - run.bat                (klik 2x -> buka Command Prompt -> jalan)
   - README.txt             (file ini)
 

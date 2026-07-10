@@ -289,7 +289,7 @@ void tui_splash(int delay_ms) {
     }
 
     /* Subtitle */
-    tui_print_centered_colored(center_row + 2, "APLIKASI PERHITUNGAN PENALTY", COLOR_GOLD, 1);
+    tui_print_centered_colored(center_row + 2, "APLIKASI PERHITUNGAN PENALTI", COLOR_GOLD, 1);
     refresh();
     napms(delay_ms);
 

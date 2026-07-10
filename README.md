@@ -1,4 +1,4 @@
-# Aplikasi Perhitungan Penalty
+# Aplikasi Perhitungan Penalti
 
 Aplikasi **console berbasis TUI** (Terminal User Interface) bahasa **C (C99)** untuk
 mengelola lomba tendangan penalti. Dibangun dengan arsitektur **AES v3.0** (Agentic
@@ -111,7 +111,7 @@ sudo dnf install -y mingw64-gcc mingw64-pdcurses
 make win
 ```
 
-Hasil: `aplikasi_perhitungan_penalty.exe`
+Hasil: `aplikasi_perhitungan_penalti.exe`
 
 ---
 
@@ -131,7 +131,7 @@ make test
 make clean
 ```
 
-Binary yang dihasilkan: `aplikasi_perhitungan_penalty`
+Binary yang dihasilkan: `aplikasi_perhitungan_penalti`
 
 ---
 
@@ -298,7 +298,7 @@ tests/
 
 | Target | Deskripsi |
 |--------|-----------|
-| `make` | Build binary `aplikasi_perhitungan_penalty` |
+| `make` | Build binary `aplikasi_perhitungan_penalti` |
 | `make run` | Build lalu jalankan |
 | `make test` | Jalankan 113 unit tests |
 | `make win` | Build `.exe` untuk Windows (MinGW + PDCurses) |

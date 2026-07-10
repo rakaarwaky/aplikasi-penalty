@@ -1,6 +1,6 @@
 /**
  * @file taxonomy_game_constant.h
- * @brief Batas & kode tetap permainan penalty (1 sumber ubah untuk seluruh aturan).
+ * @brief Batas & kode tetap permainan penalti (1 sumber ubah untuk seluruh aturan).
  */
 
 #ifndef SHARED_TAXONOMY_GAME_CONSTANT_H
