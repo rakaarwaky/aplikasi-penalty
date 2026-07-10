@@ -299,9 +299,8 @@ void tui_splash(int delay_ms) {
 
     /* Tampilkan versi */
     tui_print_centered_colored(center_row + 8, "Versi 1.0.0", COLOR_DIM, 0);
-    tui_print_centered_colored(center_row + 10, "Tekan ENTER untuk melanjutkan...", COLOR_MENU, 0);
     refresh();
 
-    /* Tunggu user tekan Enter */
-    tui_getch();
+    /* Splash otomatis lanjut ke menu (tanpa menunggu Enter). */
 }
+
