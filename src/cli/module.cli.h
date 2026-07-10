@@ -59,16 +59,19 @@ void scoring_page_draw(DisplayPort *dp, ParticipantEntity *part,
                        const char *msg, int msg_is_error);
 
 void ranking_page_draw(DisplayPort *dp, RankingEntryVO *entries,
-                       CompetitionState *state, int max_score);
+                       CompetitionState *state, int max_score,
+                       ExportAggregate *ex);
 
 void search_page_draw_input(DisplayPort *dp);
-void search_page_draw_found(DisplayPort *dp, SearchResultVO *r);
+void search_page_draw_found(DisplayPort *dp, SearchResultVO *r,
+                            ExportAggregate *ex);
 void search_page_draw_not_found(DisplayPort *dp, const char *query,
                                 CompetitionState *state);
 
 void recap_page_draw(DisplayPort *dp, RankingEntryVO *ranking,
                      SearchResultVO *details, CompetitionState *state,
-                     int total_score, int avg_score, int highest_score);
+                     int total_score, int avg_score, int highest_score,
+                     ExportAggregate *ex);
 
 void storage_page_draw(DisplayPort *dp, int selected, int file_exists,
                        const char *msg, int msg_is_error);

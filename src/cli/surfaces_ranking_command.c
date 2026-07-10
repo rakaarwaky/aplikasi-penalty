@@ -34,8 +34,8 @@ static void show_error_screen(DisplayPort *dp, const char *title,
     dp->readkey();
 }
 
-void cli_surfaces_ranking_execute(RankingAggregate *agg, CompetitionState *state,
-                                  DisplayPort *dp) {
+void cli_surfaces_ranking_execute(RankingAggregate *agg, ExportAggregate *ex,
+                                  CompetitionState *state, DisplayPort *dp) {
     if (agg == NULL || state == NULL) return;
     if (state->state != STATE_COMPLETED) {
         show_error_screen(dp, "RANKING PESERTA",
@@ -56,5 +56,5 @@ void cli_surfaces_ranking_execute(RankingAggregate *agg, CompetitionState *state
     for (ms = 0; ms < state->participant_count; ms++)
         if (entries[ms].total_score > max_score) max_score = entries[ms].total_score;
 
-    ranking_page_draw(dp, entries, state, max_score);
+    ranking_page_draw(dp, entries, state, max_score, ex);
 }

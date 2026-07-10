@@ -42,7 +42,8 @@ void search_page_draw_input(DisplayPort *dp) {
     dp->screen_refresh();
 }
 
-void search_page_draw_found(DisplayPort *dp, SearchResultVO *r) {
+void search_page_draw_found(DisplayPort *dp, SearchResultVO *r,
+                            ExportAggregate *ex) {
     char buf[128];
     dp->cls();
 
@@ -105,9 +106,41 @@ void search_page_draw_found(DisplayPort *dp, SearchResultVO *r) {
         dp->draw_colored(cy, cx, COLOR_MENU, 0, buf);
     }
 
-    dp->footer("[ENTER] Kembali ke menu");
+    dp->footer("[ENTER] Kembali  \xe2\x94\x82  [E] Export ke File");
     dp->screen_refresh();
-    dp->readkey();
+
+    for (;;) {
+        int key = dp->readkey();
+        if (key == '\n' || key == TUI_KEY_ENTER) break;
+        if ((key == 'e' || key == 'E') && ex != NULL) {
+            char defname[64];
+            snprintf(defname, sizeof defname, "peserta_%s.txt", r->name);
+            char filename[64];
+            strncpy(filename, defname, sizeof filename - 1);
+            filename[sizeof filename - 1] = '\0';
+
+            char prompt[128];
+            snprintf(prompt, sizeof prompt, "Nama file (ENTER = %s):", defname);
+            dp->footer(prompt);
+            dp->screen_refresh();
+            dp->input_string(dp->get_lines() - 1, 30, filename, 50);
+            if (strlen(filename) == 0) strcpy(filename, defname);
+
+            ExportError err = agent_export_participant(ex, filename, r);
+            dp->cls();
+            if (err == EXP_OK) {
+                char msg[128];
+                snprintf(msg, sizeof msg, "Berhasil diekspor ke: %s", filename);
+                dp->print_centered_colored(6, msg, COLOR_SUCCESS, 1);
+            } else {
+                dp->print_centered_colored(6, "[GAGAL] Export gagal!", COLOR_ERROR, 1);
+            }
+            dp->footer("[ENTER] Kembali ke menu");
+            dp->screen_refresh();
+            dp->readkey();
+            break;
+        }
+    }
 }
 
 void search_page_draw_not_found(DisplayPort *dp, const char *query,

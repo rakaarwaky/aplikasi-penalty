@@ -34,8 +34,8 @@ static void show_error_screen(DisplayPort *dp, const char *title,
     dp->readkey();
 }
 
-void cli_surfaces_recap_execute(RecapAggregate *agg, CompetitionState *state,
-                                DisplayPort *dp) {
+void cli_surfaces_recap_execute(RecapAggregate *agg, ExportAggregate *ex,
+                                CompetitionState *state, DisplayPort *dp) {
     if (agg == NULL || state == NULL) return;
     if (state->state != STATE_COMPLETED) {
         show_error_screen(dp, "REKAPITULASI LENGKAP",
@@ -64,5 +64,5 @@ void cli_surfaces_recap_execute(RecapAggregate *agg, CompetitionState *state,
                     ? total_score_all / state->participant_count : 0;
 
     recap_page_draw(dp, ranking, details, state,
-                    total_score_all, avg_score, highest_score);
+                    total_score_all, avg_score, highest_score, ex);
 }

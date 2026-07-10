@@ -6,6 +6,7 @@
 #include "cli/module.cli.h"
 
 #include <stdio.h>
+#include <string.h>
 
 static void draw_double_line(DisplayPort *dp, int row, int col, int width) {
     int i;
@@ -15,7 +16,8 @@ static void draw_double_line(DisplayPort *dp, int row, int col, int width) {
 
 void recap_page_draw(DisplayPort *dp, RankingEntryVO *ranking,
                      SearchResultVO *details, CompetitionState *state,
-                     int total_score, int avg_score, int highest_score) {
+                     int total_score, int avg_score, int highest_score,
+                     ExportAggregate *ex) {
     char buf[256];
     dp->cls();
 
@@ -113,7 +115,35 @@ void recap_page_draw(DisplayPort *dp, RankingEntryVO *ranking,
         }
     }
 
-    dp->footer("[ENTER] Kembali ke menu");
+    dp->footer("[ENTER] Kembali  \xe2\x94\x82  [E] Export ke File");
     dp->screen_refresh();
-    dp->readkey();
+
+    for (;;) {
+        int key = dp->readkey();
+        if (key == '\n' || key == TUI_KEY_ENTER) break;
+        if ((key == 'e' || key == 'E') && ex != NULL) {
+            char filename[64] = "rekap.txt";
+            dp->footer("Nama file (ENTER = rekap.txt):");
+            dp->screen_refresh();
+            dp->input_string(dp->get_lines() - 1, 30, filename, 50);
+            if (strlen(filename) == 0) strcpy(filename, "rekap.txt");
+
+            ExportError err = agent_export_recap(ex, filename, state, ranking,
+                                                 details, state->participant_count,
+                                                 total_score, avg_score,
+                                                 highest_score);
+            dp->cls();
+            if (err == EXP_OK) {
+                char msg[128];
+                snprintf(msg, sizeof msg, "Berhasil diekspor ke: %s", filename);
+                dp->print_centered_colored(6, msg, COLOR_SUCCESS, 1);
+            } else {
+                dp->print_centered_colored(6, "[GAGAL] Export gagal!", COLOR_ERROR, 1);
+            }
+            dp->footer("[ENTER] Kembali ke menu");
+            dp->screen_refresh();
+            dp->readkey();
+            break;
+        }
+    }
 }

@@ -256,7 +256,8 @@ static void dispatch_feature(int selected, RegistrationAggregate *reg,
 int cli_surfaces_menu_run(RegistrationAggregate *reg,
                           ScoringAggregate *sc, RankingAggregate *rk,
                           SearchAggregate *sr, RecapAggregate *rc,
-                          StorageAggregate *st, CompetitionState *state,
+                          StorageAggregate *st, ExportAggregate *ex,
+                          CompetitionState *state,
                           DisplayPort *dp, SanitizeAggregate *sn) {
     int selected = 1;
     int running = 1;
@@ -305,7 +306,7 @@ int cli_surfaces_menu_run(RegistrationAggregate *reg,
                     if (dp->confirm("Yakin ingin keluar?"))
                         running = 0;
                 } else {
-                    dispatch_feature(selected, reg, sc, rk, sr, rc, st, state, dp, sn);
+                    dispatch_feature(selected, reg, sc, rk, sr, rc, st, ex, state, dp, sn);
                 }
                 break;
             case TUI_KEY_ESC:

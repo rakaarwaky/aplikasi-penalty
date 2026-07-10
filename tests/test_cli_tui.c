@@ -10,6 +10,7 @@
 #include "search/module.search.h"
 #include "recap/module.recap.h"
 #include "sanitizer/module.sanitizer.h"
+#include "export/module.export.h"
 #include "cli/module.cli.h"
 #include "tui/infrastructure_tui_adapter.h"   /* root_display_build */
 #include "storage/module.storage.h"
@@ -64,7 +65,7 @@ static void test_full_game_via_surfaces(void) {
     SearchAggregate sr = root_search_build();
     RecapAggregate rc = root_recap_build(root_ranking_build().protocol);
     SanitizeAggregate sn = root_sanitize_build();
-    StorageAggregate st = root_storage_build();
+    ExportAggregate ex = root_export_build();
     DisplayPort dp = root_display_build();
 
     fake_tui_reset_input();
@@ -73,18 +74,18 @@ static void test_full_game_via_surfaces(void) {
     /* Ranking (state COMPLETED) -> 1 readkey. */
     fake_tui_reset_input();
     fake_tui_push_key(TUI_KEY_ENTER);
-    cli_surfaces_ranking_execute(&rk, &state, &dp);
+    cli_surfaces_ranking_execute(&rk, &ex, &state, &dp);
 
     /* Search "Budi" -> 1 string + 1 readkey. */
     fake_tui_reset_input();
     fake_tui_push_str("Budi");
     fake_tui_push_key(TUI_KEY_ENTER);
-    cli_surfaces_search_execute(&sr, &state, &dp);
+    cli_surfaces_search_execute(&sr, &ex, &state, &dp);
 
     /* Recap (state COMPLETED) -> 1 readkey. */
     fake_tui_reset_input();
     fake_tui_push_key(TUI_KEY_ENTER);
-    cli_surfaces_recap_execute(&rc, &state, &dp);
+    cli_surfaces_recap_execute(&rc, &ex, &state, &dp);
 
     printf("  [PASS] test_full_game_via_surfaces\n");
 }
@@ -99,6 +100,7 @@ static void test_menu_dispatch_and_exit(void) {
     RecapAggregate rc = root_recap_build(root_ranking_build().protocol);
     SanitizeAggregate sn = root_sanitize_build();
     StorageAggregate st = root_storage_build();
+    ExportAggregate ex = root_export_build();
     DisplayPort dp = root_display_build();
 
     fake_tui_reset_input();
@@ -112,7 +114,7 @@ static void test_menu_dispatch_and_exit(void) {
     fake_tui_push_key(TUI_KEY_ENTER); /* footer */
     fake_tui_push_key('q');           /* keluar dari menu */
     fake_tui_push_str("y");           /* confirm keluar */
-    cli_surfaces_menu_run(&reg, &sc, &rk, &sr, &rc, &st, &state, &dp, &sn);
+    cli_surfaces_menu_run(&reg, &sc, &rk, &sr, &rc, &st, &ex, &state, &dp, &sn);
     assert(state.participant_count == 5);
 
     /* Menu help screen ('h') lalu keluar. */
@@ -121,7 +123,7 @@ static void test_menu_dispatch_and_exit(void) {
     fake_tui_push_key(TUI_KEY_ENTER); /* kembali */
     fake_tui_push_key('0');           /* keluar */
     fake_tui_push_str("y");           /* confirm */
-    cli_surfaces_menu_run(&reg, &sc, &rk, &sr, &rc, &st, &state, &dp, &sn);
+    cli_surfaces_menu_run(&reg, &sc, &rk, &sr, &rc, &st, &ex, &state, &dp, &sn);
 
     printf("  [PASS] test_menu_dispatch_and_exit\n");
 }
@@ -133,6 +135,7 @@ static void test_surfaces_guard_paths(void) {
     SearchAggregate sr = root_search_build();
     RecapAggregate rc = root_recap_build(root_ranking_build().protocol);
     SanitizeAggregate sn = root_sanitize_build();
+    ExportAggregate ex = root_export_build();
     DisplayPort dp = root_display_build();
 
     fake_tui_reset_input();
@@ -141,11 +144,11 @@ static void test_surfaces_guard_paths(void) {
 
     fake_tui_reset_input();
     fake_tui_push_key(TUI_KEY_ENTER);
-    cli_surfaces_search_execute(&sr, &state, &dp);        /* belum daftar */
+    cli_surfaces_search_execute(&sr, &ex, &state, &dp);        /* belum daftar */
 
     fake_tui_reset_input();
     fake_tui_push_key(TUI_KEY_ENTER);
-    cli_surfaces_recap_execute(&rc, &state, &dp);         /* belum completed */
+    cli_surfaces_recap_execute(&rc, &ex, &state, &dp);         /* belum completed */
 
     printf("  [PASS] test_surfaces_guard_paths\n");
 }

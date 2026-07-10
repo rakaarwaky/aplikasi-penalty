@@ -36,8 +36,8 @@ static void show_error_screen(DisplayPort *dp, const char *title,
     dp->readkey();
 }
 
-void cli_surfaces_search_execute(SearchAggregate *agg, CompetitionState *state,
-                                 DisplayPort *dp) {
+void cli_surfaces_search_execute(SearchAggregate *agg, ExportAggregate *ex,
+                                 CompetitionState *state, DisplayPort *dp) {
     if (agg == NULL || state == NULL) return;
     if (state->state == STATE_INIT) {
         show_error_screen(dp, "CARI PESERTA",
@@ -83,7 +83,7 @@ void cli_surfaces_search_execute(SearchAggregate *agg, CompetitionState *state,
     SearchError e = agent_search_find(agg, state, &name, &r);
 
     if (e == SR_OK) {
-        search_page_draw_found(dp, &r);
+        search_page_draw_found(dp, &r, ex);
     } else {
         search_page_draw_not_found(dp, buffer, state);
     }
