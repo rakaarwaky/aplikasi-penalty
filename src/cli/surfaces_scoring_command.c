@@ -130,7 +130,7 @@ void cli_surfaces_scoring_execute(ScoringAggregate *agg, CompetitionState *state
         while (part->kick_count.value < TOTAL_KICKS) {
             draw_scoring_screen(dp, part, NULL, 0);
 
-            ZoneVO z;
+            ZoneVO z = { -1 };
             char raw[32] = "";
             read_zone(dp, &z, raw, sizeof raw);
 

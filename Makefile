@@ -69,7 +69,7 @@ coverage:
 	@echo "Coverage artefacts in ./$(COV_DIR)/ — jalankan: cd $(COV_DIR) && gcov run_tests-*.gcno"
 
 $(TEST_BIN): $(TEST_LIB_SRC) $(TEST_SRCS)
-	$(CC) $(CFLAGS) $(TEST_INC) -o $@ $^ $(LDFLAGS)
+	$(CC) $(CFLAGS) $(TEST_INC) -o $@ $^ $(TEST_LDFLAGS)
 
 clean:
 	rm -rf $(BUILD_DIR) $(TARGET) $(TEST_BIN) $(COV_DIR)
