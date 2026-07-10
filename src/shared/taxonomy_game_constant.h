@@ -32,6 +32,9 @@
 /** Panjang nama terpanjang yang diterima (belum termasu null). Dipakai ukuran buffer nama. */
 #define MAX_NAME_LENGTH 30
 
+/** Nama file penyimpanan lomba (default, pakai di auto-load & menu simpan). */
+#define DEFAULT_STORAGE_FILENAME "data_lomba.bin"
+
 /* ── Kode pilihan menu utama (cocok dengan nomor di layar menu) ── */
 
 #define MENU_EXIT 0        /**< Pilihan 0: keluar dari program. */
