@@ -118,22 +118,10 @@
 <hr/>
 
 <h2>8. Kode Sumber (Script Program)</h2>
+<p>Kode sumber lengkap seluruh isi folder <code>src/</code> (semua file <code>.c</code> dan <code>.h</code>), dikelompokkan per folder dan diurutkan.</p>
+<p>Struktur:</p>
+<ul><li><code>src/shared/</code>- <code>src/registration/</code>- <code>src/scoring/</code>- <code>src/ranking/</code>- <code>src/search/</code>- <code>src/recap/</code>- <code>src/storage/</code>- <code>src/sanitizer/</code>- <code>src/cli/</code>- <code>src/tui/</code>- <code>src/export/</code>- <code>src/</code> (root, termasuk <code>root_cli_main_entry.c</code>)</li></ul>
 
-<p>Kode sumber lengkap terdapat di folder <code>src/</code> (41 file .c/.h) dengan struktur:</p>
+<h3>src/ (root)</h3>
 
-<ul><li><code>src/shared/</code>        — konstanta, struct (VO), enum, kontrak antarmuka</li><li><code>src/registration/</code>  — pendaftaran peserta</li><li><code>src/scoring/</code>       — validasi &amp; pencatatan zona → skor</li><li><code>src/ranking/</code>       — peringkat + aturan seri</li><li><code>src/search/</code>        — pencarian peserta</li><li><code>src/recap/</code>         — rekapitulasi</li><li><code>src/storage/</code>       — simpan/muat/hapus file</li><li><code>src/sanitizer/</code>     — validasi input</li><li><code>src/cli/</code>           — layar menu &amp; tiap fitur (command + page)</li><li><code>src/tui/</code>           — adaptor ncurses (DisplayPort)</li><li><code>root_cli_main_entry.c</code> — titik masuk program</li></ul>
-
-<p>Cuplikan fungsi inti — aturan seri (ranking):</p>
-
-<pre><code>static int compare_entries(const void *a, const void *b) {
-    const RankingEntryVO *x = a, *y = b;
-    if (x-&gt;total_score != y-&gt;total_score)
-        return y-&gt;total_score - x-&gt;total_score;
-    for (int z = MAX_ZONE; z &gt;= 1; z--)        /* 5,4,3,2,1 */
-        if (x-&gt;zone_freq[z] != y-&gt;zone_freq[z])
-            return y-&gt;zone_freq[z] - x-&gt;zone_freq[z];
-    return 0;                                  /* seri sempurna */
-}</code></pre>
-
-<p>Kompilasi &amp; pengujian: <code>make</code> (build) dan <code>make test</code> (semua test lolos).</p>
-</body></html>
+<p><strong>src/root_cli_main_entry.c</strong></p></body></html>

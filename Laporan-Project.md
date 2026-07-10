@@ -278,33 +278,112 @@ graph TD
 ---
 
 ## 8. Kode Sumber (Script Program)
+Kode sumber lengkap seluruh isi folder `src/` (semua file `.c` dan `.h`), dikelompokkan per folder dan diurutkan.
+Struktur:
+- `src/shared/`- `src/registration/`- `src/scoring/`- `src/ranking/`- `src/search/`- `src/recap/`- `src/storage/`- `src/sanitizer/`- `src/cli/`- `src/tui/`- `src/export/`- `src/` (root, termasuk `root_cli_main_entry.c`)
 
-Kode sumber lengkap terdapat di folder `src/` (41 file .c/.h) dengan struktur:
+### src/ (root)
 
-- `src/shared/`        — konstanta, struct (VO), enum, kontrak antarmuka
-- `src/registration/`  — pendaftaran peserta
-- `src/scoring/`       — validasi & pencatatan zona → skor
-- `src/ranking/`       — peringkat + aturan seri
-- `src/search/`        — pencarian peserta
-- `src/recap/`         — rekapitulasi
-- `src/storage/`       — simpan/muat/hapus file
-- `src/sanitizer/`     — validasi input
-- `src/cli/`           — layar menu & tiap fitur (command + page)
-- `src/tui/`           — adaptor ncurses (DisplayPort)
-- `root_cli_main_entry.c` — titik masuk program
+**src/root_cli_main_entry.c**
+```c/**
+ * @file root_cli_main_entry.c
+ * @brief Titik mulai program: siapkan data, jalankan menu, bersihkan layar.
+ */
 
-Cuplikan fungsi inti — aturan seri (ranking):
+#include "cli/module.cli.h"
+#include "sanitizer/module.sanitizer.h"
+#include "storage/module.storage.h"
+#include "shared/taxonomy_game_constant.h"
+#include "tui/infrastructure_tui_adapter.h"
 
-```c
-static int compare_entries(const void *a, const void *b) {
-    const RankingEntryVO *x = a, *y = b;
-    if (x->total_score != y->total_score)
-        return y->total_score - x->total_score;
-    for (int z = MAX_ZONE; z >= 1; z--)        /* 5,4,3,2,1 */
-        if (x->zone_freq[z] != y->zone_freq[z])
-            return y->zone_freq[z] - x->zone_freq[z];
-    return 0;                                  /* seri sempurna */
+#include <locale.h>
+#include <signal.h>
+#include <stdlib.h>
+
+/* Bila program dihentikan mendadak, matikan moda ncurses dulu. */
+static void cleanup_handler(int sig) {
+    (void)sig;
+    tui_end();
+    exit(0);
 }
-```
+
+int main(void) {
+    /* Aktifkan UTF-8 locale agar karakter Unicode Box Drawing bisa dirender. */
+    setlocale(LC_ALL, "");
+
+    /* Tangani tombol interupsi agar terminal kembali normal. */
+    signal(SIGINT, cleanup_handler);
+    signal(SIGTERM, cleanup_handler);
+
+    /* Satu-satunya data lomba (disimpan di sini, bukan global). */
+    CompetitionState state;
+    state.participant_count = 0;
+    state.state = STATE_INIT;
+
+    /* Siapkan seluruh fitur (pendaftaran, scoring, ranking, dll). */
+    RegistrationAggregate reg = root_registration_build();
+    ScoringAggregate      sc  = root_scoring_build();
+    RankingAggregate      rk  = root_ranking_build();
+    SearchAggregate       sr  = root_search_build();
+    RecapAggregate        rc  = root_recap_build(rk.protocol);
+    SanitizeAggregate     sn  = root_sanitize_build();
+    StorageAggregate      st  = root_storage_build();
+    ExportAggregate       ex  = root_export_build();
+
+    /* Hidupkan layar ncurses, rakit DisplayPort, lalu langsung ke menu utama. */
+    tui_init();
+
+    /* Rakit DisplayPort — surfaces hanya pegang pointer ke ini. */
+    DisplayPort dp = root_display_build();
+
+    /* Muat data tersimpan bila ada (silent: kalau file belum ada, biarkan kosong). */
+    {
+        agent_storage_load(&st, DEFAULT_STORAGE_FILENAME, &state);
+    }
+
+    cli_surfaces_menu_run(&reg, &sc, &rk, &sr, &rc, &st, &ex, &state, &dp, &sn);
+
+    /* D2: Ringkasan juara sebelum keluar — tampilkan di ncurses, tunggu Enter. */
+    if (state.state == STATE_COMPLETED && state.participant_count > 0) {
+        RankingEntryVO entries[MAX_PARTICIPANTS];
+        if (agent_ranking_compute(&rk, &state, entries, MAX_PARTICIPANTS) == RK_OK) {
+            dp.cls();
+            dp.print_centered_colored(2, "\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90", COLOR_DIM, 0);
+            dp.print_centered_colored(3, "TERIMA KASIH TELAH BERLOMBA", COLOR_TITLE, 1);
+            dp.print_centered_colored(4, "\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90", COLOR_DIM, 0);
+
+            const char *winner = state.participants[entries[0].participant_id].name.value;
+            dp.print_centered_colored(7, "JUARA UMUM", COLOR_GOLD, 1);
+
+            char line[64];
+            snprintf(line, sizeof line, "%s  -  %d poin", winner, entries[0].total_score);
+            dp.print_centered_colored(8, line, COLOR_MENU, 1);
+
+            if (state.participant_count >= 2) {
+                const char *second = state.participants[entries[1].participant_id].name.value;
+                snprintf(line, sizeof line, "Juara 2: %s (%d poin)", second, entries[1].total_score);
+                dp.print_centered_colored(10, line, COLOR_MENU, 0);
+            }
+            if (state.participant_count >= 3) {
+                const char *third = state.participants[entries[2].participant_id].name.value;
+                snprintf(line, sizeof line, "Juara 3: %s (%d poin)", third, entries[2].total_score);
+                dp.print_centered_colored(11, line, COLOR_MENU, 0);
+            }
+
+            dp.footer("Tekan ENTER untuk keluar");
+            dp.screen_refresh();
+            dp.readkey();
+        }
+    }
+
+    tui_end();
+
+    /* Pesan penutup di terminal biasa. */
+    printf("\nTekan Enter untuk keluar...");
+    fflush(stdout);
+    getchar();
+
+    return 0;
+}```
 
 Kompilasi & pengujian: `make` (build) dan `make test` (semua test lolos).
