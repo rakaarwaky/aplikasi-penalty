@@ -45,6 +45,7 @@ void cli_surfaces_recap_execute(RecapAggregate *agg,
                                 CompetitionState *state, DisplayPort *dp);
 void cli_surfaces_storage_execute(StorageAggregate *agg,
                                   CompetitionState *state, DisplayPort *dp);
+void cli_surfaces_menu_draw(DisplayPort *dp, int selected, CompetitionState *state);
 
 /* ── Dumb Surfaces (page) ── */
 void registration_page_draw(DisplayPort *dp, CompetitionState *state);

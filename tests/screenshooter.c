@@ -25,7 +25,7 @@ static void render_menu(DisplayPort *dp, CompetitionState *state) {
     /* Simulate menu screen: draw menu and wait for Enter */
     fake_tui_reset_input();
     fake_tui_push_key(10); /* Enter to dismiss */
-    menu_page_draw(dp, 1, state->state, state->participant_count);
+    cli_surfaces_menu_draw(dp, 1, state);
 }
 
 int main(void) {

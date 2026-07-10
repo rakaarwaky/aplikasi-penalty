@@ -69,7 +69,7 @@ static void draw_double_line(DisplayPort *dp, int row, int col, int width) {
         dp->draw_at(row, col + i, "\xe2\x95\x90");
 }
 
-static void draw_menu(DisplayPort *dp, int selected, CompetitionState *state) {
+void cli_surfaces_menu_draw(DisplayPort *dp, int selected, CompetitionState *state) {
     char buf[128];
     dp->cls();
 
@@ -280,7 +280,7 @@ int cli_surfaces_menu_run(RegistrationAggregate *reg,
             continue;
         }
 
-        draw_menu(dp, selected, state);
+        cli_surfaces_menu_draw(dp, selected, state);
         int key = dp->readkey();
 
         switch (key) {
