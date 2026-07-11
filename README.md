@@ -51,10 +51,52 @@ terhubung statis ke dalam `.exe`.
 
 ---
 
+## Script Bantuan
+
+Di root proyek tersedia 4 script untuk memudahkan menjalankan/memasang aplikasi:
+
+| Script          | Platform | Fungsi                                                                 |
+| --------------- | -------- | ---------------------------------------------------------------------- |
+| `run.sh`        | Linux    | Langsung jalankan build yang sudah ada (AppImage, fallback binary)     |
+| `run.bat`       | Windows  | Langsung jalankan `.exe` dari `dist-windows/`                          |
+| `install.sh`    | Linux    | Build dari source lalu pasang ke sistem (atau `./bin` dengan `--local`)|
+| `install.bat`   | Windows  | Build (MinGW) lalu copy `.exe` ke `Program Files` (atau `.\bin`)       |
+
+### Cara pakai
+
+**Hanya mencoba (tanpa compile):**
+```bash
+# Linux
+./run.sh
+
+# Windows (double-click run.bat, atau di Command Prompt)
+run.bat
+```
+
+**Build lalu pasang:**
+```bash
+# Linux -> /usr/local/bin (perlu sudo)
+./install.sh
+# atau hanya ke ./bin (tanpa akses system)
+./install.sh --local
+
+# Windows -> C:\Program Files\AplikasiPenalti (jalankan sebagai Administrator)
+install.bat
+# atau hanya ke .\bin
+install.bat local
+```
+
+> `run.sh` / `run.bat` tidak melakukan kompilasi — mereka menjalankan binary
+> yang sudah dibungkus di `dist-linux/` dan `dist-windows/`. `install.sh` /
+> `install.bat` melakukan kompilasi dari `src/` terlebih dahulu.
+
+---
+
 ## Daftar Isi
 
 - [Fitur](#fitur)
 - [Cara Menjalankan Build yang Sudah Dikompilasi](#cara-menjalankan-build-yang-sudah-dikompilasi)
+- [Script Bantuan](#script-bantuan)
 - [Cara Install Prasyarat](#cara-install-prasyarat)
 - [Cara Build &amp; Run](#cara-build--run)
 - [Cara Penggunaan](#cara-penggunaan)
