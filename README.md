@@ -7,6 +7,24 @@ Engineering System) menggunakan pendekatan *feature-based vertical slicing* dan
 
 ---
 
+## Daftar Isi
+
+- [Cara Menjalankan Build yang Sudah Dikompilasi](#cara-menjalankan-build-yang-sudah-dikompilasi)
+- [Script Bantuan](#script-bantuan)
+- [Cara Install Prasyarat](#cara-install-prasyarat)
+- [Cara Build &amp; Run](#cara-build--run)
+- [Cara Penggunaan](#cara-penggunaan)
+- [Aturan Bisnis](#aturan-bisnis)
+- [State Machine](#state-machine)
+- [Struktur Proyek](#struktur-proyek)
+- [Makefile Targets](#makefile-targets)
+- [Testing](#testing)
+- [Aturan AES](#aturan-aes)
+- [Dokumentasi](#dokumentasi)
+- [License](#license)
+
+---
+
 ## Cara Menjalankan Build yang Sudah Dikompilasi
 
 Folder `dist-linux/` dan `dist-windows/` sudah berisi aplikasi yang **siap jalan
