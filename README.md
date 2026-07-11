@@ -12,6 +12,7 @@ Engineering System) menggunakan pendekatan *feature-based vertical slicing* dan
 - [Fitur](#fitur)
 - [Cara Install Prasyarat](#cara-install-prasyarat)
 - [Cara Build &amp; Run](#cara-build--run)
+- [Cara Menjalankan Build yang Sudah Dikompilasi](#cara-menjalankan-build-yang-sudah-dikompilasi)
 - [Cara Penggunaan](#cara-penggunaan)
 - [Aturan Bisnis](#aturan-bisnis)
 - [State Machine](#state-machine)
@@ -132,6 +133,49 @@ make clean
 ```
 
 Binary yang dihasilkan: `aplikasi_perhitungan_penalti`
+
+---
+
+## Cara Menjalankan Build yang Sudah Dikompilasi
+
+Folder `dist-linux/` dan `dist-windows/` sudah berisi aplikasi yang **siap jalan
+tanpa perlu compile ulang**. Semua dependensi (ncurses/PDCurses) sudah dibungkus
+ke dalam binary, sehingga user tidak perlu menginstal apa pun.
+
+### Linux — `dist-linux/`
+
+**Cara paling mudah (AppImage, klik-2x):**
+```bash
+chmod +x AplikasiPenaltyShootout-x86_64.AppImage
+./AplikasiPenaltyShootout-x86_64.AppImage
+```
+AppImage langsung membuka terminal dan menjalankan permainan. Tidak perlu install,
+tidak perlu dependensi, jalan di Ubuntu/Fedora/Debian/Arch (x86_64).
+
+**Atau pakai binary langsung:**
+```bash
+chmod +x aplikasi_perhitungan_penalti
+./aplikasi_perhitungan_penalti
+```
+
+**Atau pakai launcher `.desktop`:**
+```bash
+# Klik kanan -> "Allow Launching", lalu klik 2x
+./AplikasiPerhitunganPenalty.desktop
+```
+
+### Windows — `dist-windows/`
+
+Buka Command Prompt / PowerShell di folder `dist-windows/`, lalu:
+```bat
+aplikasi_perhitungan_penalti.exe
+```
+Atau cukup **klik 2x** file `run.bat`. Tidak butuh DLL eksternal — semua sudah
+terhubung statis ke dalam `.exe`.
+
+> **Catatan:** Aplikasi ini berbasis TUI (terminal). Di Windows, jalankan lewat
+> Command Prompt/PowerShell (atau `run.bat`); jangan diklik langsung dari Explorer
+> tanpa terminal karena jendela akan langsung tertutup setelah program selesai.
 
 ---
 
